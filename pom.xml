@@ -4,7 +4,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.lamar.common</groupId>
+	<groupId>7efeacc7-5d72-46dc-8249-c89f05c1bea1</groupId>
 	<artifactId>mule-custom-logger</artifactId>
 	<version>1.0.0</version>
 	<packaging>mule-extension</packaging>
@@ -70,10 +70,12 @@
 		</pluginRepository>
 	</pluginRepositories>
 	<distributionManagement>
-        <repository>
-             <id>lamar-maven</id>
-            <url>https://lamarapi.jfrog.io/lamarapi/lamar-maven</url>
-        </repository>
-    </distributionManagement>
+    <repository>
+      <id>lamar-anypoint-exchange</id>
+      <name>Corporate Repository</name>
+      <url>https://maven.anypoint.mulesoft.com/api/v1/organizations/7efeacc7-5d72-46dc-8249-c89f05c1bea1/maven</url>
+      <layout>default</layout>
+    </repository>
+  </distributionManagement>
 
 </project>

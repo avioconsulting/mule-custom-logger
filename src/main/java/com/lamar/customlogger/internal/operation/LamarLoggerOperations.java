@@ -33,9 +33,9 @@ public class LamarLoggerOperations {
 	 * @return
 	 */
 	@MediaType(value = ANY, strict = false)
-	public void customLogger(@ParameterGroup(name = "Generic") GenericDataPoints genericDataPoints,
-			@ParameterGroup(name = "Extra Parameters") ExtDataPoints extDataPoints,
-			@ParameterGroup(name = "Exception") ExceptionDataPoints exceptionDataPoints) {
+	public void customLogger(@ParameterGroup(name = "Standard Properties") GenericDataPoints genericDataPoints,
+			@ParameterGroup(name = "Additional Properties") ExtDataPoints extDataPoints,
+			@ParameterGroup(name = "Exception Properties") ExceptionDataPoints exceptionDataPoints) {
 
 		initLogger(genericDataPoints.getLogCategory());
 

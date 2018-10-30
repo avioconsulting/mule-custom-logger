@@ -10,15 +10,15 @@ public class ExtDataPoints {
 
 	@Parameter
 	@Optional
-	@DisplayName("Ext")
-	private Map<String, String> ext;
+	@DisplayName("")
+	private Map<String, String> properties;
 
 	public Map<String, String> getExt() {
-		return ext;
+		return properties;
 	}
 
-	public void setExt(Map<String, String> ext) {
-		this.ext = ext;
+	public void setExt(Map<String, String> properties) {
+		this.properties = properties;
 	}
 
 }

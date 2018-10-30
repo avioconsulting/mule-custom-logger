@@ -28,7 +28,7 @@ public class GenericDataPoints {
 	@Parameter
 	@DisplayName("Application Version")
 	@Summary("Version of the Mule Application")
-	@Example("1.0.0")
+	@Example("${pomVersion}")
 	String applicationVersion;
 
 	

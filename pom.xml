@@ -69,13 +69,27 @@
 			</snapshots>
 		</pluginRepository>
 	</pluginRepositories>
-	<distributionManagement>
-    <repository>
-      <id>lamar-anypoint-exchange</id>
-      <name>Corporate Repository</name>
-      <url>https://maven.anypoint.mulesoft.com/api/v1/organizations/7efeacc7-5d72-46dc-8249-c89f05c1bea1/maven</url>
-      <layout>default</layout>
-    </repository>
-  </distributionManagement>
-
+	<profiles>
+		<profile>
+			<id>deployToExchange</id>
+			<distributionManagement>
+				<repository>
+					<id>lamar-anypoint-exchange</id>
+					<name>Corporate Repository</name>
+					<url>https://maven.anypoint.mulesoft.com/api/v1/organizations/7efeacc7-5d72-46dc-8249-c89f05c1bea1/maven</url>
+					<layout>default</layout>
+				</repository>
+			</distributionManagement>
+		</profile>
+		<profile>
+			<id>deployToJfrog</id>
+			<distributionManagement>
+				<repository>
+					<id>lamar-maven</id>
+					<url>https://lamarapi.jfrog.io/lamarapi/lamar-maven</url>
+				</repository>
+			</distributionManagement>
+		</profile>
+	</profiles>
+	
 </project>

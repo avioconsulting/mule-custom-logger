@@ -11,6 +11,7 @@ import org.mule.runtime.extension.api.annotation.param.ParameterGroup;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.lamar.customlogger.internal.metadata.ExceptionDataPoints;
 import com.lamar.customlogger.internal.metadata.ExtDataPoints;
@@ -18,17 +19,16 @@ import com.lamar.customlogger.internal.metadata.GenericDataPoints;
 import com.lamar.customlogger.internal.metadata.LoggerLevel;
 
 /**
- * This class is a container for operations, every public method in this class will be taken as an extension operation.
- * Author: Chakri Bonthala
+ * This class is a container for operations, every public method in this class
+ * will be taken as an extension operation. Author: Chakri Bonthala
  */
 public class LamarLoggerOperations {
 
 	protected Log logger;
 
 	/**
-	 * Author: Chakri Bonthala
-	 * Example of an operation that uses the configuration and a connection instance
-	 * to perform some action.
+	 * Author: Chakri Bonthala Example of an operation that uses the configuration
+	 * and a connection instance to perform some action.
 	 * 
 	 * @return
 	 */
@@ -37,20 +37,35 @@ public class LamarLoggerOperations {
 			@ParameterGroup(name = "Extra Parameters") ExtDataPoints extDataPoints,
 			@ParameterGroup(name = "Exception") ExceptionDataPoints exceptionDataPoints) {
 
-		try {
 		initLogger(genericDataPoints.getLogCategory());
 
-		Gson gson = new GsonBuilder().create();
+		try {
+		Gson gson = new GsonBuilder().create();	
+		String extJsonString = extDataPoints.getExt() == null ? gson.toJson(extDataPoints) : gson.toJson(extDataPoints.getExt());	
+		String genericJsonString = gson.toJson(genericDataPoints);
+		String exceptionJsonString = gson.toJson(exceptionDataPoints);
+
+		HashMap<String, Object> logContent = new Gson().fromJson(genericJsonString, HashMap.class);
 		
-		HashMap<String, Object> logContent = new Gson().fromJson(gson.toJson(genericDataPoints), HashMap.class);
 		
-		logContent.put("ext", new JsonParser().parse(gson.toJson(extDataPoints.getExt())).getAsJsonObject());
-		logContent.put("exception", new JsonParser().parse(gson.toJson(exceptionDataPoints)).getAsJsonObject());
+		if (!extJsonString.equals("{}")) {
+			JsonObject extJson = new JsonParser().parse(extJsonString).getAsJsonObject();
+			for (Object jsonKey : extJson.keySet()) {
+		        logContent.put((String)jsonKey,extJson.get((String)jsonKey));
+		    }
+		}
 		
+		if (!exceptionJsonString.equals("{}")) {
+			JsonObject exceptionJson = new JsonParser().parse(exceptionJsonString).getAsJsonObject();
+			for (Object jsonKey : exceptionJson.keySet()) {
+		        logContent.put((String)jsonKey,exceptionJson.get((String)jsonKey));
+		    }
+		}
+
 		logWithLevel(gson.toJson(logContent), genericDataPoints.getLogLevel().logLevel());
 		return;
 		} catch (Exception e) {
-			logWithLevel("Failed to create JSON Log message","ERROR");
+			logWithLevel("Failed to produce Json"+e.getMessage(),"ERROR");
 		}
 	}
 

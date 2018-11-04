@@ -56,10 +56,11 @@ public class LamarLoggerOperations {
 		}
 		
 		if (!exceptionJsonString.equals("{}")) {
-			JsonObject exceptionJson = new JsonParser().parse(exceptionJsonString).getAsJsonObject();
-			for (Object jsonKey : exceptionJson.keySet()) {
-		        logContent.put((String)jsonKey,exceptionJson.get((String)jsonKey));
-		    }
+//			JsonObject exceptionJson = new JsonParser().parse(exceptionJsonString).getAsJsonObject();
+//			for (Object jsonKey : exceptionJson.keySet()) {
+//		        logContent.put((String)jsonKey,exceptionJson.get((String)jsonKey));
+//		    }
+			logContent.put("exception", new JsonParser().parse(exceptionJsonString).getAsJsonObject());
 		}
 
 		logWithLevel(gson.toJson(logContent), genericDataPoints.getLogLevel().logLevel());

@@ -11,14 +11,14 @@ public class ExtDataPoints {
 	@Parameter
 	@Optional
 	@DisplayName("")
-	private Map<String, String> properties;
+	private Map<String, String> ext;
 
 	public Map<String, String> getExt() {
-		return properties;
+		return ext;
 	}
 
-	public void setExt(Map<String, String> properties) {
-		this.properties = properties;
+	public void setExt(Map<String, String> ext) {
+		this.ext = ext;
 	}
 
 }

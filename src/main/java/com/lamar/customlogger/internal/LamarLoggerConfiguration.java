@@ -1,10 +1,10 @@
 package com.lamar.customlogger.internal;
 
+import com.lamar.customlogger.internal.operation.LamarLoggerOperations;
 import org.mule.runtime.extension.api.annotation.Operations;
-//import org.mule.runtime.extension.api.annotation.connectivity.ConnectionProviders;
 import org.mule.runtime.extension.api.annotation.param.Parameter;
 
-import com.lamar.customlogger.internal.operation.LamarLoggerOperations;
+//import org.mule.runtime.extension.api.annotation.connectivity.ConnectionProviders;
 
 /**
  * This class represents an extension configuration, values set in this class are commonly used across multiple
@@ -14,10 +14,10 @@ import com.lamar.customlogger.internal.operation.LamarLoggerOperations;
 //@ConnectionProviders(LamarLoggerConnectionProvider.class)
 public class LamarLoggerConfiguration {
 
-  @Parameter
-  private String configId;
+    @Parameter
+    private String configId;
 
-  public String getConfigId(){
-    return configId;
-  }
+    public String getConfigId() {
+        return configId;
+    }
 }

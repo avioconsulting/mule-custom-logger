@@ -1,9 +1,9 @@
-package com.lamar.customlogger.internal.operation;
+package com.lamar.customlogger.internal;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParser;
-import com.lamar.customlogger.internal.metadata.*;
+import com.lamar.customlogger.internal.model.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mule.runtime.extension.api.annotation.param.MediaType;
@@ -17,7 +17,7 @@ import static org.mule.runtime.extension.api.annotation.param.MediaType.ANY;
  * This class is a container for operations, every public method in this class
  * will be taken as an extension operation. Author: Chakri Bonthala
  */
-public class LamarLoggerOperations {
+public class CustomLoggerOperation {
 
     protected Log logger;
 

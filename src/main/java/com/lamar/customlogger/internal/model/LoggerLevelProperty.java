@@ -1,4 +1,4 @@
-package com.lamar.customlogger.internal.metadata;
+package com.lamar.customlogger.internal.model;
 
 
 public class LoggerLevelProperty {

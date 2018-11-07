@@ -4,11 +4,11 @@ package com.lamar.customlogger.internal;
 /**
  * This class represents an extension connection just as example (there is no real connection with anything here c:).
  */
-public final class LamarLoggerConnection {
+public final class CustomLoggerConnection {
 
     private final String id;
 
-    public LamarLoggerConnection(String id) {
+    public CustomLoggerConnection(String id) {
         this.id = id;
     }
 

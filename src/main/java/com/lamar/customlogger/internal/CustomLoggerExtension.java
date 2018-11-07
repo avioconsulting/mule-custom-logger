@@ -11,7 +11,7 @@ import org.mule.runtime.extension.api.annotation.dsl.xml.Xml;
  */
 @Xml(prefix = "lamar-core")
 @Extension(name = "Lamar Core")
-@Configurations(LamarLoggerConfiguration.class)
-public class LamarLoggerExtension {
+@Configurations(CustomLoggerConfiguration.class)
+public class CustomLoggerExtension {
 
 }

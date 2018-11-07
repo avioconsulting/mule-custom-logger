@@ -1,6 +1,5 @@
 package com.lamar.customlogger.internal;
 
-import com.lamar.customlogger.internal.operation.LamarLoggerOperations;
 import org.mule.runtime.extension.api.annotation.Operations;
 import org.mule.runtime.extension.api.annotation.param.Parameter;
 
@@ -10,9 +9,9 @@ import org.mule.runtime.extension.api.annotation.param.Parameter;
  * This class represents an extension configuration, values set in this class are commonly used across multiple
  * operations since they represent something core from the extension.
  */
-@Operations(LamarLoggerOperations.class)
+@Operations(CustomLoggerOperation.class)
 //@ConnectionProviders(LamarLoggerConnectionProvider.class)
-public class LamarLoggerConfiguration {
+public class CustomLoggerConfiguration {
 
     @Parameter
     private String configId;

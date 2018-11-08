@@ -20,8 +20,8 @@ public class ExceptionProperties {
     @Optional
     private String type;
     @Parameter
-    @DisplayName("Description")
-    @Summary("Exception Description")
+    @DisplayName("Detail")
+    @Summary("Exception Detail")
     @Optional
     private String detail;
 

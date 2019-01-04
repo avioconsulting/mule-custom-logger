@@ -14,11 +14,7 @@ public class StandardProperties {
     @Summary("Timestamp")
     @Example("#[now()]")
     private String timestamp;
-    @Parameter
-    @DisplayName("Request ID")
-    @Summary("Request UUID")
-    @Example("#[vars.requestId]")
-    private String request_id;
+
     @Parameter
     @DisplayName("App Name")
     @Summary("Name of the Mule Application")
@@ -34,20 +30,7 @@ public class StandardProperties {
     @Summary("Mule Application Environment")
     @Example("${env}")
     private String env;
-    @Parameter
-    @Optional
-    @DisplayName("Payload")
-    @Summary("Payload to be logged")
-    @Example("#[payload]")
-    String payload;
 
-    public String getRequest_id() {
-        return request_id;
-    }
-
-    public void setRequest_id(String request_id) {
-        this.request_id = request_id;
-    }
 
     public String getTimestamp() {
         return timestamp;
@@ -79,13 +62,5 @@ public class StandardProperties {
 
     public void setEnv(String env) {
         this.env = env;
-    }
-
-    public String getPayload() {
-        return payload;
-    }
-
-    public void setPayload(String payload) {
-        this.payload = payload;
     }
 }

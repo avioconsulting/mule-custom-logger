@@ -1,5 +1,6 @@
 package com.avio.customlogger.internal.model;
 
+import org.mule.runtime.extension.api.annotation.param.Optional;
 import org.mule.runtime.extension.api.annotation.param.Parameter;
 import org.mule.runtime.extension.api.annotation.param.display.DisplayName;
 
@@ -7,5 +8,6 @@ public class LogLocationInfoProperty {
 
     @Parameter
     @DisplayName("Log Location Info")
+    @Optional(defaultValue = "True")
     public boolean logLocationInfo;
 }

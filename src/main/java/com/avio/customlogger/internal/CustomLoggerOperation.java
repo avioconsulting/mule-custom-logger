@@ -9,8 +9,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mule.runtime.extension.api.annotation.param.MediaType;
 import org.mule.runtime.extension.api.annotation.param.ParameterGroup;
+import org.mule.runtime.api.component.location.ComponentLocation;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import static org.mule.runtime.extension.api.annotation.param.MediaType.ANY;
 
@@ -34,7 +36,9 @@ public class CustomLoggerOperation {
     public void customLogger(@ParameterGroup(name = "Standard") StandardProperties standardProperties,
                              @ParameterGroup(name = "Log") LogProperties logProperties,
                              @ParameterGroup(name = "Extended") ExtendedProperties extendedProperties,
-                             @ParameterGroup(name = "Exception") ExceptionProperties exceptionProperties) {
+                             @ParameterGroup(name = "Exception") ExceptionProperties exceptionProperties,
+                             @ParameterGroup(name= "JSON Output") LogLocationInfoProperty logLocationInfoProperty,
+                             ComponentLocation location) {
 
         initLogger(logProperties.getCategory());
 
@@ -46,7 +50,6 @@ public class CustomLoggerOperation {
             String logJsonString = gson.toJson(logProperties);
 
             HashMap<String, Object> logContent = new Gson().fromJson(standardJsonString, HashMap.class);
-
             logContent.put("log", new JsonParser().parse(logJsonString).getAsJsonObject());
             if (!extJsonString.equals("{}")) {
 //                JsonObject extJson = new JsonParser().parse(extJsonString).getAsJsonObject();
@@ -64,6 +67,17 @@ public class CustomLoggerOperation {
                 logContent.put("exception", new JsonParser().parse(exceptionJsonString).getAsJsonObject());
             }
 
+            if (logLocationInfoProperty.logLocationInfo == true) {
+                Map<String, String> locationInfo = new HashMap<String, String>();
+                locationInfo.put("location", location.getLocation());
+                locationInfo.put("root_container", location.getRootContainerName());
+                locationInfo.put("component", location.getComponentIdentifier().getIdentifier().toString());
+                locationInfo.put("file_name", location.getFileName().orElse(""));
+                locationInfo.put("line_in_file", String.valueOf(location.getLineInFile().orElse(null)));
+
+                logContent.put("location", new JsonParser().parse(gson.toJson(locationInfo)).getAsJsonObject());
+
+            }
             logWithLevel(gson.toJson(logContent), logProperties.getLog_level().logLevel());
             return;
         } catch (Exception e) {

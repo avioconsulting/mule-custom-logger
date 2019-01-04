@@ -13,7 +13,7 @@ public class StandardProperties {
     @DisplayName("Timestamp")
     @Summary("Timestamp")
     @Example("#[now()]")
-    String timestamp;
+    private String timestamp;
     @Parameter
     @DisplayName("Request ID")
     @Summary("Request UUID")

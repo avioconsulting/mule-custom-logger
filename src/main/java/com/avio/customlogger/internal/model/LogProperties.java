@@ -1,4 +1,4 @@
-package com.lamar.customlogger.internal.model;
+package com.avio.customlogger.internal.model;
 
 import org.mule.runtime.extension.api.annotation.param.Optional;
 import org.mule.runtime.extension.api.annotation.param.Parameter;
@@ -17,8 +17,21 @@ public class LogProperties {
     @DisplayName("Level")
     @Optional(defaultValue = "INFO")
     private LoggerLevelProperty.LogLevel level;
+
+    public tracePointProperty.tracePoint getTracePoint() {
+        return tracePoint;
+    }
+
+    public void setTracePoint(tracePointProperty.tracePoint tracePoint) {
+        this.tracePoint = tracePoint;
+    }
+
     @Parameter
-    @Optional(defaultValue = "#['com.lamar.' ++ p('app.name')]")
+    @DisplayName("Trace Point")
+    @Optional(defaultValue = "START")
+    private tracePointProperty.tracePoint tracePoint;
+    @Parameter
+    @Optional(defaultValue = "#['com.avio.' ++ p('app.name')]")
     @DisplayName("Category")
     private String category;
 

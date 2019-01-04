@@ -1,4 +1,4 @@
-package com.lamar.customlogger.internal.model;
+package com.avio.customlogger.internal.model;
 
 import org.mule.runtime.extension.api.annotation.param.Optional;
 import org.mule.runtime.extension.api.annotation.param.Parameter;

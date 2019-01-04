@@ -1,9 +1,10 @@
-package com.lamar.customlogger.internal;
+package com.avio.customlogger.internal;
 
+import com.avio.customlogger.internal.model.*;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParser;
-import com.lamar.customlogger.internal.model.*;
+import com.avio.customlogger.internal.model.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mule.runtime.extension.api.annotation.param.MediaType;
@@ -14,15 +15,17 @@ import java.util.HashMap;
 import static org.mule.runtime.extension.api.annotation.param.MediaType.ANY;
 
 /**
+ * Author: Chakri Bonthala
  * This class is a container for operations, every public method in this class
- * will be taken as an extension operation. Author: Chakri Bonthala
+ * will be taken as an extension operation.
  */
 public class CustomLoggerOperation {
 
     protected Log logger;
 
     /**
-     * Author: Chakri Bonthala Example of an operation that uses the configuration
+     * Author: Chakri Bonthala
+     * Example of an operation that uses the configuration
      * and a connection instance to perform some action.
      *
      * @return

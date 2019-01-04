@@ -1,4 +1,4 @@
-package com.lamar.customlogger.internal;
+package com.avio.customlogger.internal;
 
 import org.mule.runtime.extension.api.annotation.Operations;
 import org.mule.runtime.extension.api.annotation.param.Parameter;
@@ -10,7 +10,7 @@ import org.mule.runtime.extension.api.annotation.param.Parameter;
  * operations since they represent something core from the extension.
  */
 @Operations(CustomLoggerOperation.class)
-//@ConnectionProviders(LamarLoggerConnectionProvider.class)
+//@ConnectionProviders(AvioLoggerConnectionProvider.class)
 public class CustomLoggerConfiguration {
 
     @Parameter

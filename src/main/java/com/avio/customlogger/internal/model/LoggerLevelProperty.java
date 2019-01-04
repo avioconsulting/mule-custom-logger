@@ -1,4 +1,4 @@
-package com.lamar.customlogger.internal.model;
+package com.avio.customlogger.internal.model;
 
 
 public class LoggerLevelProperty {

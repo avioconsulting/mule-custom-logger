@@ -15,14 +15,14 @@ public class tracePointProperty {
         FLOW("07"),
         EXCEPTION("08");
 
-        private String tracePoint;
+        private String trace_point;
 
-        tracePoint(String tracePoint) {
-            this.tracePoint = tracePoint;
+        tracePoint(String trace_point) {
+            this.trace_point = trace_point;
         }
 
-        public String tracePoint() {
-            return tracePoint;
+        public String trace_point() {
+            return trace_point;
         }
     }
 }

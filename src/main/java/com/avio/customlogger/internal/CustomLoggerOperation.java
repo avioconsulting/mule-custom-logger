@@ -76,8 +76,8 @@ public class CustomLoggerOperation {
                 locationInfo.put("line_in_file", String.valueOf(location.getLineInFile().orElse(null)));
 
                 logContent.put("location", new JsonParser().parse(gson.toJson(locationInfo)).getAsJsonObject());
-
             }
+            logContent.put("thread", Thread.currentThread().getName());
             logWithLevel(gson.toJson(logContent), logProperties.getLog_level().logLevel());
             return;
         } catch (Exception e) {

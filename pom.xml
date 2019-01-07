@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.avio</groupId>
+    <groupId>26d53683-6746-4040-ad07-f671f8e2b27e</groupId>
     <artifactId>mule-custom-logger</artifactId>
     <version>3.0.0</version>
     <packaging>mule-extension</packaging>
@@ -69,5 +69,12 @@
             </snapshots>
         </pluginRepository>
     </pluginRepositories>
-
+    <distributionManagement>
+        <repository>
+            <id>avio-anypoint-exchange</id>
+            <name>Corporate Repository</name>
+            <url>https://maven.anypoint.mulesoft.com/api/v1/organizations/26d53683-6746-4040-ad07-f671f8e2b27e/maven</url>
+            <layout>default</layout>
+        </repository>
+    </distributionManagement>
 </project>

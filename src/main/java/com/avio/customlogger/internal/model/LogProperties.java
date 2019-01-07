@@ -44,7 +44,7 @@ public class LogProperties {
     @Optional(defaultValue = "START")
     private tracePointProperty.tracePoint tracePoint;
     @Parameter
-    @Optional(defaultValue = "#['com.avio.' ++ p('app.name')]")
+    @Optional
     @DisplayName("Category")
     private String category;
 

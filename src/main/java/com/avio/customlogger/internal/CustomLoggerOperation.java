@@ -7,10 +7,12 @@ import com.google.gson.JsonParser;
 import com.avio.customlogger.internal.model.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.mule.runtime.core.internal.el.datetime.DateTime;
 import org.mule.runtime.extension.api.annotation.param.MediaType;
 import org.mule.runtime.extension.api.annotation.param.ParameterGroup;
 import org.mule.runtime.api.component.location.ComponentLocation;
 
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -77,6 +79,8 @@ public class CustomLoggerOperation {
 
                 logContent.put("location", new JsonParser().parse(gson.toJson(locationInfo)).getAsJsonObject());
             }
+//            DateTime timestamp = new DateTime();
+            logContent.put("timestamp", Instant.now().toString());
             logContent.put("thread", Thread.currentThread().getName());
             logWithLevel(gson.toJson(logContent), logProperties.getLog_level().logLevel());
             return;

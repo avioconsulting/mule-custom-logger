@@ -1,5 +1,7 @@
 package com.avio.customlogger.internal.model;
 
+import org.mule.runtime.core.internal.el.datetime.Date;
+import org.mule.runtime.core.internal.el.datetime.DateTime;
 import org.mule.runtime.extension.api.annotation.param.Optional;
 import org.mule.runtime.extension.api.annotation.param.Parameter;
 import org.mule.runtime.extension.api.annotation.param.display.DisplayName;
@@ -8,12 +10,6 @@ import org.mule.runtime.extension.api.annotation.param.display.Summary;
 
 
 public class StandardProperties {
-
-    @Parameter
-    @DisplayName("Timestamp")
-    @Summary("Timestamp")
-    @Example("#[now()]")
-    private String timestamp;
 
     @Parameter
     @DisplayName("App Name")
@@ -30,15 +26,6 @@ public class StandardProperties {
     @Summary("Mule Application Environment")
     @Example("${env}")
     private String env;
-
-
-    public String getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(String timestamp) {
-        this.timestamp = timestamp;
-    }
 
     public String getApp_name() {
         return app_name;

@@ -42,7 +42,9 @@ public class CustomLoggerOperation {
                              @ParameterGroup(name= "JSON Output") LogLocationInfoProperty logLocationInfoProperty,
                              ComponentLocation location) {
 
+        if (logProperties.getCategory() != null)
         initLogger(logProperties.getCategory());
+        else initLogger("com.avio.logger");
 
         try {
             Gson gson = new GsonBuilder().create();

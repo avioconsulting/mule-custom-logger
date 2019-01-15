@@ -15,34 +15,30 @@ public class LogProperties {
     @Summary("Correlation UUID")
     @Example("#[vars.correlationId]")
     private String correlation_id;
+
     @Parameter
     @Optional
     @DisplayName("Message")
     @Summary("Message to be logged")
     private String message;
+
     @Parameter
     @Optional
     @DisplayName("Payload")
     @Summary("Payload to be logged")
     @Example("#[write(payload, \"application/json\")]")
     String payload;
+
     @Parameter
     @DisplayName("Level")
     @Optional(defaultValue = "INFO")
     private LoggerLevelProperty.LogLevel level;
 
-    public tracePointProperty.tracePoint getTracePoint() {
-        return tracePoint;
-    }
-
-    public void setTracePoint(tracePointProperty.tracePoint tracePoint) {
-        this.tracePoint = tracePoint;
-    }
-
     @Parameter
     @DisplayName("Trace Point")
     @Optional(defaultValue = "START")
     private tracePointProperty.tracePoint tracePoint;
+
     @Parameter
     @Optional
     @DisplayName("Category")
@@ -86,5 +82,13 @@ public class LogProperties {
 
     public void setPayload(String payload) {
         this.payload = payload;
+    }
+
+    public tracePointProperty.tracePoint getTracePoint() {
+        return tracePoint;
+    }
+
+    public void setTracePoint(tracePointProperty.tracePoint tracePoint) {
+        this.tracePoint = tracePoint;
     }
 }

@@ -8,6 +8,7 @@ import com.avio.customlogger.internal.model.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mule.runtime.core.internal.el.datetime.DateTime;
+import org.mule.runtime.extension.api.annotation.param.Config;
 import org.mule.runtime.extension.api.annotation.param.MediaType;
 import org.mule.runtime.extension.api.annotation.param.ParameterGroup;
 import org.mule.runtime.api.component.location.ComponentLocation;
@@ -35,12 +36,12 @@ public class CustomLoggerOperation {
      * @return
      */
     @MediaType(value = ANY, strict = false)
-    public void customLogger(@ParameterGroup(name = "Standard") StandardProperties standardProperties,
-                             @ParameterGroup(name = "Log") LogProperties logProperties,
+    public void customLogger(@ParameterGroup(name = "Log") LogProperties logProperties,
                              @ParameterGroup(name = "Extended") ExtendedProperties extendedProperties,
                              @ParameterGroup(name = "Exception") ExceptionProperties exceptionProperties,
                              @ParameterGroup(name= "JSON Output") LogLocationInfoProperty logLocationInfoProperty,
-                             ComponentLocation location) {
+                             ComponentLocation location,
+                             @Config CustomLoggerConfiguration customLoggerConfiguration) {
 
         if (logProperties.getCategory() != null)
         initLogger(logProperties.getCategory());
@@ -49,25 +50,21 @@ public class CustomLoggerOperation {
         try {
             Gson gson = new GsonBuilder().create();
             String extJsonString = extendedProperties.getProperties() == null ? gson.toJson(extendedProperties) : gson.toJson(extendedProperties.getProperties());
-            String standardJsonString = gson.toJson(standardProperties);
             String exceptionJsonString = gson.toJson(exceptionProperties);
             String logJsonString = gson.toJson(logProperties);
 
-            HashMap<String, Object> logContent = new Gson().fromJson(standardJsonString, HashMap.class);
+            HashMap<String, Object> logContent = new HashMap<String, Object>();
+            logContent.put("app_name", customLoggerConfiguration.getApp_name());
+            logContent.put("app_version", customLoggerConfiguration.getApp_version());
+            logContent.put("env", customLoggerConfiguration.getEnv());
+            logContent.put("timestamp", Instant.now().toString());
+            logContent.put("thread", Thread.currentThread().getName());
             logContent.put("log", new JsonParser().parse(logJsonString).getAsJsonObject());
             if (!extJsonString.equals("{}")) {
-//                JsonObject extJson = new JsonParser().parse(extJsonString).getAsJsonObject();
-//                for (Object jsonKey : extJson.keySet()) {
-//                    logContent.put((String) jsonKey, extJson.get((String) jsonKey));
-//                }
                 logContent.put("ext", new JsonParser().parse(extJsonString).getAsJsonObject());
             }
 
             if (!exceptionJsonString.equals("{}")) {
-//			JsonObject exceptionJson = new JsonParser().parse(exceptionJsonString).getAsJsonObject();
-//			for (Object jsonKey : exceptionJson.keySet()) {
-//		        logContent.put((String)jsonKey,exceptionJson.get((String)jsonKey));
-//		    }
                 logContent.put("exception", new JsonParser().parse(exceptionJsonString).getAsJsonObject());
             }
 
@@ -81,9 +78,6 @@ public class CustomLoggerOperation {
 
                 logContent.put("location", new JsonParser().parse(gson.toJson(locationInfo)).getAsJsonObject());
             }
-//            DateTime timestamp = new DateTime();
-            logContent.put("timestamp", Instant.now().toString());
-            logContent.put("thread", Thread.currentThread().getName());
             logWithLevel(gson.toJson(logContent), logProperties.getLog_level().logLevel());
             return;
         } catch (Exception e) {

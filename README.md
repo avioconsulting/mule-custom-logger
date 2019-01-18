@@ -49,9 +49,9 @@ Here is the example of the JSON this custom logger can generate when configured 
 
 **Tip**: ext section in the above JSON is a great way to throw in any necessary/extraneous datapoints that are critical for business and for the debugging purposes.
 
-#How?
+# How?
 
-##Using maven dependency
+## Using maven dependency
 First, clone this repository and run ```mvn clean install``` to install this maven project in your local .m2 repository.
 
 
@@ -66,7 +66,7 @@ When you install this project into your machine's local .m2 repository, You can 
 </dependency>
 ```
 
-##Push to anypoint private exchange
+## Push to anypoint private exchange
 Alternatively, you can push this mule custom component to your anypoint organization's private exchange so that all developers inside that organization can use it. Here are the steps,
 
 * First, Clone this GitHub repository into your local machine.

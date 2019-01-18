@@ -59,11 +59,11 @@ When you install this project into your machine's local .m2 repository, You can 
 
 ```xml
 <dependency>
-	<groupId>YOUR_GROUP_ID</groupId>
+    <groupId>YOUR_GROUP_ID</groupId>
     <artifactId>mule-custom-logger</artifactId>
     <version>4.0.0</version>
     <classifier>mule-plugin</classifier>
-	</dependency>
+</dependency>
 ```
 
 ##Push to anypoint private exchange

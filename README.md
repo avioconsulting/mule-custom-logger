@@ -12,38 +12,36 @@ One of the reasons for developing this custom module is to feed JSON logs to log
 * Optionally log location info with each log message.
 * Tracepoints compatibility to measure request, response times and such.
 
+Here is how mule-custom-logger looks like in action.
+
+![image](https://user-images.githubusercontent.com/34731865/57938654-361bee00-788e-11e9-9ff6-6eadf9b77a1b.png)
+
 Here is the example of the JSON this custom logger can generate when configured with necessary data points.
 ```json
 {
-    "app_name": "some-api",
+    "app_name": "sample",
     "app_version": "1.0.0",
     "env": "dev",
-    "exception": {
-        "detail": "Resource not found",
-        "status_code": "404",
-        "type": "APIKIT:NOT_FOUND"
-    },
     "ext": {
         "additionalKey1": "additionalValue1",
         "additionalKey2": "additionalValue2"
     },
     "location": {
         "component": "avio-core:custom-logger",
-        "file_name": "some.xml",
-        "line_in_file": "14",
-        "location": "someFlow/processors/0",
-        "root_container": "someFlow"
+        "file_name": "sample.xml",
+        "line_in_file": "16",
+        "location": "sampleFlow/processors/1",
+        "root_container": "sampleFlow"
     },
     "log": {
         "category": "com.avio",
-        "correlation_id": "77de8200-3cd2-4a1b-9505-69b4d9dc0e08",
+        "correlation_id": "33af6200-018b-42af-8ec1-ebdbf29c0505",
         "level": "INFO",
-        "message": "Request Received",
-        "payload": "",
+        "message": "This is nothing but a sample log message",
         "tracePoint": "START"
     },
-    "thread": "[MuleRuntime].cpuLight.14: [some].someFlow.CPU_LITE @16d0beeb",
-    "timestamp": "2019-01-18T21:38:40.842Z"
+    "thread": "[MuleRuntime].cpuLight.23: [sample].sampleFlow.CPU_LITE @27346628",
+    "timestamp": "2019-05-17T15:06:34.592Z"
 }
 ```
 

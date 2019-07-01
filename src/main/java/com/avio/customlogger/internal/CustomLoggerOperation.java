@@ -37,7 +37,7 @@ public class CustomLoggerOperation {
 
         if (logProperties.getCategory() != null)
             initLogger(logProperties.getCategory());
-        else initLogger("com.avio.logger");
+        else initLogger("com.avioconsulting.api");
 
 
         HashMap<String, Object> logContent = new HashMap<String, Object>();

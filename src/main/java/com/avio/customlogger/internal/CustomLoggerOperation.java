@@ -26,8 +26,6 @@ public class CustomLoggerOperation {
 
     /**
      * Author: Chakri Bonthala
-     * Example of an operation that uses the configuration
-     * and a connection instance to perform some action.
      *
      * @return
      */
@@ -51,7 +49,15 @@ public class CustomLoggerOperation {
         logContent.put("timestamp", Instant.now().toString());
         logContent.put("log", logProperties);
         logContent.put("ext", extendedProperties.getProperties());
-        logContent.put("exception", exceptionProperties);
+
+        //This is because, we need to see what is in the 'exceptionProperties' when the Hashmap is logged.
+        if (exceptionProperties != null) {
+            Map<String, Object> exceptionOnes = new HashMap<String, Object>();
+            exceptionOnes.put("statusCode", exceptionProperties.getStatus_code());
+            exceptionOnes.put("type", exceptionProperties.getType());
+            exceptionOnes.put("detail", exceptionProperties.getDetail());
+            logContent.put("exception", exceptionOnes);
+        }
 
         if (logLocationInfoProperty.logLocationInfo == true) {
             Map<String, String> locationInfo = new HashMap<String, String>();

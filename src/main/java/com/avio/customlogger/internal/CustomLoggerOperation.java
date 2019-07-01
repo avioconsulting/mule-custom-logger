@@ -58,7 +58,6 @@ public class CustomLoggerOperation {
             logContent.put("app_version", customLoggerConfiguration.getApp_version());
             logContent.put("env", customLoggerConfiguration.getEnv());
             logContent.put("timestamp", Instant.now().toString());
-            logContent.put("thread", Thread.currentThread().getName());
             logContent.put("log", new JsonParser().parse(logJsonString).getAsJsonObject());
             if (!extJsonString.equals("{}")) {
                 logContent.put("ext", new JsonParser().parse(extJsonString).getAsJsonObject());

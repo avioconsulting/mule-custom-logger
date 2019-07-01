@@ -39,7 +39,7 @@ public class CustomLoggerOperation {
     public void customLogger(@ParameterGroup(name = "Log") LogProperties logProperties,
                              @ParameterGroup(name = "Extended") ExtendedProperties extendedProperties,
                              @ParameterGroup(name = "Exception") ExceptionProperties exceptionProperties,
-                             @ParameterGroup(name= "JSON Output") LogLocationInfoProperty logLocationInfoProperty,
+                             @ParameterGroup(name= "Options") LogLocationInfoProperty logLocationInfoProperty,
                              ComponentLocation location,
                              @Config CustomLoggerConfiguration customLoggerConfiguration) {
 

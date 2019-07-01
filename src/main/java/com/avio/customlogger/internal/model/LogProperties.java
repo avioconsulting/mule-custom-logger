@@ -36,7 +36,7 @@ public class LogProperties {
 
     @Parameter
     @DisplayName("Trace Point")
-    @Optional(defaultValue = "START")
+    @Optional(defaultValue = "FLOW")
     private tracePointProperty.tracePoint tracePoint;
 
     @Parameter

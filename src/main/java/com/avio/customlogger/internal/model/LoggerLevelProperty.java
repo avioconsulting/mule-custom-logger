@@ -8,11 +8,12 @@ public class LoggerLevelProperty {
      */
     public enum LogLevel {
 
-        ERROR("01"),
-        INFO("02"),
-        DEBUG("03"),
-        WARN("04"),
-        TRACE("05");
+        FATAL("01"),
+        ERROR("02"),
+        WARN("03"),
+        INFO("04"),
+        DEBUG("05"),
+        TRACE("06");
 
         private String logLevel;
 

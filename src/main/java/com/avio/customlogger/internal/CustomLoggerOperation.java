@@ -17,8 +17,6 @@ import static org.mule.runtime.extension.api.annotation.param.MediaType.ANY;
 
 /**
  * Author: Chakri Bonthala
- * This class is a container for operations, every public method in this class
- * will be taken as an extension operation.
  */
 public class CustomLoggerOperation {
 
@@ -87,6 +85,8 @@ public class CustomLoggerOperation {
             logger.debug(logMessage);
         } else if (LoggerLevelProperty.LogLevel.TRACE.logLevel().equals(logLevel)) {
             logger.trace(logMessage);
+        } else if (LoggerLevelProperty.LogLevel.FATAL.logLevel().equals(logLevel)) {
+            logger.fatal(logMessage);
         } else {
             logger.info(logMessage);
         }

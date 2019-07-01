@@ -20,7 +20,7 @@ import static org.mule.runtime.extension.api.annotation.param.MediaType.ANY;
  */
 public class CustomLoggerOperation {
 
-    protected Log logger;
+    private Log logger;
 
     /**
      * Author: Chakri Bonthala
@@ -71,7 +71,7 @@ public class CustomLoggerOperation {
         logWithLevel(objectMessage, logProperties.getLog_level().logLevel());
     }
 
-    protected void initLogger(String category) {
+    private void initLogger(String category) {
         this.logger = LogFactory.getLog(category);
     }
 

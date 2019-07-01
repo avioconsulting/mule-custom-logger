@@ -68,11 +68,11 @@ public class LogProperties {
         this.category = category;
     }
 
-    public String getRequest_id() {
+    public String getCorrelation_id() {
         return correlation_id;
     }
 
-    public void setRequest_id(String correlation_id) {
+    public void setCorrelation_id(String correlation_id) {
         this.correlation_id = correlation_id;
     }
 

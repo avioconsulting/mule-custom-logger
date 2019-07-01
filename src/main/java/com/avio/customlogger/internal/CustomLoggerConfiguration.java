@@ -1,6 +1,7 @@
 package com.avio.customlogger.internal;
 
 import org.mule.runtime.extension.api.annotation.Operations;
+import org.mule.runtime.extension.api.annotation.param.Optional;
 import org.mule.runtime.extension.api.annotation.param.Parameter;
 import org.mule.runtime.extension.api.annotation.param.display.DisplayName;
 import org.mule.runtime.extension.api.annotation.param.display.Example;
@@ -18,17 +19,17 @@ public class CustomLoggerConfiguration {
     @Parameter
     @DisplayName("App Name")
     @Summary("Name of the Mule Application")
-    @Example("#[app.name]")
+    @Optional(defaultValue = "#[app.name]")
     private String app_name;
     @Parameter
     @DisplayName("App Version")
     @Summary("Version of the Mule Application")
-    @Example("${pomVersion}")
+    @Optional(defaultValue = "${appVersion}")
     private String app_version;
     @Parameter
     @DisplayName("Environment")
     @Summary("Mule Application Environment")
-    @Example("${env}")
+    @Optional(defaultValue = "${env}")
     private String env;
 
     public String getApp_name() {

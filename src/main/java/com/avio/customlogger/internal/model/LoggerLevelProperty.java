@@ -15,7 +15,7 @@ public class LoggerLevelProperty {
         DEBUG("05"),
         TRACE("06");
 
-        private String logLevel;
+        private final String logLevel;
 
         LogLevel(String logLevel) {
             this.logLevel = logLevel;

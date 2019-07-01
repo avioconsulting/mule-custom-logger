@@ -17,8 +17,4 @@ public class ExtendedProperties {
         return properties;
     }
 
-    public void setProperties(Map<String, String> properties) {
-        this.properties = properties;
-    }
-
 }

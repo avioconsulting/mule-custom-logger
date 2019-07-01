@@ -15,7 +15,7 @@ public class tracePointProperty {
         FLOW("07"),
         EXCEPTION("08");
 
-        private String trace_point;
+        private final String trace_point;
 
         tracePoint(String trace_point) {
             this.trace_point = trace_point;

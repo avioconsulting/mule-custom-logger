@@ -49,7 +49,7 @@ public class CustomLoggerOperation {
         logContent.put("timestamp", Instant.now().toString());
         logContent.put("ext", extendedProperties.getProperties());
 
-        //This is because, we need to see what is in the 'exceptionProperties' when the Hashmap is logged.
+        //This is because, we need to see what is in the nested object when the Hashmap is logged.
         Map<String, Object> logOnes = new HashMap<>();
         logOnes.put("correlation_id", logProperties.getCorrelation_id());
         logOnes.put("message", logProperties.getMessage());

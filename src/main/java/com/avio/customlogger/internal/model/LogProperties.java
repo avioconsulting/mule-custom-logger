@@ -27,7 +27,7 @@ public class LogProperties {
     @DisplayName("Payload")
     @Summary("Payload to be logged")
     @Example("#[write(payload, \"application/json\")]")
-    String payload;
+    private String payload;
 
     @Parameter
     @DisplayName("Level")
@@ -36,7 +36,7 @@ public class LogProperties {
 
     @Parameter
     @DisplayName("Trace Point")
-    @Optional(defaultValue = "START")
+    @Optional(defaultValue = "FLOW")
     private tracePointProperty.tracePoint tracePoint;
 
     @Parameter
@@ -48,47 +48,24 @@ public class LogProperties {
         return message;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
     public LoggerLevelProperty.LogLevel getLog_level() {
         return level;
-    }
-
-    public void setLog_level(LoggerLevelProperty.LogLevel log_level) {
-        this.level = level;
     }
 
     public String getCategory() {
         return category;
     }
 
-    public void setCategory(String category) {
-        this.category = category;
-    }
-
-    public String getRequest_id() {
+    public String getCorrelation_id() {
         return correlation_id;
-    }
-
-    public void setRequest_id(String correlation_id) {
-        this.correlation_id = correlation_id;
     }
 
     public String getPayload() {
         return payload;
     }
 
-    public void setPayload(String payload) {
-        this.payload = payload;
-    }
-
     public tracePointProperty.tracePoint getTracePoint() {
         return tracePoint;
     }
 
-    public void setTracePoint(tracePointProperty.tracePoint tracePoint) {
-        this.tracePoint = tracePoint;
-    }
 }

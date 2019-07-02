@@ -29,24 +29,12 @@ public class ExceptionProperties {
         return status_code;
     }
 
-    public void setStatus_code(String status_code) {
-        this.status_code = status_code;
-    }
-
     public String getType() {
         return type;
     }
 
-    public void setType(String type) {
-        this.type = type;
-    }
-
     public String getDetail() {
         return detail;
-    }
-
-    public void setDetail(String detail) {
-        this.detail = detail;
     }
 
 }

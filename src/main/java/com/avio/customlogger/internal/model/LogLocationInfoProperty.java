@@ -8,6 +8,6 @@ public class LogLocationInfoProperty {
 
     @Parameter
     @DisplayName("Log Location Info")
-    @Optional(defaultValue = "True")
+    @Optional(defaultValue = "False")
     public boolean logLocationInfo;
 }

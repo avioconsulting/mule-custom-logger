@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>26d53683-6746-4040-ad07-f671f8e2b27e</groupId>
     <artifactId>mule-custom-logger</artifactId>
-    <version>4.0.0</version>
+    <version>1.0.0</version>
     <packaging>mule-extension</packaging>
 
     <parent>
@@ -31,50 +31,11 @@
         </pluginManagement>
     </build>
     <dependencies>
-        <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
         <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.8.2</version>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>2.11.1</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
-    <repositories>
-        <repository>
-            <id>Central</id>
-            <name>Central</name>
-            <url>http://repo1.maven.org/maven2/</url>
-            <layout>default</layout>
-        </repository>
-        <repository>
-            <id>mulesoft-releases</id>
-            <name>MuleSoft Releases Repository</name>
-            <url>http://repository.mulesoft.org/releases/</url>
-            <layout>default</layout>
-        </repository>
-        <repository>
-            <id>mulesoft-snapshots</id>
-            <name>MuleSoft Snapshots Repository</name>
-            <url>http://repository.mulesoft.org/snapshots/</url>
-            <layout>default</layout>
-        </repository>
-    </repositories>
-    <pluginRepositories>
-        <pluginRepository>
-            <id>mulesoft-release</id>
-            <name>mulesoft release repository</name>
-            <layout>default</layout>
-            <url>http://repository.mulesoft.org/releases/</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </pluginRepository>
-    </pluginRepositories>
-    <distributionManagement>
-        <repository>
-            <id>avio-anypoint-exchange</id>
-            <name>Corporate Repository</name>
-            <url>https://maven.anypoint.mulesoft.com/api/v1/organizations/26d53683-6746-4040-ad07-f671f8e2b27e/maven</url>
-            <layout>default</layout>
-        </repository>
-    </distributionManagement>
 </project>

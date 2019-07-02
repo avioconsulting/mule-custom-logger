@@ -13,7 +13,7 @@ public class LoggerLevelProperty {
         INFO,
         WARN,
         ERROR,
-        FATAL;
+        FATAL
     }
 
 }

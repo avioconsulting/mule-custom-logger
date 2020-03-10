@@ -1,4 +1,4 @@
-package com.avio.customlogger.internal.model;
+package com.topgolf.customlogger.internal.model;
 
 public class tracePointProperty {
     /**

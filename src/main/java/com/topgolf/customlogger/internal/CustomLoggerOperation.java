@@ -1,6 +1,6 @@
-package com.avio.customlogger.internal;
+package com.topgolf.customlogger.internal;
 
-import com.avio.customlogger.internal.model.*;
+import com.topgolf.customlogger.internal.model.*;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -38,7 +38,7 @@ public class CustomLoggerOperation {
 
         if (logProperties.getCategory() != null)
             initLogger(logProperties.getCategory());
-        else initLogger("com.avioconsulting.api");
+        else initLogger("com.topgolf.api");
 
         final Map<LoggerLevelProperty.LogLevel, Level> levelMap = getMappings();
 

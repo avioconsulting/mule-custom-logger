@@ -1,4 +1,4 @@
-package com.avio.customlogger.internal;
+package com.topgolf.customlogger.internal;
 
 
 /**

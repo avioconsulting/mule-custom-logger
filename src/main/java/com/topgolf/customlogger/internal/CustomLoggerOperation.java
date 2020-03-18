@@ -38,7 +38,7 @@ public class CustomLoggerOperation {
 
         if (logProperties.getCategory() != null)
             initLogger(logProperties.getCategory());
-        else initLogger("com.topgolf.api");
+        else initLogger("com.integration-platform.topgolf.api");
 
         final Map<LoggerLevelProperty.LogLevel, Level> levelMap = getMappings();
 

@@ -1,5 +1,6 @@
 package com.topgolf.customlogger.internal.model;
 
+import org.mule.runtime.extension.api.annotation.Operations;
 import org.mule.runtime.extension.api.annotation.param.Optional;
 import org.mule.runtime.extension.api.annotation.param.Parameter;
 import org.mule.runtime.extension.api.annotation.param.display.DisplayName;
@@ -10,8 +11,8 @@ public class LogProperties {
 
 
     @Parameter
-    @Optional
     @DisplayName("Correlation ID")
+    @Optional(defaultValue = "#[vars.correlationId]")
     @Summary("Correlation UUID")
     @Example("#[vars.correlationId]")
     private String correlation_id;
@@ -40,7 +41,7 @@ public class LogProperties {
     private tracePointProperty.tracePoint tracePoint;
 
     @Parameter
-    @Optional
+    @Optional(defaultValue = "com.integration-platform.topgolf.api")
     @DisplayName("Category")
     private String category;
 

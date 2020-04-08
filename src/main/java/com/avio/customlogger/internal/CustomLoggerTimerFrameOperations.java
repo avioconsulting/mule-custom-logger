@@ -46,7 +46,7 @@ public class CustomLoggerTimerFrameOperations {
 
         Map<String, Object> beforeFrame = new HashMap<>();
         beforeFrame.put("message", timerName + " timer frame starting");
-        beforeFrame.put("trace_point", "FRAME_START");
+        beforeFrame.put("trace_point", "TIMER_START");
         logContent.put("log", beforeFrame);
         logContent.put("timestamp", Instant.now().toString());
         logger.debug(new ObjectMessage(logContent));
@@ -58,7 +58,7 @@ public class CustomLoggerTimerFrameOperations {
                     long elapsedMilliseconds = System.currentTimeMillis() - startTime;
                     afterFrame.put("message", timerName + " timer frame completed with milliseconds elapsed: "  + elapsedMilliseconds);
                     afterFrame.put("elapsed_milliseconds", elapsedMilliseconds);
-                    afterFrame.put("trace_point", "FRAME_END");
+                    afterFrame.put("trace_point", "TIMER_END");
                     logContent.put("log", afterFrame);
                     logContent.put("timestamp", Instant.now().toString());
                     logger.info(new ObjectMessage(logContent));
@@ -69,7 +69,7 @@ public class CustomLoggerTimerFrameOperations {
                     long elapsedMilliseconds = System.currentTimeMillis() - startTime;
                     afterFrame.put("message", timerName + " timer frame errored out with milliseconds elapsed: "  + elapsedMilliseconds);
                     afterFrame.put("elapsed_milliseconds", elapsedMilliseconds);
-                    afterFrame.put("trace_point", "FRAME_EXCEPTION");
+                    afterFrame.put("trace_point", "TIMER_EXCEPTION");
                     logContent.put("log", afterFrame);
                     logContent.put("timestamp", Instant.now().toString());
                     logger.info(new ObjectMessage(logContent));

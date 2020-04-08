@@ -12,7 +12,7 @@ import org.mule.runtime.extension.api.annotation.param.display.Summary;
  * This class represents an extension configuration, values set in this class are commonly used across multiple
  * operations since they represent something core from the extension.
  */
-@Operations(CustomLoggerOperation.class)
+@Operations({CustomLoggerOperation.class, CustomLoggerTimerFrameOperations.class})
 public class CustomLoggerConfiguration {
 
     @Parameter

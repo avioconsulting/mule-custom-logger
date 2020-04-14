@@ -14,11 +14,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-public class CustomLoggerTimerFrameOperations {
+public class CustomLoggerTimerScopeOperations {
 
     private Logger logger;
 
-    public void timerFrame(String timerName,
+    public void timerScope(String timerName,
                            String category,
                            @ParameterGroup(name = "App Level") CustomLoggerConfiguration customLoggerConfiguration,
                            @ParameterGroup(name = "Options") LogLocationInfoProperty logLocationInfoProperty,
@@ -44,33 +44,33 @@ public class CustomLoggerTimerFrameOperations {
         }
 
 
-        Map<String, Object> beforeFrame = new HashMap<>();
-        beforeFrame.put("message", timerName + " timer frame starting");
-        beforeFrame.put("trace_point", "TIMER_START");
-        logContent.put("log", beforeFrame);
+        Map<String, Object> beforeScope = new HashMap<>();
+        beforeScope.put("message", timerName + " timer scope starting");
+        beforeScope.put("trace_point", "TIMER_START");
+        logContent.put("log", beforeScope);
         logContent.put("timestamp", Instant.now().toString());
         logger.debug(new ObjectMessage(logContent));
 
         long startTime = System.currentTimeMillis();
         operations.process(
                 result -> {
-                    Map<String, Object> afterFrame = new HashMap<>();
+                    Map<String, Object> afterScope = new HashMap<>();
                     long elapsedMilliseconds = System.currentTimeMillis() - startTime;
-                    afterFrame.put("message", timerName + " timer frame completed with milliseconds elapsed: "  + elapsedMilliseconds);
-                    afterFrame.put("elapsed_milliseconds", elapsedMilliseconds);
-                    afterFrame.put("trace_point", "TIMER_END");
-                    logContent.put("log", afterFrame);
+                    afterScope.put("message", timerName + " timer scope completed with milliseconds elapsed: "  + elapsedMilliseconds);
+                    afterScope.put("elapsed_milliseconds", elapsedMilliseconds);
+                    afterScope.put("trace_point", "TIMER_END");
+                    logContent.put("log", afterScope);
                     logContent.put("timestamp", Instant.now().toString());
                     logger.info(new ObjectMessage(logContent));
                     callback.success(result);
                 },
                 (error, previous) -> {
-                    Map<String, Object> afterFrame = new HashMap<>();
+                    Map<String, Object> afterScope = new HashMap<>();
                     long elapsedMilliseconds = System.currentTimeMillis() - startTime;
-                    afterFrame.put("message", timerName + " timer frame errored out with milliseconds elapsed: "  + elapsedMilliseconds);
-                    afterFrame.put("elapsed_milliseconds", elapsedMilliseconds);
-                    afterFrame.put("trace_point", "TIMER_EXCEPTION");
-                    logContent.put("log", afterFrame);
+                    afterScope.put("message", timerName + " timer scope errored out with milliseconds elapsed: "  + elapsedMilliseconds);
+                    afterScope.put("elapsed_milliseconds", elapsedMilliseconds);
+                    afterScope.put("trace_point", "TIMER_EXCEPTION");
+                    logContent.put("log", afterScope);
                     logContent.put("timestamp", Instant.now().toString());
                     logger.info(new ObjectMessage(logContent));
                     callback.error(error);

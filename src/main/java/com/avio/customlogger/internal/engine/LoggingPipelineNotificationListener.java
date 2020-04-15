@@ -30,6 +30,7 @@ public class LoggingPipelineNotificationListener
 
     private final org.slf4j.Logger classLogger = LoggerFactory.getLogger(LoggingPipelineNotificationListener.class);
     public static final String CATEGORY_DEFAULT = "com.avioconsulting.default";
+    public static final String CATEGORY_SUFFIX = ".flow";
     public static final String APP_NAME_DEFAULT = "UNKNOWN_APP_NAME";
     public static final String APP_VERSION_DEFAULT = "UNKNOWN_APP_VERSION";
     public static final String ENV_DEFAULT = "UNKNOWN_ENV";
@@ -37,7 +38,7 @@ public class LoggingPipelineNotificationListener
     private Map<String, Object> logContext = new HashMap<>();
     private Map<String, Object> logInner = new HashMap<>();
     @Parameter
-    private String category = CATEGORY_DEFAULT;
+    private String base_category = CATEGORY_DEFAULT;
     @Parameter
     private String app_name = APP_NAME_DEFAULT;
     @Parameter
@@ -95,14 +96,17 @@ public class LoggingPipelineNotificationListener
         }
         if (componentParameters != null) {
             classLogger.debug("Retrieved properties from avio-core:config global element, attempting to parse and store in logContext");
-            if (app_name.equals(APP_NAME_DEFAULT))
+            if (APP_NAME_DEFAULT.equals(app_name))
                 logContext.put("app_name", safeEvaluate(expressionManager.get(), componentParameters.get("app_name")));
-            if (app_version.equals(APP_VERSION_DEFAULT))
+            if (APP_VERSION_DEFAULT.equals(app_version))
                 logContext.put("app_version", safeEvaluate(expressionManager.get(), componentParameters.get("app_version")));
-            if (env.equals(ENV_DEFAULT))
+            if (ENV_DEFAULT.equals(env))
                 logContext.put("env", safeEvaluate(expressionManager.get(), componentParameters.get("env")));
+            if (CATEGORY_DEFAULT.equals(base_category))
+                this.logger = LogManager.getLogger(safeEvaluate(expressionManager.get(), componentParameters.get("base_category")) + CATEGORY_SUFFIX);
         }
-        this.logger = LogManager.getLogger(category);
+        if (this.logger == null)
+            this.logger = LogManager.getLogger(base_category + CATEGORY_SUFFIX);
     }
 
     private Object safeEvaluate(ExpressionManager expressionManager, String expression) {
@@ -116,8 +120,8 @@ public class LoggingPipelineNotificationListener
         return expression;
     }
 
-    public void setCategory(String category) {
-        this.category = category;
+    public void setBase_category(String base_category) {
+        this.base_category = base_category;
     }
 
     public void setApp_name(String app_name) {

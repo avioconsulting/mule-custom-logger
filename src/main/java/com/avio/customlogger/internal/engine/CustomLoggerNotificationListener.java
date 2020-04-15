@@ -25,10 +25,10 @@ import java.util.Optional;
 /*
  * Listener for Mule notifications on flow start, end and completion.
  */
-public class LoggingPipelineNotificationListener
+public class CustomLoggerNotificationListener
         implements PipelineMessageNotificationListener<PipelineMessageNotification> {
 
-    private final org.slf4j.Logger classLogger = LoggerFactory.getLogger(LoggingPipelineNotificationListener.class);
+    private final org.slf4j.Logger classLogger = LoggerFactory.getLogger(CustomLoggerNotificationListener.class);
     public static final String CATEGORY_DEFAULT = "com.avioconsulting.default";
     public static final String CATEGORY_SUFFIX = ".flow";
     public static final String APP_NAME_DEFAULT = "UNKNOWN_APP_NAME";

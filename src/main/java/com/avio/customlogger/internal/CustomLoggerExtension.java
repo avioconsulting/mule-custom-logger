@@ -1,6 +1,6 @@
 package com.avio.customlogger.internal;
 
-import com.avio.customlogger.internal.engine.LoggingPipelineNotificationListener;
+import com.avio.customlogger.internal.engine.CustomLoggerNotificationListener;
 import org.mule.runtime.extension.api.annotation.Configurations;
 import org.mule.runtime.extension.api.annotation.Export;
 import org.mule.runtime.extension.api.annotation.Extension;
@@ -14,7 +14,7 @@ import org.mule.runtime.extension.api.annotation.dsl.xml.Xml;
 @Xml(prefix = "avio-core")
 @Extension(name = "AVIO Core")
 @Configurations(CustomLoggerConfiguration.class)
-@Export(classes = LoggingPipelineNotificationListener.class)
+@Export(classes = CustomLoggerNotificationListener.class)
 public class CustomLoggerExtension {
 
 }

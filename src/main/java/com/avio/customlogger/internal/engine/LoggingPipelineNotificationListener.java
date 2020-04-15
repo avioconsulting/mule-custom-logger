@@ -38,11 +38,11 @@ public class LoggingPipelineNotificationListener
     private Map<String, Object> logContext = new HashMap<>();
     private Map<String, Object> logInner = new HashMap<>();
     @Parameter
-    private String base_category = CATEGORY_DEFAULT;
+    private String baseCategory = CATEGORY_DEFAULT;
     @Parameter
-    private String app_name = APP_NAME_DEFAULT;
+    private String appName = APP_NAME_DEFAULT;
     @Parameter
-    private String app_version = APP_VERSION_DEFAULT;
+    private String appVersion = APP_VERSION_DEFAULT;
     @Parameter
     private String env = ENV_DEFAULT;
 
@@ -79,8 +79,8 @@ public class LoggingPipelineNotificationListener
     }
 
     private void configureLogger() {
-        logContext.put("app_name", app_name);
-        logContext.put("app_version", app_version);
+        logContext.put("app_name", appName);
+        logContext.put("app_version", appVersion);
         logContext.put("env", env);
         classLogger.debug("Set defaults, locating avio-core:config global element");
         List<Component> config = configurationComponentLocator.find(ComponentIdentifier.builder().namespace("avio-core").name("config").build());
@@ -96,17 +96,17 @@ public class LoggingPipelineNotificationListener
         }
         if (componentParameters != null) {
             classLogger.debug("Retrieved properties from avio-core:config global element, attempting to parse and store in logContext");
-            if (APP_NAME_DEFAULT.equals(app_name))
+            if (APP_NAME_DEFAULT.equals(appName))
                 logContext.put("app_name", safeEvaluate(expressionManager.get(), componentParameters.get("app_name")));
-            if (APP_VERSION_DEFAULT.equals(app_version))
+            if (APP_VERSION_DEFAULT.equals(appVersion))
                 logContext.put("app_version", safeEvaluate(expressionManager.get(), componentParameters.get("app_version")));
             if (ENV_DEFAULT.equals(env))
                 logContext.put("env", safeEvaluate(expressionManager.get(), componentParameters.get("env")));
-            if (CATEGORY_DEFAULT.equals(base_category))
-                this.logger = LogManager.getLogger(safeEvaluate(expressionManager.get(), componentParameters.get("base_category")) + CATEGORY_SUFFIX);
+            if (CATEGORY_DEFAULT.equals(baseCategory))
+                this.logger = LogManager.getLogger(safeEvaluate(expressionManager.get(), componentParameters.get("baseCategory")) + CATEGORY_SUFFIX);
         }
         if (this.logger == null)
-            this.logger = LogManager.getLogger(base_category + CATEGORY_SUFFIX);
+            this.logger = LogManager.getLogger(baseCategory + CATEGORY_SUFFIX);
     }
 
     private Object safeEvaluate(ExpressionManager expressionManager, String expression) {
@@ -120,16 +120,16 @@ public class LoggingPipelineNotificationListener
         return expression;
     }
 
-    public void setBase_category(String base_category) {
-        this.base_category = base_category;
+    public void setBaseCategory(String baseCategory) {
+        this.baseCategory = baseCategory;
     }
 
-    public void setApp_name(String app_name) {
-        this.app_name = app_name;
+    public void setAppName(String appName) {
+        this.appName = appName;
     }
 
-    public void setApp_version(String app_version) {
-        this.app_version = app_version;
+    public void setAppVersion(String appVersion) {
+        this.appVersion = appVersion;
     }
 
     public void setEnv(String env) {

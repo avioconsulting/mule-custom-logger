@@ -21,6 +21,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.avio.customlogger.utils.CustomLoggerConstants.*;
+
 /*
  * Listener for Mule notifications on flow start, end and completion.
  */
@@ -35,7 +37,7 @@ public class CustomLoggerNotificationListener
     @Parameter
     private String categoryPrefix = CustomLoggerConstants.DEFAULT_CATEGORY_PREFIX;
     @Parameter
-    private String appName = CustomLoggerConstants.DEFAULT_APP_NAME;
+    private String appName = DEFAULT_APP_NAME;
     @Parameter
     private String appVersion = CustomLoggerConstants.DEFAULT_APP_VERSION;
     @Parameter
@@ -77,68 +79,15 @@ public class CustomLoggerNotificationListener
     private void configureLogger() {
         if (customLoggerUtils == null) {
             customLoggerUtils = new CustomLoggerUtils(registry);
-            classLogger.info("Set customLoggerUtils");
         }
         try {
-            classLogger.debug("Locating avio-core:config global element");
-            List<Component> avioConfig = configurationComponentLocator.find(ComponentIdentifier.builder().namespace("avio-core").name("config").build());
-            Map<String, String> componentParameters = null;
-            if (avioConfig.size() == 1) {
-                try {
-                    classLogger.debug("Located avio-core:config global element, attempting to retrieve properties");
-                    componentParameters = (Map<String, String>) avioConfig.get(0).getAnnotations().get(QName.valueOf("{config}componentParameters"));
-                } catch (Exception e) {
-                    classLogger.error("Could not retrieve properties from avio-core:config global element");
-                }
-            }
-            classLogger.debug("Retrieved properties from avio-core:config global element, attempting to parse and store in logContext");
-            if (!CustomLoggerConstants.DEFAULT_APP_NAME.equals(appName)) {
-                classLogger.debug("Used parameter for app_name: " + appName);
-                logContext.put("app_name", customLoggerUtils.safeEvaluate(appName));
-            } else if (componentParameters != null) {
-                classLogger.debug("Used global-config for app_name: " + componentParameters.get("app_name"));
-                logContext.put("app_name", customLoggerUtils.safeEvaluate(componentParameters.get("app_name")));
-            } else {
-                classLogger.debug("Used default for app_name: " + appName);
-                logContext.put("app_name", customLoggerUtils.safeEvaluate(appName));
-            }
-
-            if (!CustomLoggerConstants.DEFAULT_APP_VERSION.equals(appVersion)) {
-                classLogger.debug("Used parameter for app_version: " + appVersion);
-                logContext.put("app_version", customLoggerUtils.safeEvaluate(appVersion));
-            } else if (componentParameters != null) {
-                classLogger.debug("Used global-config for app_version: " + componentParameters.get("app_version"));
-                logContext.put("app_version", customLoggerUtils.safeEvaluate(componentParameters.get("app_version")));
-            } else {
-                classLogger.debug("Used default for app_version: " + appVersion);
-                logContext.put("app_version", customLoggerUtils.safeEvaluate(appVersion));
-            }
-
-            if (!CustomLoggerConstants.DEFAULT_ENV.equals(env)) {
-                classLogger.debug("Used parameter for env: " + env);
-                logContext.put("env", customLoggerUtils.safeEvaluate(env));
-            } else if (componentParameters != null) {
-                classLogger.debug("Used global-config for env: " + componentParameters.get("env"));
-                logContext.put("env", customLoggerUtils.safeEvaluate(componentParameters.get("env")));
-            } else {
-                classLogger.debug("Used default for env: " + env);
-                logContext.put("env", customLoggerUtils.safeEvaluate(env));
-            }
-
-            if (!CustomLoggerConstants.DEFAULT_CATEGORY_PREFIX.equals(categoryPrefix)) {
-                classLogger.debug("Used parameter for category prefix: " + categoryPrefix);
-                this.logger = LogManager.getLogger(customLoggerUtils.safeEvaluate(categoryPrefix + CATEGORY_SUFFIX));
-            } else if (componentParameters != null) {
-                classLogger.debug("Used global-config for category prefix: " + componentParameters.get("category_prefix"));
-                this.logger = LogManager.getLogger(customLoggerUtils.safeEvaluate(componentParameters.get("category_prefix")) + CATEGORY_SUFFIX);
-            } else {
-                classLogger.debug("Used default for category prefix: " + categoryPrefix);
-                this.logger = LogManager.getLogger(customLoggerUtils.safeEvaluate(categoryPrefix + CATEGORY_SUFFIX));
-            }
+            logContext.put("app_name", customLoggerUtils.decideOnValue(DEFAULT_APP_NAME, appName, "app_name"));
+            logContext.put("app_version", customLoggerUtils.decideOnValue(DEFAULT_APP_VERSION, appVersion, "app_version"));
+            logContext.put("env", customLoggerUtils.decideOnValue(DEFAULT_ENV, env, "env"));
+            this.logger = LogManager.getLogger(customLoggerUtils.decideOnValue(DEFAULT_CATEGORY_PREFIX, categoryPrefix, "category_prefix") + CATEGORY_SUFFIX);
         } catch (NullPointerException e) {
             classLogger.error("ERROR: ", e);
         }
-
     }
 
     public void setCategoryPrefix(String categoryPrefix) {

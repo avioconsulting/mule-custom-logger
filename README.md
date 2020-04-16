@@ -1,5 +1,9 @@
 # What?
-This is a Custom Mule logger to replace MuleSoft's out of the box logger to enforce logging standards on mule application logs. This logger builds and logs Java HashMap with the given key-value pairs thus providing a way to generate consistent and structured log messages.
+This project contains several utilities to supplement MuleSoft's out of the box logger and enforce logging standards on application logs. 
+* The custom logger processor builds and logs Java HashMap with the given key-value pairs thus providing a way to generate 
+consistent and structured log messages: 
+* The timer scope records the amount of time it takes to execute the processors inside the scope and logs the time elapsed.
+* The notification logger listens to the Mule runtime's engine notifications and logs when flows start and end.
 
 # Why?
 One of the reasons for developing this custom module is to feed JSON logs to log analyzers like Splunk, ELK etc. When these log analyzers receive structured logs(JSON), It is easy on the log analyzer side to create reports, dashboards etc. Below are the things this Logger can do when compared to out-of-the-box MuleSoft's logger component.
@@ -12,6 +16,7 @@ One of the reasons for developing this custom module is to feed JSON logs to log
 * Optionally log location info with each log message.
 * Tracepoints compatibility to measure request, response times and such.
 
+# Using the Custom Logger Processor
 Here is how mule-custom-logger looks like in action.
 
 ![image](https://user-images.githubusercontent.com/34731865/57938654-361bee00-788e-11e9-9ff6-6eadf9b77a1b.png)
@@ -67,6 +72,35 @@ There are several attributes provided by this JSONLayout that you can play with.
 }
 ```
 **Important**: If you are using this kind of approach(HashMap + JSONLayout in log4j2.xml) for any MuleSoft CloudHub projects, and if you want to see JSON logs in CloudHub console, The CloudHub appender provided by MuleSoft defaults to one pattern and it ignores any layout you specify. Most of the log4j2 appenders should accept layouts though. 
+
+# Using the Timer Scope
+The timer scope allows you to unobtrusively measure the time taken to execute the processors within the scope. For example, 
+if you had a complex Transform Message processor that you wanted to time, you could place it inside the scope to get an INFO level 
+log of how many milliseconds it took to execute.
+
+To use the timer scope, pull it in from the AVIO Core section of the palette and fill in the two required values, Timer Name and Category. 
+After that, check the App Level properties and validate they're what you desire. Now you're good to go!
+
+# Using the Custom Logger Notification Listener
+The custom logger notification listener implements an interface that allows it to be notified when flows start and end. It's also able to retrieve 
+your ```avio-core:config``` global element and match its App Level properties to your custom loggers'. Note that (unless overriden) 
+all flow start/stop messages will have a category suffix of ```.flow```.
+
+To use the custom logger notification listener, you must instantiate the object inside your Mule runtime. You do this by using the ```<object>``` 
+global element. An example has been included below:
+
+```xml
+<object doc:name="Object" doc:id="4df721fe-16b2-4ce3-819e-878fb4dd53c1" 
+    name="CustomLoggerNotificationListener" 
+    class="com.avio.customlogger.internal.engine.CustomLoggerNotificationListener" />
+```
+You can also override the global configuration elements by specifying properties. The available properties are as follows:
+ * appName
+ * appVersion
+ * env
+ * category - Note, this completely overrides the category, i.e. it does not use the ```baseCategory``` from the global configuration 
+ as a prefix.
+
 # How?
 
 ## Using maven dependency

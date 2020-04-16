@@ -1,6 +1,6 @@
-package com.avio.customlogger.internal;
+package com.avio.customlogger;
 
-import com.avio.customlogger.internal.model.LogLocationInfoProperty;
+import com.avio.customlogger.model.LogLocationInfoProperty;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.message.ObjectMessage;

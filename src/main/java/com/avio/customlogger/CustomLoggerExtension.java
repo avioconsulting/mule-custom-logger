@@ -1,6 +1,6 @@
-package com.avio.customlogger.internal;
+package com.avio.customlogger;
 
-import com.avio.customlogger.internal.engine.CustomLoggerNotificationListener;
+import com.avio.customlogger.engine.CustomLoggerNotificationListener;
 import org.mule.runtime.extension.api.annotation.Configurations;
 import org.mule.runtime.extension.api.annotation.Export;
 import org.mule.runtime.extension.api.annotation.Extension;

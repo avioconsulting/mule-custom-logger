@@ -1,5 +1,6 @@
-package com.avio.customlogger.internal;
+package com.avio.customlogger;
 
+import com.avio.customlogger.utils.CustomLoggerConstants;
 import org.mule.runtime.extension.api.annotation.Operations;
 import org.mule.runtime.extension.api.annotation.param.Optional;
 import org.mule.runtime.extension.api.annotation.param.Parameter;
@@ -18,23 +19,23 @@ public class CustomLoggerConfiguration {
     @Parameter
     @DisplayName("App Name")
     @Summary("Name of the Mule Application")
-    @Optional(defaultValue = "#[app.name]")
+    @Optional(defaultValue = CustomLoggerConstants.DEFAULT_APP_NAME)
     private String app_name;
     @Parameter
     @DisplayName("App Version")
     @Summary("Version of the Mule Application")
-    @Optional(defaultValue = "${appVersion}")
+    @Optional(defaultValue = CustomLoggerConstants.DEFAULT_APP_VERSION)
     private String app_version;
     @Parameter
     @DisplayName("Environment")
     @Summary("Mule Application Environment")
-    @Optional(defaultValue = "${env}")
+    @Optional(defaultValue = CustomLoggerConstants.DEFAULT_ENV)
     private String env;
     @Parameter
-    @DisplayName("Base Category")
-    @Summary("Base category which will be prefixed to all log categories")
-    @Optional(defaultValue = "com.avioconsulting.default")
-    private String base_category;
+    @DisplayName("Category Prefix")
+    @Summary("A string which will be prefixed to all log category suffixes defined in the loggers")
+    @Optional(defaultValue = CustomLoggerConstants.DEFAULT_CATEGORY_PREFIX)
+    private String category_prefix;
 
     public String getApp_name() {
         return app_name;
@@ -48,7 +49,7 @@ public class CustomLoggerConfiguration {
         return env;
     }
 
-    public String getBase_category() {
-        return base_category;
+    public String getCategory_prefix() {
+        return category_prefix;
     }
 }

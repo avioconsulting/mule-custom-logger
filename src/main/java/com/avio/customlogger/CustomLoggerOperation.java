@@ -1,8 +1,8 @@
-package com.avio.customlogger.internal;
+package com.avio.customlogger;
 
-import com.avio.customlogger.internal.model.*;
+import com.avio.customlogger.model.*;
+import com.avio.customlogger.utils.CustomLoggerUtils;
 import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.message.ObjectMessage;
 import org.mule.runtime.api.component.location.ComponentLocation;
@@ -36,9 +36,7 @@ public class CustomLoggerOperation {
                              ComponentLocation location,
                              @Config CustomLoggerConfiguration customLoggerConfiguration) {
 
-        if (logProperties.getCategory() != null)
-            initLogger(logProperties.getCategory());
-        else initLogger("com.avioconsulting.api");
+        this.logger = CustomLoggerUtils.initLogger(customLoggerConfiguration.getCategory_prefix(), logProperties.getCategorySuffix());
 
         final Map<LoggerLevelProperty.LogLevel, Level> levelMap = getMappings();
 
@@ -78,10 +76,6 @@ public class CustomLoggerOperation {
         }
         ObjectMessage objectMessage = new ObjectMessage(logContent);
         logger.log(levelMap.get(logProperties.getLog_level()), objectMessage);
-    }
-
-    private void initLogger(String category) {
-        this.logger = LogManager.getLogger(category);
     }
 
     private static Map<LoggerLevelProperty.LogLevel, Level> getMappings() {

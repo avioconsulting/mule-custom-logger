@@ -34,7 +34,7 @@ public class CustomLoggerConfiguration {
     @DisplayName("Base Category")
     @Summary("Base category which will be prefixed to all log categories")
     @Optional(defaultValue = "com.avioconsulting.default")
-    private String baseCategory;
+    private String base_category;
 
     public String getApp_name() {
         return app_name;
@@ -48,7 +48,7 @@ public class CustomLoggerConfiguration {
         return env;
     }
 
-    public String getBaseCategory() {
-        return baseCategory;
+    public String getBase_category() {
+        return base_category;
     }
 }

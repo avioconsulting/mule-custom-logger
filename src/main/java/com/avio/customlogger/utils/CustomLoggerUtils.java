@@ -29,24 +29,51 @@ public class CustomLoggerUtils {
     private static final org.slf4j.Logger classLogger = LoggerFactory.getLogger(CustomLoggerUtils.class);
 
     private ExpressionManager expressionManager = null;
-    private Map<String, String> globalConfig = null;
+    private Map<String, String> globalConfigurationProperties = null;
 
     public CustomLoggerUtils(Registry registry) {
+        this(registry, null);
+    }
+
+    public CustomLoggerUtils(Registry registry, String globalConfigurationName) {
         this.registry = registry;
         if (registry != null) {
-            classLogger.debug("Locating avio-core:config global element");
-            Optional<ConfigurationComponentLocator> configurationComponentLocator = registry.lookupByType(ConfigurationComponentLocator.class);
-            if (configurationComponentLocator.isPresent()) {
-                List<Component> components = configurationComponentLocator.get().find(ComponentIdentifier.builder().namespace("avio-core").name("config").build());
-                if (components.size() == 1) {
+            if (globalConfigurationName != null && !"".equals(globalConfigurationName)) {
+                classLogger.debug("Retrieving avio-core:config global element directly.");
+                Optional<Object> config = registry.lookupByName(globalConfigurationName);
+                if (config.isPresent()) {
                     try {
-                        classLogger.debug("Located avio-core:config global element, attempting to retrieve properties");
-                        globalConfig = (Map<String, String>) components.get(0).getAnnotations().get(QName.valueOf("{config}componentParameters"));
-                    } catch (Exception e) {
-                        classLogger.error("Could not retrieve properties from avio-core:config global element");
+                        classLogger.debug("Retrieved the avio-core:config element directly.");
+                        globalConfigurationProperties = (Map<String, String>) ((Component) config.get()).getAnnotation(QName.valueOf("{config}componentParameters"));
+                    } catch (ClassCastException exception) {
+                        classLogger.error("There was an error when retrieving the global configuration's properties.");
+                    }
+                } else {
+                    classLogger.debug("Could not retrieve the avio-core:config element directly.");
+                }
+            }
+            if (globalConfigurationProperties == null) {
+                classLogger.debug("Locating avio-core:config global element from the registry.");
+                Optional<ConfigurationComponentLocator> configurationComponentLocator = registry.lookupByType(ConfigurationComponentLocator.class);
+                if (configurationComponentLocator.isPresent()) {
+                    List<Component> globalConfigurations = configurationComponentLocator.get().find(ComponentIdentifier.builder().namespace("avio-core").name("config").build());
+                    if (globalConfigurations.size() == 1) {
+                        try {
+                            classLogger.debug("Located avio-core:config global element, attempting to retrieve properties.");
+                            globalConfigurationProperties = (Map<String, String>) globalConfigurations.get(0).getAnnotation(QName.valueOf("{config}componentParameters"));
+                        } catch (Exception e) {
+                            classLogger.error("Could not retrieve properties from avio-core:config global element.");
+                        }
+                    } else if (globalConfigurations.size() > 1) {
+                        classLogger.debug("Found more than one avio-core:config, using the last loaded configuration.");
+                        globalConfigurationProperties = (Map<String, String>) globalConfigurations.get(globalConfigurations.size()-1).getAnnotation(QName.valueOf("{config}componentParameters"));
                     }
                 }
-                classLogger.debug("Retrieved properties from avio-core:config global element, attempting to parse and store in logContext");
+            }
+            if (globalConfigurationProperties != null) {
+                classLogger.debug("Successfully retrieved properties from avio-core:config global element.");
+            } else {
+                classLogger.debug("Could not retrieve properties from avio-core:config global element.");
             }
         }
     }
@@ -62,12 +89,12 @@ public class CustomLoggerUtils {
                 (DEFAULT_CATEGORY_PREFIX.equals(categoryPrefix) &&
                         !(categorySuffix.charAt(0) == '.' || !categorySuffix.contains(".")) &&
                         !(DEFAULT_CATEGORY_SUFFIX.equals(categorySuffix) ||
-                        CustomLoggerTimerScopeOperations.DEFAULT_CATEGORY_SUFFIX.equals(categorySuffix) ||
-                        CustomLoggerNotificationListener.DEFAULT_CATEGORY_SUFFIX.equals(categorySuffix)))
+                                CustomLoggerTimerScopeOperations.DEFAULT_CATEGORY_SUFFIX.equals(categorySuffix) ||
+                                CustomLoggerNotificationListener.DEFAULT_CATEGORY_SUFFIX.equals(categorySuffix)))
         ) {
             return LogManager.getLogger(categorySuffix);
         }
-        if (categoryPrefix.charAt(categoryPrefix.length()-1) == '.') {
+        if (categoryPrefix.charAt(categoryPrefix.length() - 1) == '.') {
             if (categorySuffix.charAt(0) == '.') {
                 return LogManager.getLogger(categoryPrefix + categorySuffix.substring(1));
             } else {
@@ -119,9 +146,9 @@ public class CustomLoggerUtils {
         if (!defaultConstant.equals(parameterValue)) {
             classLogger.trace("Used parameter: " + parameterValue);
             return safeEvaluate(parameterValue);
-        } else if (globalConfig != null) {
-            classLogger.trace("Used global-config: " + globalConfig.get(globalConfigFieldName));
-            return safeEvaluate(globalConfig.get(globalConfigFieldName));
+        } else if (globalConfigurationProperties != null) {
+            classLogger.trace("Used global-config: " + globalConfigurationProperties.get(globalConfigFieldName));
+            return safeEvaluate(globalConfigurationProperties.get(globalConfigFieldName));
         } else {
             classLogger.trace("Used default: " + parameterValue);
             return safeEvaluate(parameterValue);
@@ -129,8 +156,8 @@ public class CustomLoggerUtils {
     }
 
     public String retrieveValueFromGlobalConfig(String globalConfigFieldName) {
-        if (globalConfig != null) {
-            return safeEvaluate(globalConfig.get(globalConfigFieldName));
+        if (globalConfigurationProperties != null) {
+            return safeEvaluate(globalConfigurationProperties.get(globalConfigFieldName));
         } else {
             return null;
         }

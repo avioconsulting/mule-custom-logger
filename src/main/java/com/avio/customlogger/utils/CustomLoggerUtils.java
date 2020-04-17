@@ -1,5 +1,7 @@
 package com.avio.customlogger.utils;
 
+import com.avio.customlogger.CustomLoggerTimerScopeOperations;
+import com.avio.customlogger.engine.CustomLoggerNotificationListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.mule.runtime.api.artifact.Registry;
@@ -50,13 +52,19 @@ public class CustomLoggerUtils {
     }
 
     public static Logger initLogger(String categoryPrefix, String categorySuffix) {
-        if (categoryPrefix == null) {
+        if (categoryPrefix == null || categoryPrefix.length() == 0) {
             categoryPrefix = DEFAULT_CATEGORY_PREFIX;
         }
-        if (categorySuffix == null) {
+        if (categorySuffix == null || categorySuffix.length() == 0) {
             categorySuffix = DEFAULT_CATEGORY_SUFFIX;
         }
-        if (categorySuffix.contains(categoryPrefix)) {
+        if (categorySuffix.contains(categoryPrefix) ||
+                (DEFAULT_CATEGORY_PREFIX.equals(categoryPrefix) &&
+                categorySuffix.charAt(0) != '.' &&
+                        !(DEFAULT_CATEGORY_SUFFIX.equals(categorySuffix) ||
+                        CustomLoggerTimerScopeOperations.DEFAULT_CATEGORY_SUFFIX.equals(categorySuffix) ||
+                        CustomLoggerNotificationListener.DEFAULT_CATEGORY_SUFFIX.equals(categorySuffix)))
+        ) {
             return LogManager.getLogger(categorySuffix);
         }
         if (categoryPrefix.charAt(categoryPrefix.length()-1) == '.') {

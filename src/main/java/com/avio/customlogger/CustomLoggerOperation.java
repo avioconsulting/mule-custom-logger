@@ -37,7 +37,7 @@ public class CustomLoggerOperation {
                              ComponentLocation location,
                              @Config CustomLoggerConfiguration customLoggerConfiguration) {
 
-        this.logger = CustomLoggerUtils.initLogger(customLoggerConfiguration.getCategory_prefix(), logProperties.getCategorySuffix());
+        this.logger = CustomLoggerUtils.initLogger(customLoggerConfiguration.getCategory_prefix(), logProperties.getCategory());
 
         final Map<LoggerLevelProperty.LogLevel, Level> levelMap = getMappings();
 

@@ -34,9 +34,13 @@ public class CustomLoggerUtilsTest {
         logger = CustomLoggerUtils.initLogger("com.mycompany", "customcategory").getName();
         Assert.assertEquals("com.mycompany.customcategory", logger);
 
-        // If default prefix is still set and a custom suffix is defined (BUT it does not start with a .), use the suffix
+        // If default prefix is still set and a custom suffix is defined (BUT it contains a .), use the suffix
         logger = CustomLoggerUtils.initLogger(DEFAULT_CATEGORY_PREFIX, "com.mycompany.customcategory").getName();
         Assert.assertEquals("com.mycompany.customcategory", logger);
+
+        // If default prefix is still set and a custom suffix is defined (BUT it does NOT contain a .), concatenate
+        logger = CustomLoggerUtils.initLogger(DEFAULT_CATEGORY_PREFIX, "customcategory").getName();
+        Assert.assertEquals(DEFAULT_CATEGORY_PREFIX + ".customcategory", logger);
 
         // If both are custom but the suffix contains the prefix, use the suffix
         logger = CustomLoggerUtils.initLogger("com.mycompany", "com.mycompany.customcategory").getName();

@@ -60,7 +60,7 @@ public class CustomLoggerUtils {
         }
         if (categorySuffix.contains(categoryPrefix) ||
                 (DEFAULT_CATEGORY_PREFIX.equals(categoryPrefix) &&
-                categorySuffix.charAt(0) != '.' &&
+                        !(categorySuffix.charAt(0) == '.' || !categorySuffix.contains(".")) &&
                         !(DEFAULT_CATEGORY_SUFFIX.equals(categorySuffix) ||
                         CustomLoggerTimerScopeOperations.DEFAULT_CATEGORY_SUFFIX.equals(categorySuffix) ||
                         CustomLoggerNotificationListener.DEFAULT_CATEGORY_SUFFIX.equals(categorySuffix)))

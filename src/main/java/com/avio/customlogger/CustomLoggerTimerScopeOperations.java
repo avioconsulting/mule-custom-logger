@@ -23,6 +23,7 @@ import static com.avio.customlogger.utils.CustomLoggerConstants.DEFAULT_CATEGORY
 
 
 public class CustomLoggerTimerScopeOperations {
+    public static final String DEFAULT_CATEGORY_SUFFIX = ".timer";
     private final org.slf4j.Logger classLogger = LoggerFactory.getLogger(CustomLoggerTimerScopeOperations.class);
 
     @Inject
@@ -32,7 +33,7 @@ public class CustomLoggerTimerScopeOperations {
     private CustomLoggerUtils customLoggerUtils;
 
     public void timerScope(String timerName,
-                           @Optional(defaultValue = ".timer") String categorySuffix,
+                           @Optional(defaultValue = DEFAULT_CATEGORY_SUFFIX) String categorySuffix,
                            @ParameterGroup(name = "Options") LogLocationInfoProperty logLocationInfoProperty,
                            ComponentLocation location,
                            Chain operations,

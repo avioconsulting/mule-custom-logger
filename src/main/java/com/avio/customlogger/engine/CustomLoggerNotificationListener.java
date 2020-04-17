@@ -6,8 +6,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.message.ObjectMessage;
 import org.mule.runtime.api.artifact.Registry;
-import org.mule.runtime.api.component.Component;
-import org.mule.runtime.api.component.ComponentIdentifier;
 import org.mule.runtime.api.component.location.ConfigurationComponentLocator;
 import org.mule.runtime.api.notification.PipelineMessageNotification;
 import org.mule.runtime.api.notification.PipelineMessageNotificationListener;
@@ -15,10 +13,8 @@ import org.mule.runtime.extension.api.annotation.param.Parameter;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import javax.xml.namespace.QName;
 import java.time.Instant;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static com.avio.customlogger.utils.CustomLoggerConstants.*;
@@ -30,12 +26,14 @@ public class CustomLoggerNotificationListener
         implements PipelineMessageNotificationListener<PipelineMessageNotification> {
 
     private final org.slf4j.Logger classLogger = LoggerFactory.getLogger(CustomLoggerNotificationListener.class);
-    public static final String CATEGORY_SUFFIX = ".flow";
+    public static final String DEFAULT_CATEGORY_SUFFIX = ".flow";
     private Logger logger = null;
     private Map<String, Object> logContext = new HashMap<>();
     private Map<String, Object> logInner = new HashMap<>();
     @Parameter
     private String categoryPrefix = CustomLoggerConstants.DEFAULT_CATEGORY_PREFIX;
+    @Parameter
+    private String categorySuffix = DEFAULT_CATEGORY_SUFFIX;
     @Parameter
     private String appName = DEFAULT_APP_NAME;
     @Parameter
@@ -84,7 +82,7 @@ public class CustomLoggerNotificationListener
             logContext.put("app_name", customLoggerUtils.decideOnValue(DEFAULT_APP_NAME, appName, "app_name"));
             logContext.put("app_version", customLoggerUtils.decideOnValue(DEFAULT_APP_VERSION, appVersion, "app_version"));
             logContext.put("env", customLoggerUtils.decideOnValue(DEFAULT_ENV, env, "env"));
-            this.logger = LogManager.getLogger(customLoggerUtils.decideOnValue(DEFAULT_CATEGORY_PREFIX, categoryPrefix, "category_prefix") + CATEGORY_SUFFIX);
+            this.logger = LogManager.getLogger(customLoggerUtils.decideOnValue(DEFAULT_CATEGORY_PREFIX, categoryPrefix, "category_prefix") + categorySuffix);
         } catch (NullPointerException e) {
             classLogger.error("ERROR: ", e);
         }

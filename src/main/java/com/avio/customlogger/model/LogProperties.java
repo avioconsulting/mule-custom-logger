@@ -42,7 +42,7 @@ public class LogProperties {
     @Parameter
     @Optional
     @DisplayName("Category Suffix")
-    private String categorySuffix;
+    private String category;
 
     public String getMessage() {
         return message;
@@ -52,8 +52,8 @@ public class LogProperties {
         return level;
     }
 
-    public String getCategorySuffix() {
-        return categorySuffix;
+    public String getCategory() {
+        return category;
     }
 
     public String getCorrelation_id() {

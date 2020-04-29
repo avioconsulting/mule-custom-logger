@@ -39,9 +39,9 @@
     </dependencies>
     <distributionManagement>
         <repository>
-            <id>anypoint-exchange</id>
-            <name>AVIO Anypoint Exchange</name>
-            <url>https://maven.anypoint.mulesoft.com/api/v1/organizations/26d53683-6746-4040-ad07-f671f8e2b27e/maven</url>
+            <id>anypoint-exchange-v2</id>
+            <name>Anypoint Exchange</name>
+            <url>https://maven.anypoint.mulesoft.com/api/v2/maven</url>
             <layout>default</layout>
         </repository>
     </distributionManagement>

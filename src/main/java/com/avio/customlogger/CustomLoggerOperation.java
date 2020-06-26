@@ -1,8 +1,8 @@
-package com.avio.customlogger.internal;
+package com.avio.customlogger;
 
-import com.avio.customlogger.internal.model.*;
+import com.avio.customlogger.model.*;
+import com.avio.customlogger.utils.CustomLoggerUtils;
 import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.message.ObjectMessage;
 import org.mule.runtime.api.component.location.ComponentLocation;
@@ -14,6 +14,7 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.avio.customlogger.utils.CustomLoggerUtils.getLocationInformation;
 import static org.mule.runtime.extension.api.annotation.param.MediaType.ANY;
 
 /**
@@ -36,26 +37,24 @@ public class CustomLoggerOperation {
                              ComponentLocation location,
                              @Config CustomLoggerConfiguration customLoggerConfiguration) {
 
-        if (logProperties.getCategory() != null)
-            initLogger(logProperties.getCategory());
-        else initLogger("com.avioconsulting.api");
+        this.logger = CustomLoggerUtils.initLogger(customLoggerConfiguration.getCategory_prefix(), logProperties.getCategory());
 
         final Map<LoggerLevelProperty.LogLevel, Level> levelMap = getMappings();
 
-        Map<String, Object> logContent = new HashMap<>();
-        logContent.put("app_name", customLoggerConfiguration.getApp_name());
-        logContent.put("app_version", customLoggerConfiguration.getApp_version());
-        logContent.put("env", customLoggerConfiguration.getEnv());
-        logContent.put("timestamp", Instant.now().toString());
-        logContent.put("ext", extendedProperties.getProperties());
+        Map<String, Object> logContext = new HashMap<>();
+        logContext.put("app_name", customLoggerConfiguration.getApp_name());
+        logContext.put("app_version", customLoggerConfiguration.getApp_version());
+        logContext.put("env", customLoggerConfiguration.getEnv());
+        logContext.put("timestamp", Instant.now().toString());
+        logContext.put("ext", extendedProperties.getProperties());
 
         //This is because, we need to see what is in the nested object when the Hashmap is logged.
-        Map<String, Object> logOnes = new HashMap<>();
-        logOnes.put("correlation_id", logProperties.getCorrelation_id());
-        logOnes.put("message", logProperties.getMessage());
-        logOnes.put("payload", logProperties.getPayload());
-        logOnes.put("trace_point", logProperties.getTracePoint());
-        logContent.put("log", logOnes);
+        Map<String, Object> logInner = new HashMap<>();
+        logInner.put("correlation_id", logProperties.getCorrelation_id());
+        logInner.put("message", logProperties.getMessage());
+        logInner.put("payload", logProperties.getPayload());
+        logInner.put("trace_point", logProperties.getTracePoint());
+        logContext.put("log", logInner);
 
         if (exceptionProperties != null) {
             Map<String, Object> exceptionOnes = new HashMap<>();
@@ -63,25 +62,13 @@ public class CustomLoggerOperation {
             exceptionOnes.put("type", exceptionProperties.getType());
             exceptionOnes.put("detail", exceptionProperties.getDetail());
 
-            logContent.put("exception", exceptionOnes);
+            logContext.put("exception", exceptionOnes);
         }
-
         if (logLocationInfoProperty.logLocationInfo) {
-            Map<String, String> locationInfo = new HashMap<>();
-            locationInfo.put("location", location.getLocation());
-            locationInfo.put("root_container", location.getRootContainerName());
-            locationInfo.put("component", location.getComponentIdentifier().getIdentifier().toString());
-            locationInfo.put("file_name", location.getFileName().orElse(""));
-            locationInfo.put("line_in_file", String.valueOf(location.getLineInFile().orElse(null)));
-
-            logContent.put("location", locationInfo);
+            logContext.put("location", getLocationInformation(location));
         }
-        ObjectMessage objectMessage = new ObjectMessage(logContent);
+        ObjectMessage objectMessage = new ObjectMessage(logContext);
         logger.log(levelMap.get(logProperties.getLog_level()), objectMessage);
-    }
-
-    private void initLogger(String category) {
-        this.logger = LogManager.getLogger(category);
     }
 
     private static Map<LoggerLevelProperty.LogLevel, Level> getMappings() {

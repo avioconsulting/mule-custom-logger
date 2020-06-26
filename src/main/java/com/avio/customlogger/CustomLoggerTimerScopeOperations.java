@@ -1,55 +1,64 @@
-package com.avio.customlogger.internal;
+package com.avio.customlogger;
 
-import com.avio.customlogger.internal.model.LogLocationInfoProperty;
+import com.avio.customlogger.model.LogLocationInfoProperty;
+import com.avio.customlogger.utils.CustomLoggerUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.message.ObjectMessage;
+import org.mule.runtime.api.artifact.Registry;
 import org.mule.runtime.api.component.location.ComponentLocation;
+import org.mule.runtime.extension.api.annotation.param.Optional;
 import org.mule.runtime.extension.api.annotation.param.ParameterGroup;
 import org.mule.runtime.extension.api.runtime.process.CompletionCallback;
 import org.mule.runtime.extension.api.runtime.route.Chain;
+import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.avio.customlogger.utils.CustomLoggerConstants.*;
+import static com.avio.customlogger.utils.CustomLoggerConstants.DEFAULT_CATEGORY_PREFIX;
+
 
 public class CustomLoggerTimerScopeOperations {
+    public static final String DEFAULT_CATEGORY_SUFFIX = ".timer";
+    private final org.slf4j.Logger classLogger = LoggerFactory.getLogger(CustomLoggerTimerScopeOperations.class);
+
+    @Inject
+    Registry registry;
 
     private Logger logger;
+    private CustomLoggerUtils customLoggerUtils;
 
     public void timerScope(String timerName,
-                           String category,
-                           @ParameterGroup(name = "App Level") CustomLoggerConfiguration customLoggerConfiguration,
+                           @Optional(defaultValue = DEFAULT_CATEGORY_SUFFIX) String categorySuffix,
+                           @Optional String moduleConfigurationName,
                            @ParameterGroup(name = "Options") LogLocationInfoProperty logLocationInfoProperty,
                            ComponentLocation location,
                            Chain operations,
                            CompletionCallback<Object, Object> callback) {
-        this.logger = LogManager.getLogger(category);
-        Map<String, Object> logContent = new HashMap<>();
-        logContent.put("timer_name", timerName);
-        logContent.put("app_name", customLoggerConfiguration.getApp_name());
-        logContent.put("app_version", customLoggerConfiguration.getApp_version());
-        logContent.put("env", customLoggerConfiguration.getEnv());
-
-        if (logLocationInfoProperty.logLocationInfo) {
-            Map<String, String> locationInfo = new HashMap<>();
-            locationInfo.put("location", location.getLocation());
-            locationInfo.put("root_container", location.getRootContainerName());
-            locationInfo.put("component", location.getComponentIdentifier().getIdentifier().toString());
-            locationInfo.put("file_name", location.getFileName().orElse(""));
-            locationInfo.put("line_in_file", String.valueOf(location.getLineInFile().orElse(null)));
-
-            logContent.put("location", locationInfo);
+        if (customLoggerUtils == null) {
+            customLoggerUtils = new CustomLoggerUtils(registry, moduleConfigurationName);
+        } else {
+            classLogger.info("Registry was found");
         }
-
-
+        this.logger = LogManager.getLogger(customLoggerUtils.retrieveValueFromGlobalConfig("category_prefix") + categorySuffix);
+        Map<String, Object> logContext = new HashMap<>();
+        logContext.put("timer_name", timerName);
+        logContext.put("app_name", customLoggerUtils.retrieveValueFromGlobalConfig("app_name"));
+        logContext.put("app_version", customLoggerUtils.retrieveValueFromGlobalConfig("app_version"));
+        logContext.put("env", customLoggerUtils.retrieveValueFromGlobalConfig("env"));
+        if (logLocationInfoProperty.logLocationInfo) {
+            logContext.put("location", CustomLoggerUtils.getLocationInformation(location));
+        }
         Map<String, Object> beforeScope = new HashMap<>();
         beforeScope.put("message", timerName + " timer scope starting");
         beforeScope.put("trace_point", "TIMER_START");
-        logContent.put("log", beforeScope);
-        logContent.put("timestamp", Instant.now().toString());
-        logger.debug(new ObjectMessage(logContent));
+        logContext.put("log", beforeScope);
+        logContext.put("timestamp", Instant.now().toString());
+        logger.debug(new ObjectMessage(logContext));
 
         long startTime = System.currentTimeMillis();
         operations.process(
@@ -59,9 +68,9 @@ public class CustomLoggerTimerScopeOperations {
                     afterScope.put("message", timerName + " timer scope completed with milliseconds elapsed: "  + elapsedMilliseconds);
                     afterScope.put("elapsed_milliseconds", elapsedMilliseconds);
                     afterScope.put("trace_point", "TIMER_END");
-                    logContent.put("log", afterScope);
-                    logContent.put("timestamp", Instant.now().toString());
-                    logger.info(new ObjectMessage(logContent));
+                    logContext.put("log", afterScope);
+                    logContext.put("timestamp", Instant.now().toString());
+                    logger.info(new ObjectMessage(logContext));
                     callback.success(result);
                 },
                 (error, previous) -> {
@@ -70,9 +79,9 @@ public class CustomLoggerTimerScopeOperations {
                     afterScope.put("message", timerName + " timer scope errored out with milliseconds elapsed: "  + elapsedMilliseconds);
                     afterScope.put("elapsed_milliseconds", elapsedMilliseconds);
                     afterScope.put("trace_point", "TIMER_EXCEPTION");
-                    logContent.put("log", afterScope);
-                    logContent.put("timestamp", Instant.now().toString());
-                    logger.info(new ObjectMessage(logContent));
+                    logContext.put("log", afterScope);
+                    logContext.put("timestamp", Instant.now().toString());
+                    logger.info(new ObjectMessage(logContext));
                     callback.error(error);
                 });
     }

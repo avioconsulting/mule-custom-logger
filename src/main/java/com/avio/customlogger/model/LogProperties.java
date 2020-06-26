@@ -1,4 +1,4 @@
-package com.avio.customlogger.internal.model;
+package com.avio.customlogger.model;
 
 import org.mule.runtime.extension.api.annotation.param.Optional;
 import org.mule.runtime.extension.api.annotation.param.Parameter;
@@ -41,7 +41,7 @@ public class LogProperties {
 
     @Parameter
     @Optional
-    @DisplayName("Category")
+    @DisplayName("Category Suffix")
     private String category;
 
     public String getMessage() {

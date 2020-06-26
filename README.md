@@ -92,7 +92,7 @@ global element. An example has been included below:
 ```xml
 <object doc:name="Object" doc:id="4df721fe-16b2-4ce3-819e-878fb4dd53c1" 
     name="CustomLoggerNotificationListener" 
-    class="com.avio.customlogger.internal.engine.CustomLoggerNotificationListener" />
+    class="com.avio.customlogger.engine.CustomLoggerNotificationListener" />
 ```
 You can also override the global configuration elements by specifying properties. The available properties are as follows:
  * appName

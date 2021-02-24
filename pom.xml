@@ -40,9 +40,9 @@
     </dependencies>
     <distributionManagement>
         <repository>
-            <id>anypoint-exchange</id>
-            <name>AVIO Anypoint Exchange</name>
-            <url>https://maven.anypoint.mulesoft.com/api/v1/organizations/26d53683-6746-4040-ad07-f671f8e2b27e/maven</url>
+            <id>github</id>
+            <name>GitHub OWNER Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/avioconsulting/public-packages</url>
             <layout>default</layout>
         </repository>
     </distributionManagement>

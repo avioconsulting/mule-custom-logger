@@ -45,6 +45,13 @@
             <url>https://maven.pkg.github.com/avioconsulting/public-packages</url>
             <layout>default</layout>
         </repository>
+        <snapshotRepository>
+            <uniqueVersion>false</uniqueVersion>
+            <id>github</id>
+            <name>GitHub OWNER Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/avioconsulting/public-packages</url>
+            <layout>default</layout>
+        </snapshotRepository>
     </distributionManagement>
     <repositories>
         <repository>

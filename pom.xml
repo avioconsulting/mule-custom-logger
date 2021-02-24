@@ -46,4 +46,11 @@
             <layout>default</layout>
         </repository>
     </distributionManagement>
+    <repositories>
+        <repository>
+            <id>mulesoft-releases</id>
+            <name>MuleSoft Releases Repository</name>
+            <url>https://repository.mulesoft.org/releases/</url>
+        </repository>
+    </repositories>
 </project>

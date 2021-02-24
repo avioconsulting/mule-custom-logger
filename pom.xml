@@ -4,9 +4,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-    <groupId>26d53683-6746-4040-ad07-f671f8e2b27e</groupId>
+    <groupId>com.avioconsulting.mule</groupId>
     <artifactId>mule-custom-logger</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1-SNAPSHOT</version>
     <packaging>mule-extension</packaging>
 
     <parent>
@@ -40,10 +40,17 @@
     </dependencies>
     <distributionManagement>
         <repository>
-            <id>anypoint-exchange</id>
-            <name>AVIO Anypoint Exchange</name>
-            <url>https://maven.anypoint.mulesoft.com/api/v1/organizations/26d53683-6746-4040-ad07-f671f8e2b27e/maven</url>
+            <id>github</id>
+            <name>GitHub OWNER Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/avioconsulting/public-packages</url>
             <layout>default</layout>
         </repository>
     </distributionManagement>
+    <repositories>
+        <repository>
+            <id>mulesoft-releases</id>
+            <name>MuleSoft Releases Repository</name>
+            <url>https://repository.mulesoft.org/releases/</url>
+        </repository>
+    </repositories>
 </project>

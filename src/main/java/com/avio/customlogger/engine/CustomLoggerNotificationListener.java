@@ -40,9 +40,8 @@ public class CustomLoggerNotificationListener
     private String appVersion = CustomLoggerConstants.DEFAULT_APP_VERSION;
     @Parameter
     private String env = CustomLoggerConstants.DEFAULT_ENV;
-
-    @Inject
-    ConfigurationComponentLocator configurationComponentLocator;
+    @Parameter
+    private String moduleConfigurationName;
 
     @Inject
     Registry registry;
@@ -76,7 +75,7 @@ public class CustomLoggerNotificationListener
 
     private void configureLogger() {
         if (customLoggerUtils == null) {
-            customLoggerUtils = new CustomLoggerUtils(registry);
+            customLoggerUtils = new CustomLoggerUtils(registry, moduleConfigurationName);
         }
         try {
             logContext.put("app_name", customLoggerUtils.decideOnValue(DEFAULT_APP_NAME, appName, "app_name"));
@@ -102,5 +101,9 @@ public class CustomLoggerNotificationListener
 
     public void setEnv(String env) {
         this.env = env;
+    }
+
+    public void setModuleConfigurationName(String moduleConfigurationName) {
+        this.moduleConfigurationName = moduleConfigurationName;
     }
 }

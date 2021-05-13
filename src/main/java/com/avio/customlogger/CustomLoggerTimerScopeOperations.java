@@ -34,12 +34,13 @@ public class CustomLoggerTimerScopeOperations {
 
     public void timerScope(String timerName,
                            @Optional(defaultValue = DEFAULT_CATEGORY_SUFFIX) String categorySuffix,
+                           @Optional String moduleConfigurationName,
                            @ParameterGroup(name = "Options") LogLocationInfoProperty logLocationInfoProperty,
                            ComponentLocation location,
                            Chain operations,
                            CompletionCallback<Object, Object> callback) {
         if (customLoggerUtils == null) {
-            customLoggerUtils = new CustomLoggerUtils(registry);
+            customLoggerUtils = new CustomLoggerUtils(registry, moduleConfigurationName);
         } else {
             classLogger.info("Registry was found");
         }

@@ -5,6 +5,7 @@ import org.mule.runtime.extension.api.annotation.Operations;
 import org.mule.runtime.extension.api.annotation.param.Optional;
 import org.mule.runtime.extension.api.annotation.param.Parameter;
 import org.mule.runtime.extension.api.annotation.param.display.DisplayName;
+import org.mule.runtime.extension.api.annotation.param.display.Example;
 import org.mule.runtime.extension.api.annotation.param.display.Summary;
 
 //import org.mule.runtime.extension.api.annotation.connectivity.ConnectionProviders;
@@ -24,7 +25,7 @@ public class CustomLoggerConfiguration {
     @Parameter
     @DisplayName("App Version")
     @Summary("Version of the Mule Application")
-    @Optional(defaultValue = CustomLoggerConstants.DEFAULT_APP_VERSION)
+    @Example(CustomLoggerConstants.EXAMPLE_APP_VERSION)
     private String app_version;
     @Parameter
     @DisplayName("Environment")

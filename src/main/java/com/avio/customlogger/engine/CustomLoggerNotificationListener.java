@@ -37,7 +37,7 @@ public class CustomLoggerNotificationListener
     @Parameter
     private String appName = DEFAULT_APP_NAME;
     @Parameter
-    private String appVersion = CustomLoggerConstants.DEFAULT_APP_VERSION;
+    private String appVersion = CustomLoggerConstants.EXAMPLE_APP_VERSION;
     @Parameter
     private String env = CustomLoggerConstants.DEFAULT_ENV;
     @Parameter
@@ -79,7 +79,7 @@ public class CustomLoggerNotificationListener
         }
         try {
             logContext.put("app_name", customLoggerUtils.decideOnValue(DEFAULT_APP_NAME, appName, "app_name"));
-            logContext.put("app_version", customLoggerUtils.decideOnValue(DEFAULT_APP_VERSION, appVersion, "app_version"));
+            logContext.put("app_version", customLoggerUtils.decideOnValue(EXAMPLE_APP_VERSION, appVersion, "app_version"));
             logContext.put("env", customLoggerUtils.decideOnValue(DEFAULT_ENV, env, "env"));
             this.logger = LogManager.getLogger(customLoggerUtils.decideOnValue(DEFAULT_CATEGORY_PREFIX, categoryPrefix, "category_prefix") + categorySuffix);
         } catch (NullPointerException e) {

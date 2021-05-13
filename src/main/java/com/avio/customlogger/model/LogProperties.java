@@ -5,6 +5,7 @@ import org.mule.runtime.extension.api.annotation.param.Parameter;
 import org.mule.runtime.extension.api.annotation.param.display.DisplayName;
 import org.mule.runtime.extension.api.annotation.param.display.Example;
 import org.mule.runtime.extension.api.annotation.param.display.Summary;
+import org.mule.runtime.extension.api.runtime.parameter.ParameterResolver;
 
 public class LogProperties {
 
@@ -27,7 +28,7 @@ public class LogProperties {
     @DisplayName("Payload")
     @Summary("Payload to be logged")
     @Example("#[write(payload, \"application/json\")]")
-    private String payload;
+    private ParameterResolver<String> payload;
 
     @Parameter
     @DisplayName("Level")
@@ -60,7 +61,7 @@ public class LogProperties {
         return correlation_id;
     }
 
-    public String getPayload() {
+    public ParameterResolver<String> getPayload() {
         return payload;
     }
 

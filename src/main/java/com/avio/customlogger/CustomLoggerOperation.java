@@ -9,6 +9,7 @@ import org.mule.runtime.api.component.location.ComponentLocation;
 import org.mule.runtime.extension.api.annotation.param.Config;
 import org.mule.runtime.extension.api.annotation.param.MediaType;
 import org.mule.runtime.extension.api.annotation.param.ParameterGroup;
+import org.mule.runtime.extension.api.runtime.parameter.ParameterResolver;
 
 import java.time.Instant;
 import java.util.HashMap;
@@ -52,9 +53,15 @@ public class CustomLoggerOperation {
         Map<String, Object> logInner = new HashMap<>();
         logInner.put("correlation_id", logProperties.getCorrelation_id());
         logInner.put("message", logProperties.getMessage());
-        logInner.put("payload", logProperties.getPayload());
         logInner.put("trace_point", logProperties.getTracePoint());
         logContext.put("log", logInner);
+
+        Level level = levelMap.get(logProperties.getLog_level());
+        //evaluate payload only when we actually need it
+        ParameterResolver<String> payload = logProperties.getPayload();
+        if (logger.isEnabled(level) && payload != null) {
+            logInner.put("payload", payload.resolve());
+        }
 
         if (exceptionProperties != null) {
             Map<String, Object> exceptionOnes = new HashMap<>();
@@ -68,7 +75,7 @@ public class CustomLoggerOperation {
             logContext.put("location", getLocationInformation(location));
         }
         ObjectMessage objectMessage = new ObjectMessage(logContext);
-        logger.log(levelMap.get(logProperties.getLog_level()), objectMessage);
+        logger.log(level, objectMessage);
     }
 
     private static Map<LoggerLevelProperty.LogLevel, Level> getMappings() {

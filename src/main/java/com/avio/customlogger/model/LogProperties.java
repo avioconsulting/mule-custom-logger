@@ -1,10 +1,11 @@
-package com.avio.customlogger.internal.model;
+package com.avio.customlogger.model;
 
 import org.mule.runtime.extension.api.annotation.param.Optional;
 import org.mule.runtime.extension.api.annotation.param.Parameter;
 import org.mule.runtime.extension.api.annotation.param.display.DisplayName;
 import org.mule.runtime.extension.api.annotation.param.display.Example;
 import org.mule.runtime.extension.api.annotation.param.display.Summary;
+import org.mule.runtime.extension.api.runtime.parameter.ParameterResolver;
 
 public class LogProperties {
 
@@ -13,7 +14,7 @@ public class LogProperties {
     @Optional
     @DisplayName("Correlation ID")
     @Summary("Correlation UUID")
-    @Example("#[vars.correlationId]")
+    @Example("#[correlationId]")
     private String correlation_id;
 
     @Parameter
@@ -27,7 +28,7 @@ public class LogProperties {
     @DisplayName("Payload")
     @Summary("Payload to be logged")
     @Example("#[write(payload, \"application/json\")]")
-    private String payload;
+    private ParameterResolver<String> payload;
 
     @Parameter
     @DisplayName("Level")
@@ -41,7 +42,7 @@ public class LogProperties {
 
     @Parameter
     @Optional
-    @DisplayName("Category")
+    @DisplayName("Category Suffix")
     private String category;
 
     public String getMessage() {
@@ -60,7 +61,7 @@ public class LogProperties {
         return correlation_id;
     }
 
-    public String getPayload() {
+    public ParameterResolver<String> getPayload() {
         return payload;
     }
 

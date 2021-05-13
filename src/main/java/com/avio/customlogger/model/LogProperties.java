@@ -14,7 +14,7 @@ public class LogProperties {
     @Optional
     @DisplayName("Correlation ID")
     @Summary("Correlation UUID")
-    @Example("#[vars.correlationId]")
+    @Example("#[correlationId]")
     private String correlation_id;
 
     @Parameter

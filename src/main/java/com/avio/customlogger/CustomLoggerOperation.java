@@ -4,6 +4,7 @@ import com.avio.customlogger.model.*;
 import com.avio.customlogger.utils.CustomLoggerUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.message.MapMessage;
 import org.apache.logging.log4j.message.ObjectMessage;
 import org.mule.runtime.api.component.location.ComponentLocation;
 import org.mule.runtime.extension.api.annotation.param.Config;
@@ -61,6 +62,7 @@ public class CustomLoggerOperation {
         ParameterResolver<String> payload = logProperties.getPayload();
         if (logger.isEnabled(level) && payload != null) {
             logInner.put("payload", payload.resolve());
+
         }
 
         if (exceptionProperties != null) {
@@ -74,8 +76,9 @@ public class CustomLoggerOperation {
         if (logLocationInfoProperty.logLocationInfo) {
             logContext.put("location", getLocationInformation(location));
         }
-        ObjectMessage objectMessage = new ObjectMessage(logContext);
-        logger.log(level, objectMessage);
+        /* 1.2.1 - Changed to MapMessage instead of ObjectMessage */
+        MapMessage mapMessage = new MapMessage(logContext);
+        logger.log(level, mapMessage);
     }
 
     private static Map<LoggerLevelProperty.LogLevel, Level> getMappings() {

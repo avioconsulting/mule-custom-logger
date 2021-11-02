@@ -5,6 +5,7 @@ import com.avio.customlogger.utils.CustomLoggerUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.message.MapMessage;
+import org.apache.logging.log4j.message.Message;
 import org.apache.logging.log4j.message.ObjectMessage;
 import org.mule.runtime.api.component.location.ComponentLocation;
 import org.mule.runtime.extension.api.annotation.param.Config;
@@ -76,9 +77,17 @@ public class CustomLoggerOperation {
         if (logLocationInfoProperty.logLocationInfo) {
             logContext.put("location", getLocationInformation(location));
         }
+
         /* 1.2.1 - Changed to MapMessage instead of ObjectMessage */
-        MapMessage mapMessage = new MapMessage(logContext);
-        logger.log(level, mapMessage);
+        /* Check system property - avio.custom.logger.mapmessage  */
+        /* this lets us differentiate to use simplified logging locally */
+        Message message;
+        if("local".equalsIgnoreCase(System.getProperty("avio.custom.logger.env"))) {
+            message = new MapMessage(logContext);
+        } else {
+            message = new ObjectMessage(logContext);
+        }
+        logger.log(level, message);
     }
 
     private static Map<LoggerLevelProperty.LogLevel, Level> getMappings() {

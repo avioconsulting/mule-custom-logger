@@ -73,6 +73,20 @@ There are several attributes provided by this JSONLayout that you can play with.
 ```
 **Important**: If you are using this kind of approach(HashMap + JSONLayout in log4j2.xml) for any MuleSoft CloudHub projects, and if you want to see JSON logs in CloudHub console, The CloudHub appender provided by MuleSoft defaults to one pattern and it ignores any layout you specify. Most of the log4j2 appenders should accept layouts though. 
 
+**Local Development**: The above logs use an ObjectMessage that can be parsed into JSON as a complete message.  To make local development easier, a flag can be enabled that will use a MapMessage.  This MapMessage can then be filtered in the Log4j setting.
+
+From Studio: go to Run -> Run Configurations and add the following to VM arguments:
+```
+-Davio.custom.logger.env=local
+```
+In Log4j, add the following appender:
+```xml
+ <Console name="LOCAL" target="SYSTEM_OUT">
+	<PatternLayout pattern="%5p [%d] %K{log}%n" />
+</Console>
+```
+
+
 # Using the Timer Scope
 The timer scope allows you to unobtrusively measure the time taken to execute the processors within the scope. For example, 
 if you had a complex Transform Message processor that you wanted to time, you could place it inside the scope to get an INFO level 

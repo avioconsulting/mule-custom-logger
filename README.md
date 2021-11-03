@@ -245,7 +245,9 @@ When developing and debugging code locally, the complete log message is rarely n
 ```
 * From Studio, Run -> Run Configurations
   * Add VM Argument: -Davio.logger.mapmessage=true
+![VMArgument](https://user-images.githubusercontent.com/36522886/140087312-290dd3d0-5158-4a6f-b07d-ec18d9ff743e.png)
   * Add Maven command line arguments: -Plocal
+![MavenCommand](https://user-images.githubusercontent.com/36522886/140087337-5bc6421c-640e-4c57-b836-d80cb8fa0c21.png)
 
 Sample Log
 ```

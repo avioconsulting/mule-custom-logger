@@ -19,7 +19,7 @@ One of the reasons for developing this custom module is to feed JSON logs to log
 # Changes
 ## 1.2.1
 * Added system property '_avio.logger.mapmessage = true_' to utilize a MapMessage instead of ObjectMessage for logging, this allows for filtered logs.  See Simplified Logging section below.
-* Supports 4.1, 4.2, 4.3 releases of the Mule Runtime
+* Supports 4.1 - 4.4 releases of the Mule Runtime
 
 # Using the Custom Logger Processor
 Here is how mule-custom-logger looks like in action.
@@ -77,23 +77,6 @@ There are several attributes provided by this JSONLayout that you can play with.
 }
 ```
 **Important**: If you are using this kind of approach(HashMap + JSONLayout in log4j2.xml) for any MuleSoft CloudHub projects, and if you want to see JSON logs in CloudHub console, The CloudHub appender provided by MuleSoft defaults to one pattern and it ignores any layout you specify. Most of the log4j2 appenders should accept layouts though. 
-
-**Local Development**: To make local development easier, logs can be simplified by adding a flag can be enabled that makes use of a MapMessage component.  This MapMessage can then be filtered in a Log4j pattern.
-
-From Studio: go to Run -> Run Configurations and add the following to VM arguments:
-```
--Davio.logger.mapmessage=true
-```
-In Log4j, update the appender to have a new pattern.  Below is an updated RollingFile appender that is included automatically on new projects.
-```xml
-<RollingFile name="file" fileName="${sys:mule.home}${sys:file.separator}logs${sys:file.separator}test.log"
-			 filePattern="${sys:mule.home}${sys:file.separator}logs${sys:file.separator}test-%i.log">
-	<PatternLayout pattern="%5p [%d] %K{log}%n"/> <!-- New Pattern -->
-	<SizeBasedTriggeringPolicy size="10 MB"/>
-	<DefaultRolloverStrategy max="10"/>
-</RollingFile>
-```
-
 
 # Using the Timer Scope
 The timer scope allows you to unobtrusively measure the time taken to execute the processors within the scope. For example, 
@@ -164,8 +147,10 @@ Alternatively, you can push this mule custom component to your anypoint organiza
 * Now, click on "search on exchange" in your mule project pallete, login and install component in your project.
 
 # Simplified Logging
-When developing and debugging code locally, the complete log message is rarely necessary, only a small subset.  To utilize this, enable the system property _avio.logger.mapmessage
-* Create a src/main/resources/local/log4j2.xml file
+When developing and debugging code locally, the complete log message is rarely necessary, only a small subset. 
+To be able to filter messages, the logger code must use a MapMessage component, instead of an ObjectMessage.  This MapMessage can then be filtered in a Log4j pattern.
+
+* Create a ```src/main/resources/local/log4j2.xml``` file - This file will only be used when running locally
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <Configuration>
@@ -183,7 +168,7 @@ When developing and debugging code locally, the complete log message is rarely n
 	</Loggers>
 </Configuration>
 ```
-* Update pom.xml to include profiles - This will copy the src/main/resources/local directory into the project output directory, overriding the original log4j2.xml 
+* Update pom.xml to include the following profiles - Using the ```local``` profile will copy the src/main/resources/local directory into the project output directory, overriding the original log4j2.xml 
 ```xml
 . . .
 <profiles>
@@ -244,9 +229,9 @@ When developing and debugging code locally, the complete log message is rarely n
 . . .
 ```
 * From Studio, Run -> Run Configurations
-  * Add VM Argument: -Davio.logger.mapmessage=true
+  * Add VM Argument: ```-Davio.logger.mapmessage=true```
 ![VMArgument](https://user-images.githubusercontent.com/36522886/140087312-290dd3d0-5158-4a6f-b07d-ec18d9ff743e.png)
-  * Add Maven command line arguments: -Plocal
+  * Add Maven command line arguments: ```-Plocal```
 ![MavenCommand](https://user-images.githubusercontent.com/36522886/140087337-5bc6421c-640e-4c57-b836-d80cb8fa0c21.png)
 
 Sample Log

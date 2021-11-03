@@ -16,6 +16,11 @@ One of the reasons for developing this custom module is to feed JSON logs to log
 * Optionally log location info with each log message.
 * Tracepoints compatibility to measure request, response times and such.
 
+# Changes
+## 1.2.1
+* Added system property '_avio.logger.mapmessage = true_' to utilize a MapMessage instead of ObjectMessage for logging, this allows for filtered logs.  See Simplified Logging section below.
+* Supports 4.1, 4.2, 4.3 releases of the Mule Runtime
+
 # Using the Custom Logger Processor
 Here is how mule-custom-logger looks like in action.
 
@@ -73,17 +78,20 @@ There are several attributes provided by this JSONLayout that you can play with.
 ```
 **Important**: If you are using this kind of approach(HashMap + JSONLayout in log4j2.xml) for any MuleSoft CloudHub projects, and if you want to see JSON logs in CloudHub console, The CloudHub appender provided by MuleSoft defaults to one pattern and it ignores any layout you specify. Most of the log4j2 appenders should accept layouts though. 
 
-**Local Development**: The above logs use an ObjectMessage that can be parsed into JSON as a complete message.  To make local development easier, a flag can be enabled that will use a MapMessage.  This MapMessage can then be filtered in the Log4j setting.
+**Local Development**: To make local development easier, logs can be simplified by adding a flag can be enabled that makes use of a MapMessage component.  This MapMessage can then be filtered in a Log4j pattern.
 
 From Studio: go to Run -> Run Configurations and add the following to VM arguments:
 ```
--Davio.custom.logger.env=local
+-Davio.logger.mapmessage=true
 ```
-In Log4j, add the following appender:
+In Log4j, update the appender to have a new pattern.  Below is an updated RollingFile appender that is included automatically on new projects.
 ```xml
- <Console name="LOCAL" target="SYSTEM_OUT">
-	<PatternLayout pattern="%5p [%d] %K{log}%n" />
-</Console>
+<RollingFile name="file" fileName="${sys:mule.home}${sys:file.separator}logs${sys:file.separator}test.log"
+			 filePattern="${sys:mule.home}${sys:file.separator}logs${sys:file.separator}test-%i.log">
+	<PatternLayout pattern="%5p [%d] %K{log}%n"/> <!-- New Pattern -->
+	<SizeBasedTriggeringPolicy size="10 MB"/>
+	<DefaultRolloverStrategy max="10"/>
+</RollingFile>
 ```
 
 
@@ -154,3 +162,101 @@ Alternatively, you can push this mule custom component to your anypoint organiza
 * Include exchange credentials in your settings.xml under servers section and with the matching server id with the repository id in pom's distribution management tag.
 * Run ```mvn clean deploy``` to deploy this custom component into your anypoint exchange.
 * Now, click on "search on exchange" in your mule project pallete, login and install component in your project.
+
+# Simplified Logging
+When developing and debugging code locally, the complete log message is rarely necessary, only a small subset.  To utilize this, enable the system property _avio.logger.mapmessage
+* Create a src/main/resources/local/log4j2.xml file
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<Configuration>
+	<Appenders>
+		<Console name="CONSOLE" target="SYSTEM_OUT">
+			<!-- the pattern can be modified to your need -->
+			<PatternLayout pattern="%5p [%d] %K{log}%n" />
+		</Console>
+	</Appenders>
+	<Loggers>
+		<AsyncRoot level="INFO">
+			<!-- don't forget to enable the appender -->
+			<AppenderRef ref="CONSOLE"/>
+		</AsyncRoot>
+	</Loggers>
+</Configuration>
+```
+* Update pom.xml to include profiles - This will copy the src/main/resources/local directory into the project output directory, overriding the original log4j2.xml 
+```xml
+. . .
+<profiles>
+	<profile>
+		<!-- using maven pass in -Plocal to use this profile -->
+		<id>local</id>
+		<build>
+			<plugins>
+				<plugin>
+					<artifactId>maven-resources-plugin</artifactId>
+					<version>3.1.0</version>
+					<executions>
+						<execution>
+							<id>local-log4j2</id>
+							<phase>process-resources</phase>
+							<goals>
+								<goal>copy-resources</goal>
+							</goals>
+							<configuration>
+								<resources>
+									<resource>
+										<!-- copies the 'local' folder to outputDirectory -->
+										<directory>src/main/resources/local/</directory>
+										<filtering>true</filtering>
+									</resource>
+								</resources>
+								<outputDirectory>${project.build.outputDirectory}</outputDirectory>
+								<overwrite>true</overwrite>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
+			</plugins>
+		</build>
+	</profile>
+	<profile>
+		<!-- Standard profile for normal builds -->
+		<id>other</id>
+		<activation>
+			<activeByDefault>true</activeByDefault>
+		</activation>
+		<build>
+			<resources>
+				<resource>
+					<directory>src/main/resources</directory>
+					<excludes>
+						<exclude>local/**</exclude>
+					</excludes>
+				</resource>
+				<resource>
+					<!-- Helps IntelliJ understand src/main/mule is a source directory too -->
+					<directory>src/main/mule</directory>
+				</resource>
+			</resources>
+		</build>
+	</profile>
+</profiles>
+. . .
+```
+* From Studio, Run -> Run Configurations
+  * Add VM Argument: -Davio.logger.mapmessage=true
+  * Add Maven command line arguments: -Plocal
+
+Sample Log
+```
+ INFO [2021-11-03 10:14:29,744] {trace_point=START, payload=OrderId : 548102842, correlation_id=b25b770a.ee7a.4820.8abc.9346ff693840, message=Start of flow}
+ INFO [2021-11-03 10:14:29,773] {trace_point=FLOW, payload={
+  "orderId": 548102842,
+  "customerId": "ARG-12934",
+  "items": [
+    "CP-123",
+    "CP-452"
+  ]
+}, correlation_id=correlationId, message=Here is my message}
+ INFO [2021-11-03 10:14:29,775] {trace_point=END, payload=OrderId : 548102842, correlation_id=b25b770a.ee7a.4820.8abc.9346ff693840, message=End of flow}
+```

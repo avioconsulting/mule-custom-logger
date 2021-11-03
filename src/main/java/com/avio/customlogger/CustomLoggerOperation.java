@@ -79,10 +79,10 @@ public class CustomLoggerOperation {
         }
 
         /* 1.2.1 - Changed to MapMessage instead of ObjectMessage */
-        /* Check system property - avio.custom.logger.mapmessage  */
+        /* Check system property - avio.custom.logger.env  */
         /* this lets us differentiate to use simplified logging locally */
         Message message;
-        if("local".equalsIgnoreCase(System.getProperty("avio.custom.logger.env"))) {
+        if("true".equalsIgnoreCase(System.getProperty("avio.logger.mapmessage"))) {
             message = new MapMessage(logContext);
         } else {
             message = new ObjectMessage(logContext);

@@ -51,21 +51,29 @@ jobs:
         if: always()
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          files: ./*/*/surefire-reports/*.xml
+          files: ./**/surefire-reports/*.xml
 
       - name: Publish package
-        if: github.event_name != 'pull_request'
+        if: ${{ github.event_name != 'pull_request' && env.GITHUB_REF_NAME == 'master' }}
         run: mvn --batch-mode deploy -DskipTests -X
         env:
           MAVEN_USERNAME: ${{ secrets.GIT_USER }}
           MAVEN_PASSWORD: ${{ secrets.GIT_TOKEN }}
 
+      - name: Publish Exchange Artifact
+        if: $${{ not snapshot }}
+        # need to fix this step, check for 'not snapshot' and then publish to AVIO exchange
+        # Kevin (or Adam) has clientId / clientSecret / groupID
+        # add profile - to publish to exchage -P=exchange
+        # need credentials for exchange (start as project secret, will move to org secrets later)
+
+        # A Release (next 3 steps) should only run on 'master' branch - Added 'GITHUB_REF_NAME' to check for master
       - name: Perform Release
-        if: ${{ !contains(steps.set-version.outputs.version, 'SNAPSHOT') && github.event_name != 'pull_request' }}
+        if: ${{ !contains(steps.set-version.outputs.version, 'SNAPSHOT') && github.event_name != 'pull_request' && env.GITHUB_REF_NAME == 'master'}}
         run: echo "Releasing version ${{ steps.set-version.outputs.version }}"
 
       - name: Perform Release
-        if: ${{ !contains(steps.set-version.outputs.version, 'SNAPSHOT') && github.event_name != 'pull_request' }}
+        if: ${{ !contains(steps.set-version.outputs.version, 'SNAPSHOT') && github.event_name != 'pull_request' && env.GITHUB_REF_NAME == 'master' }}
         env:
           GIT_USER: ${{ secrets.GIT_USER }}
           GIT_PASSWORD: ${{ secrets.GIT_TOKEN }}
@@ -80,7 +88,7 @@ jobs:
           git push --follow-tags
       
       - name: Add Release Note and Create Github Release
-        if: ${{ !contains(steps.set-version.outputs.version, 'SNAPSHOT') && github.event_name != 'pull_request' }}
+        if: ${{ !contains(steps.set-version.outputs.version, 'SNAPSHOT') && github.event_name != 'pull_request' && env.GITHUB_REF_NAME == 'master'}}
         uses: release-drafter/release-drafter@v5
         with:
           version: ${{ steps.set-version.outputs.version }}

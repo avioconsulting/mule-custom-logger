@@ -53,6 +53,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           files: ./**/surefire-reports/*.xml
 
+      # publish anything on master (including -SNAPSHOT)
       - name: Publish package
         if: ${{ github.event_name != 'pull_request' && env.GITHUB_REF_NAME == 'master' }}
         run: mvn --batch-mode deploy -DskipTests -X
@@ -60,14 +61,17 @@ jobs:
           MAVEN_USERNAME: ${{ secrets.GIT_USER }}
           MAVEN_PASSWORD: ${{ secrets.GIT_TOKEN }}
 
+      # Needs step to update pom groupId.
+
       - name: Publish Exchange Artifact
-        if: $${{ not snapshot }}
+        if: $${{ !contains(steps.set-version.outputs.version, 'SNAPSHOT') && env.GITHUB_REF_NAME == 'master'}}  # Add master branch condition
         # need to fix this step, check for 'not snapshot' and then publish to AVIO exchange
         # Kevin (or Adam) has clientId / clientSecret / groupID
-        # add profile - to publish to exchage -P=exchange
+        # add profile - to publish to exchage -Pexchange
         # need credentials for exchange (start as project secret, will move to org secrets later)
 
         # A Release (next 3 steps) should only run on 'master' branch - Added 'GITHUB_REF_NAME' to check for master
+        # Want original groupId in POM - com.avioconsulting.mule
       - name: Perform Release
         if: ${{ !contains(steps.set-version.outputs.version, 'SNAPSHOT') && github.event_name != 'pull_request' && env.GITHUB_REF_NAME == 'master'}}
         run: echo "Releasing version ${{ steps.set-version.outputs.version }}"

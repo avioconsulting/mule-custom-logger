@@ -4,11 +4,54 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.avioconsulting.mule</groupId>
+    <groupId>${env.groupId}</groupId>
     <artifactId>mule-custom-logger</artifactId>
     <version>1.2.1-SNAPSHOT</version>
     <packaging>mule-extension</packaging>
 
+    <profiles>
+        <profile>
+            <id>default</id>
+            <properties>
+                <env.groupId>com.avioconsulting.mule</env.groupId>
+            </properties>
+            <distributionManagement>
+                <repository>
+                    <id>github</id>
+                    <name>GitHub OWNER Apache Maven Packages</name>
+                    <url>https://maven.pkg.github.com/avioconsulting/public-packages</url>
+                    <layout>default</layout>
+                </repository>
+                <snapshotRepository>
+                    <uniqueVersion>false</uniqueVersion>
+                    <id>github</id>
+                    <name>GitHub OWNER Apache Maven Packages</name>
+                    <url>https://maven.pkg.github.com/avioconsulting/public-packages</url>
+                    <layout>default</layout>
+                </snapshotRepository>
+            </distributionManagement>
+        </profile>
+        <profile>
+            <id>exchange</id>
+            <properties>
+                <env.groupId>26d53683-6746-4040-ad07-f671f8e2b27e</env.groupId>
+            </properties>
+            <distributionManagement>
+                <snapshotRepository>
+                    <id>exchange-repository</id>
+                    <name>Exchange Repository</name>
+                    <url>https://maven.anypoint.mulesoft.com/api/v1/organizations/${pom.groupId}/maven</url>
+                    <layout>default</layout>
+                </snapshotRepository>
+                <repository>
+                    <id>exchange-repository</id>
+                    <name>Exchange Repository</name>
+                    <url>https://maven.anypoint.mulesoft.com/api/v1/organizations/${pom.groupId}/maven</url>
+                    <layout>default</layout>
+                </repository>
+            </distributionManagement>
+        </profile>
+    </profiles>
     <parent>
         <groupId>org.mule.extensions</groupId>
         <artifactId>mule-modules-parent</artifactId>
@@ -37,21 +80,6 @@
             <version>2.13.2</version>
         </dependency>
     </dependencies>
-    <distributionManagement>
-        <repository>
-            <id>github</id>
-            <name>GitHub OWNER Apache Maven Packages</name>
-            <url>https://maven.pkg.github.com/avioconsulting/public-packages</url>
-            <layout>default</layout>
-        </repository>
-        <snapshotRepository>
-            <uniqueVersion>false</uniqueVersion>
-            <id>github</id>
-            <name>GitHub OWNER Apache Maven Packages</name>
-            <url>https://maven.pkg.github.com/avioconsulting/public-packages</url>
-            <layout>default</layout>
-        </snapshotRepository>
-    </distributionManagement>
     <repositories>
         <repository>
             <id>maven-central</id>

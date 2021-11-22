@@ -12,6 +12,9 @@
     <profiles>
         <profile>
             <id>default</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
             <properties>
                 <env.groupId>com.avioconsulting.mule</env.groupId>
             </properties>

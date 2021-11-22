@@ -26,6 +26,31 @@ jobs:
           server-username: MAVEN_USERNAME
           server-password: MAVEN_PASSWORD
 
+      - name: Create settings xml
+        uses: whelk-io/maven-settings-xml-action@v18
+        with:
+          servers: >
+            [
+              {
+                "id": "avio-repository",
+                "username": "${{secrets.NEXUS_USER}}",
+                "password": "${{secrets.NEXUS_PASSWORD}}"
+              },
+              {
+                "id": "exchange-repositoryy",
+                "username": "${{secrets.ANYPOINT_EXCHANGE_CLIENT_ID}}",
+                "password": "${{secrets.ANYPOINT_EXCHANGE_CLIENT_ID}}"
+              }
+            ]
+          mirrors: >
+            [
+              {
+                "id": "avio-repository",
+                "mirrorOf": "mulesoft-ee-releases",
+                "url": "https://devops.avioconsulting.com/nexus/repository/mulesoft-ee-releases/"
+              }
+            ]
+
       - name: Cache for maven dependencies
         uses: actions/cache@v2
         with:
@@ -55,29 +80,22 @@ jobs:
 
       # publish anything on master (including -SNAPSHOT)
       - name: Publish package
-        if: ${{ github.event_name != 'pull_request' && env.GITHUB_REF_NAME == 'master' }}
+        if: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/master'}}
         run: mvn --batch-mode deploy -DskipTests -X
         env:
           MAVEN_USERNAME: ${{ secrets.GIT_USER }}
           MAVEN_PASSWORD: ${{ secrets.GIT_TOKEN }}
 
-      # Needs step to update pom groupId.
-
       - name: Publish Exchange Artifact
-        if: $${{ !contains(steps.set-version.outputs.version, 'SNAPSHOT') && env.GITHUB_REF_NAME == 'master'}}  # Add master branch condition
-        # need to fix this step, check for 'not snapshot' and then publish to AVIO exchange
-        # Kevin (or Adam) has clientId / clientSecret / groupID
-        # add profile - to publish to exchage -Pexchange
-        # need credentials for exchange (start as project secret, will move to org secrets later)
+        if: $${{ !contains(steps.set-version.outputs.version, 'SNAPSHOT') && github.event_name != 'pull_request' && github.ref == 'refs/heads/master'}}
+        run: mvn clean deploy -P exchange,!default
 
-        # A Release (next 3 steps) should only run on 'master' branch - Added 'GITHUB_REF_NAME' to check for master
-        # Want original groupId in POM - com.avioconsulting.mule
       - name: Perform Release
-        if: ${{ !contains(steps.set-version.outputs.version, 'SNAPSHOT') && github.event_name != 'pull_request' && env.GITHUB_REF_NAME == 'master'}}
+        if: ${{ !contains(steps.set-version.outputs.version, 'SNAPSHOT') && github.event_name != 'pull_request' && github.ref == 'refs/heads/master'}}
         run: echo "Releasing version ${{ steps.set-version.outputs.version }}"
 
       - name: Perform Release
-        if: ${{ !contains(steps.set-version.outputs.version, 'SNAPSHOT') && github.event_name != 'pull_request' && env.GITHUB_REF_NAME == 'master' }}
+        if: ${{ !contains(steps.set-version.outputs.version, 'SNAPSHOT') && github.event_name != 'pull_request' && github.ref == 'refs/heads/master'}}
         env:
           GIT_USER: ${{ secrets.GIT_USER }}
           GIT_PASSWORD: ${{ secrets.GIT_TOKEN }}

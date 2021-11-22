@@ -27,7 +27,7 @@ jobs:
           server-password: MAVEN_PASSWORD
 
       - name: Create settings xml
-        uses: whelk-io/maven-settings-xml-action@v18
+        uses: whelk-io/maven-settings-xml-action@v19
         with:
           servers: >
             [

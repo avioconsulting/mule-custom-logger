@@ -43,8 +43,8 @@ jobs:
               },
               {
                 "id": "exchange-repository",
-                "username": "${{secrets.ANYPOINT_EXCHANGE_CLIENT_ID}}",
-                "password": "${{secrets.ANYPOINT_EXCHANGE_CLIENT_SECRET}}"
+                "username": "~~~Token~~~",
+                "password": "${anypoint-exchange-token}"
               }
             ]
           mirrors: >
@@ -93,7 +93,7 @@ jobs:
 
       - name: Publish Exchange Artifact
         if: ${{ !contains(steps.set-version.outputs.version, 'SNAPSHOT') && github.event_name != 'pull_request' && github.ref == 'refs/heads/master'}}
-        run: mvn clean deploy -P exchange,!default
+        run: mvn deploy -P exchange
 
       - name: Perform Release
         if: ${{ !contains(steps.set-version.outputs.version, 'SNAPSHOT') && github.event_name != 'pull_request' && github.ref == 'refs/heads/master'}}

@@ -92,7 +92,7 @@ jobs:
           MAVEN_PASSWORD: ${{ secrets.GIT_TOKEN }}
 
       - name: Publish Exchange Artifact
-        if: $${{ !contains(steps.set-version.outputs.version, 'SNAPSHOT') && github.event_name != 'pull_request' && github.ref == 'refs/heads/master'}}
+        if: ${{ !contains(steps.set-version.outputs.version, 'SNAPSHOT') && github.event_name != 'pull_request' && github.ref == 'refs/heads/master'}}
         run: mvn clean deploy -P exchange,!default
 
       - name: Perform Release

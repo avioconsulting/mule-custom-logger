@@ -32,7 +32,7 @@ jobs:
           maven-version: 3.6.1
 
       - name: Create settings xml
-        uses: whelk-io/maven-settings-xml-action@v19
+        uses: whelk-io/maven-settings-xml-action@v20
         with:
           servers: >
             [

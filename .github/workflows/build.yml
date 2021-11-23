@@ -91,9 +91,15 @@ jobs:
           MAVEN_USERNAME: ${{ secrets.GIT_USER }}
           MAVEN_PASSWORD: ${{ secrets.GIT_TOKEN }}
 
+      - name: Get Exchange Token
+        id: get-token
+        if: ${{ !contains(steps.set-version.outputs.version, 'SNAPSHOT') && github.event_name != 'pull_request' && github.ref == 'refs/heads/master'}}
+        run: |
+          echo ::set-output name=token::$(curl --location --request POST 'https://anypoint.mulesoft.com/accounts/api/v2/oauth2/token' --header 'Content-Type: application/x-www-form-urlencoded' --data-urlencode 'client_id=${{secrets.ANYPOINT_EXCHANGE_CLIENT_ID}}' --data-urlencode 'client_secret=${{secrets.ANYPOINT_EXCHANGE_CLIENT_SECRET}}' --data-urlencode 'grant_type=client_credentials')
+
       - name: Publish Exchange Artifact
         if: ${{ !contains(steps.set-version.outputs.version, 'SNAPSHOT') && github.event_name != 'pull_request' && github.ref == 'refs/heads/master'}}
-        run: mvn deploy -P exchange
+        run: mvn deploy -P exchange -Danypoint-exchange-token=${{ steps.get-token.outputs.token }}
 
       - name: Perform Release
         if: ${{ !contains(steps.set-version.outputs.version, 'SNAPSHOT') && github.event_name != 'pull_request' && github.ref == 'refs/heads/master'}}

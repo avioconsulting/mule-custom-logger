@@ -26,6 +26,11 @@ jobs:
           server-username: MAVEN_USERNAME
           server-password: MAVEN_PASSWORD
 
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4.2
+        with:
+          maven-version: 3.6.1
+
       - name: Create settings xml
         uses: whelk-io/maven-settings-xml-action@v19
         with:
@@ -35,6 +40,11 @@ jobs:
                 "id": "avio-repository",
                 "username": "${{secrets.NEXUS_USER}}",
                 "password": "${{secrets.NEXUS_PASSWORD}}"
+              },
+              {
+                "id": "exchange-repository",
+                "username": "${{secrets.ANYPOINT_EXCHANGE_CLIENT_ID}}",
+                "password": "${{secrets.ANYPOINT_EXCHANGE_CLIENT_ID}}"
               }
             ]
           mirrors: >

@@ -35,11 +35,6 @@ jobs:
                 "id": "avio-repository",
                 "username": "${{secrets.NEXUS_USER}}",
                 "password": "${{secrets.NEXUS_PASSWORD}}"
-              },
-              {
-                "id": "exchange-repository",
-                "username": "${{secrets.ANYPOINT_EXCHANGE_CLIENT_ID}}",
-                "password": "${{secrets.ANYPOINT_EXCHANGE_CLIENT_ID}}"
               }
             ]
           mirrors: >

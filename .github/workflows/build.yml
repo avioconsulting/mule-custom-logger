@@ -97,9 +97,13 @@ jobs:
         run: |
           echo ::set-output name=token::$(curl --location --request POST 'https://anypoint.mulesoft.com/accounts/api/v2/oauth2/token' --header 'Content-Type: application/x-www-form-urlencoded' --data-urlencode 'client_id=${{secrets.ANYPOINT_EXCHANGE_CLIENT_ID}}' --data-urlencode 'client_secret=${{secrets.ANYPOINT_EXCHANGE_CLIENT_SECRET}}' --data-urlencode 'grant_type=client_credentials')
 
+      - name: Create pom for Exchange
+        if: ${{ !contains(steps.set-version.outputs.version, 'SNAPSHOT') && github.event_name != 'pull_request' && github.ref == 'refs/heads/master'}}
+        run: sed "s/<groupId>com.avioconsulting.mule<\/groupId>/<groupId>f2ea2cb4-c600-4bb5-88e8-e952ff5591ee<\/groupId>/" pom.xml > anypoint-pom.xml
+
       - name: Publish Exchange Artifact
         if: ${{ !contains(steps.set-version.outputs.version, 'SNAPSHOT') && github.event_name != 'pull_request' && github.ref == 'refs/heads/master'}}
-        run: mvn deploy -P exchange -Danypoint-exchange-token=${{ steps.get-token.outputs.token }}
+        run: mvn -f anypoint-pom.xml deploy -P exchange -Danypoint-exchange-token=${{ steps.get-token.outputs.token }}
 
       - name: Perform Release
         if: ${{ !contains(steps.set-version.outputs.version, 'SNAPSHOT') && github.event_name != 'pull_request' && github.ref == 'refs/heads/master'}}

@@ -26,6 +26,36 @@ jobs:
           server-username: MAVEN_USERNAME
           server-password: MAVEN_PASSWORD
 
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4.2
+        with:
+          maven-version: 3.6.1
+
+      - name: Create settings xml
+        uses: whelk-io/maven-settings-xml-action@v20
+        with:
+          servers: >
+            [
+              {
+                "id": "avio-repository",
+                "username": "${{secrets.NEXUS_USER}}",
+                "password": "${{secrets.NEXUS_PASSWORD}}"
+              },
+              {
+                "id": "exchange-repository",
+                "username": "~~~Token~~~",
+                "password": "${anypoint-exchange-token}"
+              }
+            ]
+          mirrors: >
+            [
+              {
+                "id": "avio-repository",
+                "mirrorOf": "mulesoft-ee-releases",
+                "url": "https://devops.avioconsulting.com/nexus/repository/mulesoft-ee-releases/"
+              }
+            ]
+
       - name: Cache for maven dependencies
         uses: actions/cache@v2
         with:
@@ -51,21 +81,36 @@ jobs:
         if: always()
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          files: ./*/*/surefire-reports/*.xml
+          files: ./**/surefire-reports/*.xml
 
+      # publish anything on master (including -SNAPSHOT)
       - name: Publish package
-        if: github.event_name != 'pull_request'
+        if: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/master'}}
         run: mvn --batch-mode deploy -DskipTests -X
         env:
           MAVEN_USERNAME: ${{ secrets.GIT_USER }}
           MAVEN_PASSWORD: ${{ secrets.GIT_TOKEN }}
 
+      - name: Get Exchange Token
+        id: get-token
+        if: ${{ !contains(steps.set-version.outputs.version, 'SNAPSHOT') && github.event_name != 'pull_request' && github.ref == 'refs/heads/master'}}
+        run: |
+          echo ::set-output name=token::$(curl --location --request POST 'https://anypoint.mulesoft.com/accounts/api/v2/oauth2/token' --header 'Content-Type: application/x-www-form-urlencoded' --data-urlencode 'client_id=${{secrets.ANYPOINT_EXCHANGE_CLIENT_ID}}' --data-urlencode 'client_secret=${{secrets.ANYPOINT_EXCHANGE_CLIENT_SECRET}}' --data-urlencode 'grant_type=client_credentials')
+
+      - name: Create pom for Exchange
+        if: ${{ !contains(steps.set-version.outputs.version, 'SNAPSHOT') && github.event_name != 'pull_request' && github.ref == 'refs/heads/master'}}
+        run: sed "s/<groupId>com.avioconsulting.mule<\/groupId>/<groupId>f2ea2cb4-c600-4bb5-88e8-e952ff5591ee<\/groupId>/" pom.xml > anypoint-pom.xml
+
+      - name: Publish Exchange Artifact
+        if: ${{ !contains(steps.set-version.outputs.version, 'SNAPSHOT') && github.event_name != 'pull_request' && github.ref == 'refs/heads/master'}}
+        run: mvn -f anypoint-pom.xml deploy -P exchange -Danypoint-exchange-token=${{ steps.get-token.outputs.token }}
+
       - name: Perform Release
-        if: ${{ !contains(steps.set-version.outputs.version, 'SNAPSHOT') && github.event_name != 'pull_request' }}
+        if: ${{ !contains(steps.set-version.outputs.version, 'SNAPSHOT') && github.event_name != 'pull_request' && github.ref == 'refs/heads/master'}}
         run: echo "Releasing version ${{ steps.set-version.outputs.version }}"
 
       - name: Perform Release
-        if: ${{ !contains(steps.set-version.outputs.version, 'SNAPSHOT') && github.event_name != 'pull_request' }}
+        if: ${{ !contains(steps.set-version.outputs.version, 'SNAPSHOT') && github.event_name != 'pull_request' && github.ref == 'refs/heads/master'}}
         env:
           GIT_USER: ${{ secrets.GIT_USER }}
           GIT_PASSWORD: ${{ secrets.GIT_TOKEN }}
@@ -80,7 +125,7 @@ jobs:
           git push --follow-tags
       
       - name: Add Release Note and Create Github Release
-        if: ${{ !contains(steps.set-version.outputs.version, 'SNAPSHOT') && github.event_name != 'pull_request' }}
+        if: ${{ !contains(steps.set-version.outputs.version, 'SNAPSHOT') && github.event_name != 'pull_request' && env.GITHUB_REF_NAME == 'master'}}
         uses: release-drafter/release-drafter@v5
         with:
           version: ${{ steps.set-version.outputs.version }}

@@ -7,6 +7,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.message.ObjectMessage;
 import org.mule.runtime.api.artifact.Registry;
 import org.mule.runtime.api.component.location.ComponentLocation;
+import org.mule.runtime.extension.api.annotation.param.MediaType;
 import org.mule.runtime.extension.api.annotation.param.Optional;
 import org.mule.runtime.extension.api.annotation.param.ParameterGroup;
 import org.mule.runtime.extension.api.runtime.process.CompletionCallback;
@@ -18,9 +19,7 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.avio.customlogger.utils.CustomLoggerConstants.*;
-import static com.avio.customlogger.utils.CustomLoggerConstants.DEFAULT_CATEGORY_PREFIX;
-
+import static org.mule.runtime.extension.api.annotation.param.MediaType.ANY;
 
 public class CustomLoggerTimerScopeOperations {
     public static final String DEFAULT_CATEGORY_SUFFIX = ".timer";
@@ -32,6 +31,7 @@ public class CustomLoggerTimerScopeOperations {
     private Logger logger;
     private CustomLoggerUtils customLoggerUtils;
 
+    @MediaType(value = ANY, strict = false)
     public void timerScope(String timerName,
                            @Optional(defaultValue = DEFAULT_CATEGORY_SUFFIX) String categorySuffix,
                            @Optional String moduleConfigurationName,

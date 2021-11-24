@@ -16,6 +16,11 @@ One of the reasons for developing this custom module is to feed JSON logs to log
 * Optionally log location info with each log message.
 * Tracepoints compatibility to measure request, response times and such.
 
+# Changes
+## 1.2.1
+* Added system property '_avio.logger.mapmessage = true_' to utilize a MapMessage instead of ObjectMessage for logging, this allows for filtered logs.  See Simplified Logging section below.
+* Supports 4.1 - 4.4 releases of the Mule Runtime
+
 # Using the Custom Logger Processor
 Here is how mule-custom-logger looks like in action.
 
@@ -140,3 +145,105 @@ Alternatively, you can push this mule custom component to your anypoint organiza
 * Include exchange credentials in your settings.xml under servers section and with the matching server id with the repository id in pom's distribution management tag.
 * Run ```mvn clean deploy``` to deploy this custom component into your anypoint exchange.
 * Now, click on "search on exchange" in your mule project pallete, login and install component in your project.
+
+# Simplified Logging
+When developing and debugging code locally, the complete log message is rarely necessary, only a small subset. 
+To be able to filter messages, the logger code must use a MapMessage component, instead of an ObjectMessage.  This MapMessage can then be filtered in a Log4j pattern.
+
+* Create a ```src/main/resources/local/log4j2.xml``` file - This file will only be used when running locally
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<Configuration>
+	<Appenders>
+		<Console name="CONSOLE" target="SYSTEM_OUT">
+			<!-- the pattern can be modified to your need -->
+			<PatternLayout pattern="%5p [%d] %K{log}%n" />
+		</Console>
+	</Appenders>
+	<Loggers>
+		<AsyncRoot level="INFO">
+			<!-- don't forget to enable the appender -->
+			<AppenderRef ref="CONSOLE"/>
+		</AsyncRoot>
+	</Loggers>
+</Configuration>
+```
+* Update pom.xml to include the following profiles - Using the ```local``` profile will copy the src/main/resources/local directory into the project output directory, overriding the original log4j2.xml 
+```xml
+. . .
+<profiles>
+	<profile>
+		<!-- using maven pass in -Plocal to use this profile -->
+		<id>local</id>
+		<build>
+			<plugins>
+				<plugin>
+					<artifactId>maven-resources-plugin</artifactId>
+					<version>3.1.0</version>
+					<executions>
+						<execution>
+							<id>local-log4j2</id>
+							<phase>process-resources</phase>
+							<goals>
+								<goal>copy-resources</goal>
+							</goals>
+							<configuration>
+								<resources>
+									<resource>
+										<!-- copies the 'local' folder to outputDirectory -->
+										<directory>src/main/resources/local/</directory>
+										<filtering>true</filtering>
+									</resource>
+								</resources>
+								<outputDirectory>${project.build.outputDirectory}</outputDirectory>
+								<overwrite>true</overwrite>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
+			</plugins>
+		</build>
+	</profile>
+	<profile>
+		<!-- Standard profile for normal builds -->
+		<id>other</id>
+		<activation>
+			<activeByDefault>true</activeByDefault>
+		</activation>
+		<build>
+			<resources>
+				<resource>
+					<directory>src/main/resources</directory>
+					<excludes>
+						<exclude>local/**</exclude>
+					</excludes>
+				</resource>
+				<resource>
+					<!-- Helps IntelliJ understand src/main/mule is a source directory too -->
+					<directory>src/main/mule</directory>
+				</resource>
+			</resources>
+		</build>
+	</profile>
+</profiles>
+. . .
+```
+* From Studio, Run -> Run Configurations
+  * Add VM Argument: ```-Davio.logger.mapmessage=true```
+![VMArgument](https://user-images.githubusercontent.com/36522886/140087312-290dd3d0-5158-4a6f-b07d-ec18d9ff743e.png)
+  * Add Maven command line arguments: ```-Plocal```
+![MavenCommand](https://user-images.githubusercontent.com/36522886/140087337-5bc6421c-640e-4c57-b836-d80cb8fa0c21.png)
+
+Sample Log
+```
+ INFO [2021-11-03 10:14:29,744] {trace_point=START, payload=OrderId : 548102842, correlation_id=b25b770a.ee7a.4820.8abc.9346ff693840, message=Start of flow}
+ INFO [2021-11-03 10:14:29,773] {trace_point=FLOW, payload={
+  "orderId": 548102842,
+  "customerId": "ARG-12934",
+  "items": [
+    "CP-123",
+    "CP-452"
+  ]
+}, correlation_id=correlationId, message=Here is my message}
+ INFO [2021-11-03 10:14:29,775] {trace_point=END, payload=OrderId : 548102842, correlation_id=b25b770a.ee7a.4820.8abc.9346ff693840, message=End of flow}
+```

@@ -81,12 +81,12 @@ jobs:
           files: ./**/surefire-reports/*.xml
 
       # publish anything on master (including -SNAPSHOT)
-      - name: Publish package
-        if: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/master'}}
-        run: mvn --batch-mode deploy -DskipTests -X
-        env:
-          MAVEN_USERNAME: ${{ secrets.GIT_USER }}
-          MAVEN_PASSWORD: ${{ secrets.GIT_TOKEN }}
+      #- name: Publish package
+      #  if: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/master'}}
+      #  run: mvn --batch-mode deploy -DskipTests -X
+      #  env:
+      #    MAVEN_USERNAME: ${{ secrets.GIT_USER }}
+      #    MAVEN_PASSWORD: ${{ secrets.GIT_TOKEN }}
 
       - name: Get Exchange Token
         id: get-token

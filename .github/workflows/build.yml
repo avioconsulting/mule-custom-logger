@@ -100,7 +100,7 @@ jobs:
 
       - name: Publish Exchange Artifact
         if: ${{ !contains(steps.set-version.outputs.version, 'SNAPSHOT') && github.event_name != 'pull_request' && github.ref == 'refs/heads/master'}}
-        run: mvn -f anypoint-pom.xml deploy -P exchange -Danypoint-exchange-token=${{ steps.get-token.outputs.token }}.access_token
+        run: mvn -f anypoint-pom.xml deploy -P exchange -Danypoint-exchange-token=${{ fromJson(steps.get-token.outputs.token).access_token }}
 
       - name: Perform Release
         if: ${{ !contains(steps.set-version.outputs.version, 'SNAPSHOT') && github.event_name != 'pull_request' && github.ref == 'refs/heads/master'}}

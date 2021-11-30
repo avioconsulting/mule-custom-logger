@@ -39,7 +39,7 @@ jobs:
                 "password": "${{secrets.NEXUS_PASSWORD}}"
               },
               {
-                "id": "exchange-repository",
+                "id": "anypoint-exchange",
                 "username": "~~~Token~~~",
                 "password": "${anypoint-exchange-token}"
               }

@@ -34,9 +34,9 @@ jobs:
           servers: >
             [
               {
-                "id": "avio-repository",
-                "username": "${{secrets.NEXUS_USER}}",
-                "password": "${{secrets.NEXUS_PASSWORD}}"
+                "id": "github",
+                "username": "${{secrets.GIT_USER}}",
+                "password": "${{secrets.GIT_TOKEN}}"
               },
               {
                 "id": "anypoint-exchange",

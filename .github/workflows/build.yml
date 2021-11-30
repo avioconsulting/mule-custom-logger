@@ -44,14 +44,6 @@ jobs:
                 "password": "${anypoint-exchange-token}"
               }
             ]
-          mirrors: >
-            [
-              {
-                "id": "avio-repository",
-                "mirrorOf": "mulesoft-ee-releases",
-                "url": "https://devops.avioconsulting.com/nexus/repository/mulesoft-ee-releases/"
-              }
-            ]
 
       - name: Cache for maven dependencies
         uses: actions/cache@v2

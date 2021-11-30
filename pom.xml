@@ -6,36 +6,8 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.avioconsulting.mule</groupId>
     <artifactId>mule-custom-logger</artifactId>
-    <version>1.2.2-SNAPSHOT</version>
+    <version>1.2.1-SNAPSHOT</version>
     <packaging>mule-extension</packaging>
-
-    <profiles>
-        <profile>
-            <id>default</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <distributionManagement>
-                <repository>
-                    <id>github</id>
-                    <name>GitHub Packages</name>
-                    <url>https://maven.pkg.github.com/avioconsulting/public-packages</url>
-                    <layout>default</layout>
-                </repository>
-            </distributionManagement>
-        </profile>
-        <profile>
-            <id>exchange</id>
-            <distributionManagement>
-                <repository>
-                    <id>anypoint-exchange</id>
-                    <name>Exchange Repository</name>
-                    <url>https://maven.anypoint.mulesoft.com/api/v2/organizations/${project.groupId}/maven</url>
-                    <layout>default</layout>
-                </repository>
-            </distributionManagement>
-        </profile>
-    </profiles>
     <parent>
         <groupId>org.mule.extensions</groupId>
         <artifactId>mule-modules-parent</artifactId>
@@ -95,4 +67,33 @@
             </snapshots>
         </pluginRepository>
     </pluginRepositories>
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub Packages</name>
+            <url>https://maven.pkg.github.com/avioconsulting/public-packages</url>
+        </repository>
+        <snapshotRepository>
+            <id>github</id>
+            <name>GitHub Packages</name>
+            <url>https://maven.pkg.github.com/avioconsulting/public-packages</url>
+        </snapshotRepository>
+    </distributionManagement>
+    <profiles>
+        <profile>
+            <id>exchange</id>
+            <distributionManagement>
+                <repository>
+                    <id>anypoint-exchange</id>
+                    <name>Exchange Repository</name>
+                    <url>https://maven.anypoint.mulesoft.com/api/v2/organizations/${project.groupId}/maven</url>
+                </repository>
+                <snapshotRepository>
+                    <id>anypoint-exchange</id>
+                    <name>Exchange Repository</name>
+                    <url>https://maven.anypoint.mulesoft.com/api/v2/organizations/${project.groupId}/maven</url>
+                </snapshotRepository>
+            </distributionManagement>
+        </profile>
+    </profiles>
 </project>

@@ -122,7 +122,7 @@ jobs:
           git push --follow-tags
       
       - name: Add Release Note and Create Github Release
-        if: ${{ !contains(steps.set-version.outputs.version, 'SNAPSHOT') && github.event_name != 'pull_request' && env.GITHUB_REF_NAME == 'master'}}
+        if: ${{ !contains(steps.set-version.outputs.version, 'SNAPSHOT') && github.event_name != 'pull_request' && github.ref == 'refs/heads/master'}}
         uses: release-drafter/release-drafter@v5
         with:
           version: ${{ steps.set-version.outputs.version }}

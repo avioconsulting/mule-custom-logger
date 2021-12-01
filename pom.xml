@@ -67,18 +67,6 @@
             </snapshots>
         </pluginRepository>
     </pluginRepositories>
-    <distributionManagement>
-        <repository>
-            <id>github</id>
-            <name>GitHub Packages</name>
-            <url>https://maven.pkg.github.com/avioconsulting/public-packages</url>
-        </repository>
-        <snapshotRepository>
-            <id>github</id>
-            <name>GitHub Packages</name>
-            <url>https://maven.pkg.github.com/avioconsulting/public-packages</url>
-        </snapshotRepository>
-    </distributionManagement>
     <profiles>
         <profile>
             <id>exchange</id>

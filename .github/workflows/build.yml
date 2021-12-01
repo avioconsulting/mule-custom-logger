@@ -41,7 +41,7 @@ jobs:
               {
                 "id": "anypoint-exchange",
                 "username": "~~~Token~~~",
-                "password": "${anypoint-exchange-token}"
+                "password": "${token}"
               }
             ]
 

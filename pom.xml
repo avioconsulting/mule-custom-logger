@@ -39,12 +39,6 @@
     </dependencies>
     <repositories>
         <repository>
-            <id>maven-central</id>
-            <name>maven central</name>
-            <url>http://central.maven.org/maven2/</url>
-            <layout>default</layout>
-        </repository>
-        <repository>
             <id>mulesoft-releases</id>
             <name>MuleSoft Releases Repository</name>
             <url>https://repository.mulesoft.org/releases/</url>
@@ -52,12 +46,6 @@
         </repository>
     </repositories>
     <pluginRepositories>
-        <pluginRepository>
-            <id>maven-central</id>
-            <name>maven central</name>
-            <url>http://central.maven.org/maven2/</url>
-            <layout>default</layout>
-        </pluginRepository>
         <pluginRepository>
             <id>mulesoft-releases</id>
             <name>mulesoft release repository</name>

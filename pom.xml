@@ -29,26 +29,26 @@
             </plugins>
         </pluginManagement>
 	<plugins>
-		                <plugin>
-                    <groupId>com.mulesoft.munit</groupId>
-                    <artifactId>munit-extensions-maven-plugin</artifactId>
-		    <version>1.1.2</version>
-                    <dependencies>
-                        <!-- MUnit Dependencies -->
-                        <dependency>
-                            <groupId>com.mulesoft.munit</groupId>
-                            <artifactId>munit-runner</artifactId>
-			    <version>2.3.8</version>
-                            <classifier>mule-plugin</classifier>
-                        </dependency>
-                        <dependency>
-                            <groupId>com.mulesoft.munit</groupId>
-                            <artifactId>munit-tools</artifactId>
-			    <version>2.3.8</version>
-                            <classifier>mule-plugin</classifier>
-                        </dependency>
-                    </dependencies>
-	    </plugin>
+	<plugin>
+		<groupId>com.mulesoft.munit</groupId>
+                <artifactId>munit-extensions-maven-plugin</artifactId>
+		<version>1.1.2</version>
+                <dependencies>
+                    <!-- MUnit Dependencies -->
+                    <dependency>
+                        <groupId>com.mulesoft.munit</groupId>
+                        <artifactId>munit-runner</artifactId>
+			<version>2.3.8</version>
+                        <classifier>mule-plugin</classifier>
+                    </dependency>
+                    <dependency>
+                        <groupId>com.mulesoft.munit</groupId>
+                        <artifactId>munit-tools</artifactId>
+			<version>2.3.8</version>
+                        <classifier>mule-plugin</classifier>
+                    </dependency>
+                </dependencies>
+	</plugin>
     </plugins>
     </build>
     <dependencies>
@@ -60,14 +60,6 @@
         </dependency>
 </dependencies>
     <repositories>
-	    <!--
-        <repository>
-            <id>maven-central</id>
-            <name>maven central</name>
-	    <url>https://repo1.maven.org/maven2/<url>
-            <layout>default</layout>
-		    </repository>
-	    -->
         <repository>
             <id>mulesoft-releases</id>
             <name>MuleSoft Releases Repository</name>
@@ -76,12 +68,6 @@
         </repository>
     </repositories>
     <pluginRepositories>
-        <pluginRepository>
-            <id>maven-central</id>
-            <name>maven central</name>
-            <url>http://central.maven.org/maven2/</url>
-            <layout>default</layout>
-        </pluginRepository>
         <pluginRepository>
             <id>mulesoft-releases</id>
             <name>mulesoft release repository</name>

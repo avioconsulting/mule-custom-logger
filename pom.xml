@@ -6,12 +6,12 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.avioconsulting.mule</groupId>
     <artifactId>mule-custom-logger</artifactId>
-    <version>1.2.3</version>
+    <version>1.2.4-SNAPSHOT</version>
     <packaging>mule-extension</packaging>
     <parent>
         <groupId>org.mule.extensions</groupId>
         <artifactId>mule-modules-parent</artifactId>
-        <version>1.2.1</version>
+	<version>1.2.1</version>
     </parent>
     <build>
         <pluginManagement>
@@ -28,6 +28,28 @@
                 </plugin>
             </plugins>
         </pluginManagement>
+	<plugins>
+		                <plugin>
+                    <groupId>com.mulesoft.munit</groupId>
+                    <artifactId>munit-extensions-maven-plugin</artifactId>
+		    <version>1.1.2</version>
+                    <dependencies>
+                        <!-- MUnit Dependencies -->
+                        <dependency>
+                            <groupId>com.mulesoft.munit</groupId>
+                            <artifactId>munit-runner</artifactId>
+			    <version>2.3.8</version>
+                            <classifier>mule-plugin</classifier>
+                        </dependency>
+                        <dependency>
+                            <groupId>com.mulesoft.munit</groupId>
+                            <artifactId>munit-tools</artifactId>
+			    <version>2.3.8</version>
+                            <classifier>mule-plugin</classifier>
+                        </dependency>
+                    </dependencies>
+	    </plugin>
+    </plugins>
     </build>
     <dependencies>
         <dependency>
@@ -36,14 +58,16 @@
             <version>2.17.1</version>
             <scope>provided</scope>
         </dependency>
-    </dependencies>
+</dependencies>
     <repositories>
+	    <!--
         <repository>
             <id>maven-central</id>
             <name>maven central</name>
-            <url>http://central.maven.org/maven2/</url>
+	    <url>https://repo1.maven.org/maven2/<url>
             <layout>default</layout>
-        </repository>
+		    </repository>
+	    -->
         <repository>
             <id>mulesoft-releases</id>
             <name>MuleSoft Releases Repository</name>
@@ -61,11 +85,8 @@
         <pluginRepository>
             <id>mulesoft-releases</id>
             <name>mulesoft release repository</name>
-            <layout>default</layout>
             <url>https://repository.mulesoft.org/releases/</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
+            <layout>default</layout>
         </pluginRepository>
     </pluginRepositories>
     <profiles>

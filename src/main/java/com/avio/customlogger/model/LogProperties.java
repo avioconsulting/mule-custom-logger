@@ -13,7 +13,7 @@ public class LogProperties {
     @Parameter
     @Optional
     @DisplayName("Correlation ID")
-    @Summary("Correlation UUID")
+    @Summary("Correlation UUID. Defaults to current event's correlation id.")
     @Example("#[correlationId]")
     private String correlation_id;
 

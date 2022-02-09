@@ -19,17 +19,34 @@ jobs:
           submodules: 'recursive'
 
       - name: Set up JDK 1.8
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v2
         with:
-          java-version: 1.8
+          distribution: adopt-hotspot
+          java-version: 8
+          cache: maven
 
-      - name: Set up Maven
-        uses: stCarolas/setup-maven@v4.2
+      - name: Set Version
+        id: set-version
+        run: echo ::set-output name=version::$(./mvnw -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)
+
+      - name: Print Version
+        run: echo "Version ${{ steps.set-version.outputs.version }}"
+
+      - name: Compile
+        run: ./mvnw compile
+
+      - name: Verify
+        run: ./mvnw --batch-mode verify
+
+      - name: Publish Unit Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v1
+        if: always()
         with:
-          maven-version: 3.6.1
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          files: ./**/surefire-reports/*.xml
 
       - name: Create settings xml
-        uses: whelk-io/maven-settings-xml-action@v18
+        uses: whelk-io/maven-settings-xml-action@v20
         with:
           servers: >
             [
@@ -44,33 +61,7 @@ jobs:
                 "password": "${token}"
               }
             ]
-
-      - name: Cache for maven dependencies
-        uses: actions/cache@v2
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-maven
-
-      - name: Set Version
-        id: set-version
-        run: echo ::set-output name=version::$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)
-
-      - name: Print Version
-        run: echo "Version ${{ steps.set-version.outputs.version }}"
-
-      - name: Compile
-        run: mvn compile
-
-      - name: Verify
-        run: mvn --batch-mode verify
-
-      - name: Publish Unit Test Results
-        uses: EnricoMi/publish-unit-test-result-action@v1
-        if: always()
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          files: ./**/surefire-reports/*.xml
+            
 
       - name: Get Exchange Token
         id: get-token
@@ -96,7 +87,7 @@ jobs:
           git config --global user.email "${{ secrets.GIT_EMAIL }}"
           git config --global user.name "${{ secrets.GIT_USER }}"
           git tag -a v${{ steps.set-version.outputs.version }} -m "Version ${{ steps.set-version.outputs.version }}"
-          mvn clean build-helper:parse-version versions:set -DnewVersion=\${parsedVersion.majorVersion}.\${parsedVersion.minorVersion}.\${parsedVersion.nextIncrementalVersion}-SNAPSHOT -DprocessAllModules versions:commit
+          ./mvnw clean build-helper:parse-version versions:set -DnewVersion=\${parsedVersion.majorVersion}.\${parsedVersion.minorVersion}.\${parsedVersion.nextIncrementalVersion}-SNAPSHOT -DprocessAllModules versions:commit
           find . -name 'pom.xml' | xargs git add
           git commit -m "Incrementing to next SNAPSHOT patch version"
           git push --follow-tags

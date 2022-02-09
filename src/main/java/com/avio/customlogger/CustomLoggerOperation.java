@@ -11,6 +11,7 @@ import org.mule.runtime.api.component.location.ComponentLocation;
 import org.mule.runtime.extension.api.annotation.param.Config;
 import org.mule.runtime.extension.api.annotation.param.MediaType;
 import org.mule.runtime.extension.api.annotation.param.ParameterGroup;
+import org.mule.runtime.extension.api.runtime.parameter.CorrelationInfo;
 import org.mule.runtime.extension.api.runtime.parameter.ParameterResolver;
 
 import java.time.Instant;
@@ -38,7 +39,8 @@ public class CustomLoggerOperation {
                              @ParameterGroup(name = "Exception") ExceptionProperties exceptionProperties,
                              @ParameterGroup(name = "Options") LogLocationInfoProperty logLocationInfoProperty,
                              ComponentLocation location,
-                             @Config CustomLoggerConfiguration customLoggerConfiguration) {
+                             @Config CustomLoggerConfiguration customLoggerConfiguration,
+                             CorrelationInfo correlationInfo) {
 
         this.logger = CustomLoggerUtils.initLogger(customLoggerConfiguration.getCategory_prefix(), logProperties.getCategory());
 
@@ -53,7 +55,8 @@ public class CustomLoggerOperation {
 
         //This is because, we need to see what is in the nested object when the Hashmap is logged.
         Map<String, Object> logInner = new HashMap<>();
-        logInner.put("correlation_id", logProperties.getCorrelation_id());
+        String correlationId = logProperties.getCorrelation_id() != null ? logProperties.getCorrelation_id() : correlationInfo.getCorrelationId();
+        logInner.put("correlation_id", correlationId);
         logInner.put("message", logProperties.getMessage());
         logInner.put("trace_point", logProperties.getTracePoint());
         logContext.put("log", logInner);

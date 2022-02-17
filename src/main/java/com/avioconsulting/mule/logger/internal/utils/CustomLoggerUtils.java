@@ -1,7 +1,7 @@
-package com.avio.customlogger.utils;
+package com.avioconsulting.mule.logger.internal.utils;
 
-import com.avio.customlogger.CustomLoggerTimerScopeOperations;
-import com.avio.customlogger.engine.CustomLoggerNotificationListener;
+import com.avioconsulting.mule.logger.internal.CustomLoggerTimerScopeOperations;
+import com.avioconsulting.mule.logger.internal.listeners.CustomLoggerNotificationListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.mule.runtime.api.artifact.Registry;
@@ -19,8 +19,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static com.avio.customlogger.utils.CustomLoggerConstants.DEFAULT_CATEGORY_PREFIX;
-import static com.avio.customlogger.utils.CustomLoggerConstants.DEFAULT_CATEGORY_SUFFIX;
+import static com.avioconsulting.mule.logger.internal.config.CustomLoggerConfiguration.DEFAULT_CATEGORY_PREFIX;
+import static com.avioconsulting.mule.logger.internal.utils.CustomLoggerConstants.DEFAULT_CATEGORY_SUFFIX;
 
 public class CustomLoggerUtils {
 
@@ -163,13 +163,4 @@ public class CustomLoggerUtils {
         }
     }
 
-    public static Map<String, String> getLocationInformation(ComponentLocation location) {
-        Map<String, String> locationInfo = new HashMap<>();
-        locationInfo.put("location", location.getLocation());
-        locationInfo.put("root_container", location.getRootContainerName());
-        locationInfo.put("component", location.getComponentIdentifier().getIdentifier().toString());
-        locationInfo.put("file_name", location.getFileName().orElse(""));
-        locationInfo.put("line_in_file", String.valueOf(location.getLineInFile().orElse(null)));
-        return locationInfo;
-    }
 }

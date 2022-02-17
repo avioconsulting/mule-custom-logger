@@ -1,12 +1,11 @@
-package com.avio.customlogger.engine;
+package com.avioconsulting.mule.logger.internal.listeners;
 
-import com.avio.customlogger.utils.CustomLoggerUtils;
-import com.avio.customlogger.utils.CustomLoggerConstants;
+import com.avioconsulting.mule.logger.internal.config.CustomLoggerConfiguration;
+import com.avioconsulting.mule.logger.internal.utils.CustomLoggerUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.message.ObjectMessage;
 import org.mule.runtime.api.artifact.Registry;
-import org.mule.runtime.api.component.location.ConfigurationComponentLocator;
 import org.mule.runtime.api.notification.PipelineMessageNotification;
 import org.mule.runtime.api.notification.PipelineMessageNotificationListener;
 import org.mule.runtime.extension.api.annotation.param.Parameter;
@@ -16,8 +15,6 @@ import javax.inject.Inject;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
-
-import static com.avio.customlogger.utils.CustomLoggerConstants.*;
 
 /*
  * Listener for Mule notifications on flow start, end and completion.
@@ -31,21 +28,27 @@ public class CustomLoggerNotificationListener
     private Map<String, Object> logContext = new HashMap<>();
     private Map<String, Object> logInner = new HashMap<>();
     @Parameter
-    private String categoryPrefix = CustomLoggerConstants.DEFAULT_CATEGORY_PREFIX;
+    private String categoryPrefix = CustomLoggerConfiguration.DEFAULT_CATEGORY_PREFIX;
     @Parameter
     private String categorySuffix = DEFAULT_CATEGORY_SUFFIX;
     @Parameter
-    private String appName = DEFAULT_APP_NAME;
+    private String appName = CustomLoggerConfiguration.DEFAULT_APP_NAME;
     @Parameter
-    private String appVersion = CustomLoggerConstants.EXAMPLE_APP_VERSION;
+    private String appVersion = CustomLoggerConfiguration.EXAMPLE_APP_VERSION;
     @Parameter
-    private String env = CustomLoggerConstants.DEFAULT_ENV;
+    private String env = CustomLoggerConfiguration.DEFAULT_ENV;
     @Parameter
     private String moduleConfigurationName;
+
+    private CustomLoggerConfiguration config;
 
     @Inject
     Registry registry;
     private CustomLoggerUtils customLoggerUtils;
+
+    public CustomLoggerNotificationListener(CustomLoggerConfiguration config) {
+        this.config = config;
+    }
 
     @Override
     public void onNotification(PipelineMessageNotification notification) {
@@ -78,10 +81,10 @@ public class CustomLoggerNotificationListener
             customLoggerUtils = new CustomLoggerUtils(registry, moduleConfigurationName);
         }
         try {
-            logContext.put("app_name", customLoggerUtils.decideOnValue(DEFAULT_APP_NAME, appName, "app_name"));
-            logContext.put("app_version", customLoggerUtils.decideOnValue(EXAMPLE_APP_VERSION, appVersion, "app_version"));
-            logContext.put("env", customLoggerUtils.decideOnValue(DEFAULT_ENV, env, "env"));
-            this.logger = LogManager.getLogger(customLoggerUtils.decideOnValue(DEFAULT_CATEGORY_PREFIX, categoryPrefix, "category_prefix") + categorySuffix);
+            logContext.put("app_name", customLoggerUtils.decideOnValue(CustomLoggerConfiguration.DEFAULT_APP_NAME, appName, "app_name"));
+            logContext.put("app_version", customLoggerUtils.decideOnValue(CustomLoggerConfiguration.EXAMPLE_APP_VERSION, appVersion, "app_version"));
+            logContext.put("env", customLoggerUtils.decideOnValue(CustomLoggerConfiguration.DEFAULT_ENV, env, "env"));
+            this.logger = LogManager.getLogger(customLoggerUtils.decideOnValue(CustomLoggerConfiguration.DEFAULT_CATEGORY_PREFIX, categoryPrefix, "category_prefix") + categorySuffix);
         } catch (NullPointerException e) {
             classLogger.error("ERROR: ", e);
         }

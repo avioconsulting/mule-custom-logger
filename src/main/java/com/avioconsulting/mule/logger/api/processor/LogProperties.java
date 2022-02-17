@@ -1,11 +1,16 @@
-package com.avio.customlogger.model;
+package com.avioconsulting.mule.logger.api.processor;
 
+import org.mule.runtime.extension.api.annotation.param.NullSafe;
 import org.mule.runtime.extension.api.annotation.param.Optional;
 import org.mule.runtime.extension.api.annotation.param.Parameter;
 import org.mule.runtime.extension.api.annotation.param.display.DisplayName;
 import org.mule.runtime.extension.api.annotation.param.display.Example;
 import org.mule.runtime.extension.api.annotation.param.display.Summary;
 import org.mule.runtime.extension.api.runtime.parameter.ParameterResolver;
+
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public class LogProperties {
 
@@ -15,7 +20,7 @@ public class LogProperties {
     @DisplayName("Correlation ID")
     @Summary("Correlation UUID. Defaults to current event's correlation id.")
     @Example("#[correlationId]")
-    private String correlation_id;
+    private String correlationId;
 
     @Parameter
     @Optional
@@ -33,23 +38,34 @@ public class LogProperties {
     @Parameter
     @DisplayName("Level")
     @Optional(defaultValue = "INFO")
-    private LoggerLevelProperty.LogLevel level;
-
-    @Parameter
-    @DisplayName("Trace Point")
-    @Optional(defaultValue = "FLOW")
-    private tracePointProperty.tracePoint tracePoint;
+    private LogLevel level;
 
     @Parameter
     @Optional
-    @DisplayName("Category Suffix")
+    @DisplayName("Category")
     private String category;
+
+    @Parameter
+    @DisplayName("Message Attributes")
+    @Optional
+    @NullSafe
+    @Summary("Discrete data elements you want to log as key value pairs.  Useful for adding data fields for reporting in log aggregation tools")
+    private List<MessageAttribute> messageAttributes;
+
+    public enum LogLevel {
+        TRACE,
+        DEBUG,
+        INFO,
+        WARN,
+        ERROR,
+        FATAL
+    }
 
     public String getMessage() {
         return message;
     }
 
-    public LoggerLevelProperty.LogLevel getLog_level() {
+    public LogLevel getLevel() {
         return level;
     }
 
@@ -57,16 +73,19 @@ public class LogProperties {
         return category;
     }
 
-    public String getCorrelation_id() {
-        return correlation_id;
+    public String getCorrelationId() {
+        return correlationId;
     }
 
     public ParameterResolver<String> getPayload() {
         return payload;
     }
 
-    public tracePointProperty.tracePoint getTracePoint() {
-        return tracePoint;
+    public Map<String,String> getMessageAttributes() {
+        Map<String,String> attributes = new LinkedHashMap<>();
+        for(MessageAttribute a : messageAttributes) {
+            attributes.put(a.getKey(), a.getValue());
+        }
+        return attributes;
     }
-
 }

@@ -1,7 +1,7 @@
-package com.avio.customlogger;
+package com.avioconsulting.mule.logger.internal;
 
-import com.avio.customlogger.model.LogLocationInfoProperty;
-import com.avio.customlogger.utils.CustomLoggerUtils;
+import com.avioconsulting.mule.logger.api.processor.AdditionalProperties;
+import com.avioconsulting.mule.logger.internal.utils.CustomLoggerUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.message.ObjectMessage;
@@ -35,7 +35,7 @@ public class CustomLoggerTimerScopeOperations {
     public void timerScope(String timerName,
                            @Optional(defaultValue = DEFAULT_CATEGORY_SUFFIX) String categorySuffix,
                            @Optional String moduleConfigurationName,
-                           @ParameterGroup(name = "Options") LogLocationInfoProperty logLocationInfoProperty,
+                           @ParameterGroup(name = "Options") AdditionalProperties logLocationInfoProperty,
                            ComponentLocation location,
                            Chain operations,
                            CompletionCallback<Object, Object> callback) {
@@ -50,8 +50,8 @@ public class CustomLoggerTimerScopeOperations {
         logContext.put("app_name", customLoggerUtils.retrieveValueFromGlobalConfig("app_name"));
         logContext.put("app_version", customLoggerUtils.retrieveValueFromGlobalConfig("app_version"));
         logContext.put("env", customLoggerUtils.retrieveValueFromGlobalConfig("env"));
-        if (logLocationInfoProperty.logLocationInfo) {
-            logContext.put("location", CustomLoggerUtils.getLocationInformation(location));
+        if (logLocationInfoProperty.isIncludeLocationInfo() ) {
+            logContext.put("location", CustomLoggerOperation.getLocationInformation(location));
         }
         Map<String, Object> beforeScope = new HashMap<>();
         beforeScope.put("message", timerName + " timer scope starting");

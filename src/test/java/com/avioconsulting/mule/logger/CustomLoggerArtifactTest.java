@@ -1,4 +1,4 @@
-package com.avio.customlogger;
+package com.avioconsulting.mule.logger;
 
 import org.junit.Assert;
 import org.junit.Test;

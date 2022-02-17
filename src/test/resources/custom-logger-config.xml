@@ -1,14 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:avio-core="http://www.mulesoft.org/schema/mule/avio-core" xmlns="http://www.mulesoft.org/schema/mule/core"
-	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
-http://www.mulesoft.org/schema/mule/avio-core http://www.mulesoft.org/schema/mule/avio-core/current/mule-avio-core.xsd">
+<mule xmlns:avio-logger="http://www.mulesoft.org/schema/mule/avio-logger" xmlns="http://www.mulesoft.org/schema/mule/core"
+      xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/avio-logger http://www.mulesoft.org/schema/mule/avio-logger/current/mule-avio-logger.xsd">
 
-	<avio-core:config name="AVIO_Core_Config" doc:name="AVIO Core Config" doc:id="84bd2712-015b-46b8-93e9-94536774b8ad" app_version="#['1']" />
+    <avio-logger:config name="AVIO_Logger_Config" doc:name="AVIO Logger Config" doc:id="84bd2712-015b-46b8-93e9-94536774b8ad"
+                      applicationVersion="#['1']"/>
 
-	<flow name="custom-logger-configFlow" doc:id="0068e855-24dc-41a4-8e13-41ca38de99ba" >
-		<avio-core:custom-logger doc:name="Custom logger" doc:id="3a7b6ada-78ef-4f32-a14d-df126c8f887d" config-ref="AVIO_Core_Config" correlation_id="#['static-correlation-id']" message="#['Added static correlation id on logger']"/>
-		<avio-core:custom-logger doc:name="Custom logger" doc:id="322979c8-a722-4fea-a272-cf579529c78c" config-ref="AVIO_Core_Config" message="#['Logger should get correlation id from event']"/>
-	</flow>
+    <flow name="custom-logger-configFlow" doc:id="0068e855-24dc-41a4-8e13-41ca38de99ba">
+        <avio-logger:log doc:name="Custom logger" doc:id="3a7b6ada-78ef-4f32-a14d-df126c8f887d"
+                         config-ref="AVIO_Logger_Config" correlationId="#['static-correlation-id']"
+                         message="#['Added static correlation id on logger']"/>
+        <avio-logger:log doc:name="Custom logger" doc:id="322979c8-a722-4fea-a272-cf579529c78c"
+                         config-ref="AVIO_Logger_Config" message="#['Logger should get correlation id from event']"/>
+    </flow>
 </mule>

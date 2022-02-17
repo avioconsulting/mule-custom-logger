@@ -1,20 +1,18 @@
-package com.avio.customlogger.model;
+package com.avioconsulting.mule.logger.api.processor;
 
+import com.avioconsulting.mule.logger.internal.utils.CustomLoggerConstants;
 import org.mule.runtime.extension.api.annotation.param.Optional;
 import org.mule.runtime.extension.api.annotation.param.Parameter;
 import org.mule.runtime.extension.api.annotation.param.display.DisplayName;
 import org.mule.runtime.extension.api.annotation.param.display.Summary;
-import com.avio.customlogger.utils.CustomLoggerConstants;
-
 
 public class ExceptionProperties {
-
 
     @Parameter
     @DisplayName("Status Code")
     @Summary("Exception Status Code")
     @Optional
-    private String status_code;
+    private String statusCode;
     @Parameter
     @DisplayName("Type")
     @Summary("Type of Exception")
@@ -26,8 +24,8 @@ public class ExceptionProperties {
     @Optional(defaultValue = CustomLoggerConstants.DEFAULT_EXCEPTION_DETAIL)
     private String detail;
 
-    public String getStatus_code() {
-        return status_code;
+    public String getStatusCode() {
+        return statusCode;
     }
 
     public String getType() {

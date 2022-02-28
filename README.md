@@ -95,9 +95,10 @@ To use the custom logger notification listener, you must instantiate the object 
 global element. An example has been included below:
 
 ```xml
-<object doc:name="Object" doc:id="4df721fe-16b2-4ce3-819e-878fb4dd53c1" 
-    name="CustomLoggerNotificationListener" 
-    class="com.avio.customlogger.engine.CustomLoggerNotificationListener" />
+
+<object doc:name="Object" doc:id="4df721fe-16b2-4ce3-819e-878fb4dd53c1"
+        name="CustomLoggerNotificationListener"
+        class="com.avioconsulting.mule.logger.internal.listeners.CustomLoggerNotificationListener"/>
 ```
 You can also override the global configuration elements by specifying properties. The available properties are as follows:
  * appName

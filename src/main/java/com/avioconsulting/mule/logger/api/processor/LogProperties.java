@@ -43,14 +43,14 @@ public class LogProperties {
     @Parameter
     @Optional
     @DisplayName("Category")
+    @Summary("Override the globally configured log category")
     private String category;
 
     @Parameter
-    @DisplayName("Message Attributes")
     @Optional
-    @NullSafe
-    @Summary("Discrete data elements you want to log as key value pairs.  Useful for adding data fields for reporting in log aggregation tools")
-    private List<MessageAttribute> messageAttributes;
+    @DisplayName("Category Suffix")
+    @Summary("Append this suffix to the globally configured log category")
+    private String categorySuffix;
 
     public enum LogLevel {
         TRACE,
@@ -73,6 +73,10 @@ public class LogProperties {
         return category;
     }
 
+    public String getCategorySuffix() {
+        return categorySuffix;
+    }
+
     public String getCorrelationId() {
         return correlationId;
     }
@@ -81,11 +85,33 @@ public class LogProperties {
         return payload;
     }
 
-    public Map<String,String> getMessageAttributes() {
-        Map<String,String> attributes = new LinkedHashMap<>();
-        for(MessageAttribute a : messageAttributes) {
-            attributes.put(a.getKey(), a.getValue());
-        }
-        return attributes;
+
+
+    public void setCorrelationId(String correlationId) {
+        this.correlationId = correlationId;
     }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public void setPayload(ParameterResolver<String> payload) {
+        this.payload = payload;
+    }
+
+    public void setLevel(LogLevel level) {
+        this.level = level;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public void setCategorySuffix(String categorySuffix) {
+        this.categorySuffix = categorySuffix;
+    }
+
+//    public void setMessageAttributes(List<MessageAttribute> messageAttributes) {
+//        this.messageAttributes = messageAttributes;
+//    }
 }

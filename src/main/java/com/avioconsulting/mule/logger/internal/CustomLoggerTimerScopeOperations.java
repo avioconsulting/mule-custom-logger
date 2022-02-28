@@ -1,28 +1,26 @@
 package com.avioconsulting.mule.logger.internal;
 
-import com.avioconsulting.mule.logger.api.processor.AdditionalProperties;
+import com.avioconsulting.mule.logger.api.processor.*;
 import com.avioconsulting.mule.logger.internal.utils.CustomLoggerUtils;
-import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.message.ObjectMessage;
 import org.mule.runtime.api.artifact.Registry;
 import org.mule.runtime.api.component.location.ComponentLocation;
+import org.mule.runtime.core.api.el.ExpressionManager;
 import org.mule.runtime.extension.api.annotation.param.MediaType;
-import org.mule.runtime.extension.api.annotation.param.Optional;
 import org.mule.runtime.extension.api.annotation.param.ParameterGroup;
+import org.mule.runtime.extension.api.annotation.param.display.DisplayName;
+import org.mule.runtime.extension.api.runtime.parameter.CorrelationInfo;
 import org.mule.runtime.extension.api.runtime.process.CompletionCallback;
 import org.mule.runtime.extension.api.runtime.route.Chain;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import java.time.Instant;
-import java.util.HashMap;
 import java.util.Map;
 
 import static org.mule.runtime.extension.api.annotation.param.MediaType.ANY;
 
 public class CustomLoggerTimerScopeOperations {
-    public static final String DEFAULT_CATEGORY_SUFFIX = ".timer";
+    public static final String DEFAULT_CATEGORY_SUFFIX = "timer";
     private final org.slf4j.Logger classLogger = LoggerFactory.getLogger(CustomLoggerTimerScopeOperations.class);
 
     @Inject
@@ -32,56 +30,47 @@ public class CustomLoggerTimerScopeOperations {
     private CustomLoggerUtils customLoggerUtils;
 
     @MediaType(value = ANY, strict = false)
-    public void timerScope(String timerName,
-                           @Optional(defaultValue = DEFAULT_CATEGORY_SUFFIX) String categorySuffix,
-                           @Optional String moduleConfigurationName,
-                           @ParameterGroup(name = "Options") AdditionalProperties logLocationInfoProperty,
+    @DisplayName(value = "Logging Timer Scope")
+    public void timerScope(@DisplayName(value = "Timer Name") String timerName,
+                           @ParameterGroup(name = "Log") LogProperties logProperties,
+                           @ParameterGroup(name = "Options") AdditionalProperties additionalProperties,
                            ComponentLocation location,
+                           CorrelationInfo correlationInfo,
                            Chain operations,
                            CompletionCallback<Object, Object> callback) {
-        if (customLoggerUtils == null) {
-            customLoggerUtils = new CustomLoggerUtils(registry, moduleConfigurationName);
-        } else {
-            classLogger.info("Registry was found");
-        }
-        this.logger = LogManager.getLogger(customLoggerUtils.retrieveValueFromGlobalConfig("category_prefix") + categorySuffix);
-        Map<String, Object> logContext = new HashMap<>();
-        logContext.put("timer_name", timerName);
-        logContext.put("app_name", customLoggerUtils.retrieveValueFromGlobalConfig("app_name"));
-        logContext.put("app_version", customLoggerUtils.retrieveValueFromGlobalConfig("app_version"));
-        logContext.put("env", customLoggerUtils.retrieveValueFromGlobalConfig("env"));
-        if (logLocationInfoProperty.isIncludeLocationInfo() ) {
-            logContext.put("location", CustomLoggerOperation.getLocationInformation(location));
-        }
-        Map<String, Object> beforeScope = new HashMap<>();
-        beforeScope.put("message", timerName + " timer scope starting");
-        beforeScope.put("trace_point", "TIMER_START");
-        logContext.put("log", beforeScope);
-        logContext.put("timestamp", Instant.now().toString());
-        logger.debug(new ObjectMessage(logContext));
+
+        Map<String, String> loggerConfigAttributes = CustomLoggerUtils.getGlobalConfigAttributes(registry, "avio-logger", "config");
+        classLogger.info("Global Config Attributes: " + loggerConfigAttributes.toString());
+
+
+        CustomLogger logger = new CustomLogger();
+        ExceptionProperties exceptionProperties = new ExceptionProperties();
+        ExpressionManager expressionManager = CustomLoggerUtils.getExpressionManager(registry);
+        String correlationId = correlationInfo.getCorrelationId();
+        String applicationName = CustomLoggerUtils.retrieveValueFromGlobalConfig(expressionManager, loggerConfigAttributes, "applicationName");
+        String applicationVersion = CustomLoggerUtils.retrieveValueFromGlobalConfig(expressionManager, loggerConfigAttributes, "applicationVersion");
+        String environment = CustomLoggerUtils.retrieveValueFromGlobalConfig(expressionManager, loggerConfigAttributes, "environment");
+        String defaultCategory = CustomLoggerUtils.retrieveValueFromGlobalConfig(expressionManager, loggerConfigAttributes, "defaultCategory");
+        Boolean enableV1Compatibility = Boolean.valueOf(CustomLoggerUtils.retrieveValueFromGlobalConfig(expressionManager, loggerConfigAttributes, "enableV1Compatibility"));
+        MessageAttributes messageAttributes = new MessageAttributes();
 
         long startTime = System.currentTimeMillis();
         operations.process(
                 result -> {
-                    Map<String, Object> afterScope = new HashMap<>();
                     long elapsedMilliseconds = System.currentTimeMillis() - startTime;
-                    afterScope.put("message", timerName + " timer scope completed with milliseconds elapsed: "  + elapsedMilliseconds);
-                    afterScope.put("elapsed_milliseconds", elapsedMilliseconds);
-                    afterScope.put("trace_point", "TIMER_END");
-                    logContext.put("log", afterScope);
-                    logContext.put("timestamp", Instant.now().toString());
-                    logger.info(new ObjectMessage(logContext));
+                    MessageAttribute elapsed = new MessageAttribute("elapsedTimeMs", String.valueOf(elapsedMilliseconds));
+                    messageAttributes.getAttributeList().add(elapsed);
+                    logProperties.setMessage("Timer scope [" + timerName + "] completed in " + elapsedMilliseconds + "ms");
+                    logger.log(logProperties, messageAttributes, exceptionProperties, additionalProperties, location, correlationId, applicationName, applicationVersion, environment, defaultCategory, enableV1Compatibility);
                     callback.success(result);
                 },
                 (error, previous) -> {
-                    Map<String, Object> afterScope = new HashMap<>();
                     long elapsedMilliseconds = System.currentTimeMillis() - startTime;
-                    afterScope.put("message", timerName + " timer scope errored out with milliseconds elapsed: "  + elapsedMilliseconds);
-                    afterScope.put("elapsed_milliseconds", elapsedMilliseconds);
-                    afterScope.put("trace_point", "TIMER_EXCEPTION");
-                    logContext.put("log", afterScope);
-                    logContext.put("timestamp", Instant.now().toString());
-                    logger.info(new ObjectMessage(logContext));
+                    MessageAttribute elapsed = new MessageAttribute("elapsedTimeMs", String.valueOf(elapsedMilliseconds));
+                    messageAttributes.getAttributeList().add(elapsed);
+                    logProperties.setMessage("Timer scope [" + timerName + "] completed with errors in " + elapsedMilliseconds + "ms");
+                    logProperties.setLevel(LogProperties.LogLevel.ERROR);
+                    logger.log(logProperties, messageAttributes, exceptionProperties, additionalProperties, location, correlationId, applicationName, applicationVersion, environment, defaultCategory, enableV1Compatibility);
                     callback.error(error);
                 });
     }

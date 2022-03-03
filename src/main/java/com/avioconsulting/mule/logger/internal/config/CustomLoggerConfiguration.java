@@ -32,6 +32,7 @@ public class CustomLoggerConfiguration implements Startable {
     public static final String DEFAULT_APP_NAME = "#[app.name]";
     public static final String DEFAULT_ENV = "#[p('env')]";
     public static final String EXAMPLE_APP_VERSION = "#[p('appVersion')]";
+    public static final String DEFAULT_FLOW_CATEGORY = "flow";
 
     @Parameter
     @DisplayName("Application Name")
@@ -68,7 +69,13 @@ public class CustomLoggerConfiguration implements Startable {
     @DisplayName("Flow Log Level")
     @Summary("The level flow logs will be logged at if enabled")
     @Optional(defaultValue = "DEBUG")
-    private LogProperties.LogLevel level;
+    private LogProperties.LogLevel flowLogLevel;
+
+    @Parameter
+    @DisplayName("Flow Log Category Suffix")
+    @Summary("This category will be appended to the default logger category and used for all flow logs")
+    @Optional(defaultValue = DEFAULT_FLOW_CATEGORY)
+    private String flowCategorySuffix;
 
     @Parameter
     @DisplayName("Enable AVIO Logger V1 Compatibility")
@@ -100,6 +107,18 @@ public class CustomLoggerConfiguration implements Startable {
 
     public CustomLogger getLogger() {
         return logger;
+    }
+
+    public boolean isEnableFlowLogs() {
+        return enableFlowLogs;
+    }
+
+    public LogProperties.LogLevel getFlowLogLevel() {
+        return flowLogLevel;
+    }
+
+    public String getFlowCategorySuffix() {
+        return flowCategorySuffix;
     }
 
     public boolean isEnableV1Compatibility() {

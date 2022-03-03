@@ -26,6 +26,9 @@ public class CustomLoggerTimerScopeOperations {
     @Inject
     Registry registry;
 
+    @Inject
+    ExpressionManager expressionManager;
+
     private Logger logger;
     private CustomLoggerUtils customLoggerUtils;
 
@@ -45,16 +48,19 @@ public class CustomLoggerTimerScopeOperations {
 
         CustomLogger logger = new CustomLogger();
         ExceptionProperties exceptionProperties = new ExceptionProperties();
-        ExpressionManager expressionManager = CustomLoggerUtils.getExpressionManager(registry);
         String correlationId = correlationInfo.getCorrelationId();
         String applicationName = CustomLoggerUtils.retrieveValueFromGlobalConfig(expressionManager, loggerConfigAttributes, "applicationName");
         String applicationVersion = CustomLoggerUtils.retrieveValueFromGlobalConfig(expressionManager, loggerConfigAttributes, "applicationVersion");
         String environment = CustomLoggerUtils.retrieveValueFromGlobalConfig(expressionManager, loggerConfigAttributes, "environment");
         String defaultCategory = CustomLoggerUtils.retrieveValueFromGlobalConfig(expressionManager, loggerConfigAttributes, "defaultCategory");
+        String logLevel = CustomLoggerUtils.retrieveValueFromGlobalConfig(expressionManager, loggerConfigAttributes, "level");
+        classLogger.debug("Log Level: " + logLevel);
         Boolean enableV1Compatibility = Boolean.valueOf(CustomLoggerUtils.retrieveValueFromGlobalConfig(expressionManager, loggerConfigAttributes, "enableV1Compatibility"));
         MessageAttributes messageAttributes = new MessageAttributes();
 
         long startTime = System.currentTimeMillis();
+        MessageAttribute timerNameAtt = new MessageAttribute("timerName", timerName);
+        messageAttributes.getAttributeList().add(timerNameAtt);
         operations.process(
                 result -> {
                     long elapsedMilliseconds = System.currentTimeMillis() - startTime;

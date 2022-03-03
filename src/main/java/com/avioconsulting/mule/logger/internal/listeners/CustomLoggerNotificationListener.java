@@ -27,10 +27,11 @@ public class CustomLoggerNotificationListener
     @Override
     public void onNotification(PipelineMessageNotification notification) {
         classLogger.debug(
-                "Received "
+                "Received Notification ["
                         + notification.getClass().getName()
                         + ":"
-                        + notification.getActionName());
+                        + notification.getActionName()
+                        + "]");
         try {
             ComponentLocation location = notification.getComponent().getLocation();
             CustomLogger logger = config.getLogger();
@@ -40,18 +41,25 @@ public class CustomLoggerNotificationListener
             AdditionalProperties additionalProperties = new AdditionalProperties();
             additionalProperties.setIncludeLocationInfo(true);
             String correlationId = notification.getEvent().getCorrelationId();
-            logProperties.setCategorySuffix("flow");
-            logProperties.setLevel(LogProperties.LogLevel.DEBUG);
+            if(config.getFlowCategorySuffix() != null && !config.getFlowCategorySuffix().equals("")) {
+                logProperties.setCategorySuffix(config.getFlowCategorySuffix());
+            }
+            logProperties.setLevel(config.getFlowLogLevel());
+            String logMessage = "Event not processed yet, this should never be shown";
             switch (Integer.parseInt(notification.getAction().getIdentifier())) {
                 case PipelineMessageNotification.PROCESS_START:
-                    classLogger.debug("Flow Starting");
-                    logProperties.setMessage("Flow [" + notification.getResourceIdentifier() + "]" + " start");
-                    logger.log(logProperties, messageAttributes, exceptionProperties, additionalProperties, config, location, correlationId);
+                    logMessage = "Flow [" + notification.getResourceIdentifier() + "]" + " start";
+                    break;
                 case PipelineMessageNotification.PROCESS_COMPLETE:
-                    classLogger.debug("Flow Completing");
-                    logProperties.setMessage("Flow [" + notification.getResourceIdentifier() + "]" + " end");
-                    logger.log(logProperties, messageAttributes, exceptionProperties, additionalProperties, config, location, correlationId);
+                    logMessage = "Flow [" + notification.getResourceIdentifier() + "]" + " end";
+                    break;
+                default:
+                    classLogger.debug("Not a flow start or complete event being processed, existing without logging.");
+                    return;
             }
+            classLogger.debug(logMessage);
+            logProperties.setMessage(logMessage);
+            logger.log(logProperties, messageAttributes, exceptionProperties, additionalProperties, config, location, correlationId);
         } catch (Exception e) {
             classLogger.error("Error processing flow notification", e);
         }

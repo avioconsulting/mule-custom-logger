@@ -91,17 +91,6 @@ public class CustomLoggerUtils {
         }
     }
 
-    public static ExpressionManager getExpressionManager(Registry registry) {
-        Optional<ExpressionManager> optionalExpressionManager = registry.lookupByType(ExpressionManager.class);
-        if (optionalExpressionManager.isPresent()) {
-            classLogger.debug("ExpressionManager was found");
-            return optionalExpressionManager.get();
-        } else {
-            classLogger.error("ExpressionManager was not found.");
-            throw new NoSuchElementException("ExpressionManager was not found.");
-        }
-    }
-
     private static String safeEvaluate(ExpressionManager expressionManager, String expression) throws ExpressionRuntimeException {
         if (expression == null) {
             return "null";

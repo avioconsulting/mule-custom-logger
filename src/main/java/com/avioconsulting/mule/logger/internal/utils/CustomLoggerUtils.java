@@ -21,19 +21,18 @@ import static com.avioconsulting.mule.logger.internal.config.CustomLoggerConfigu
 public class CustomLoggerUtils {
 
     private static final org.slf4j.Logger classLogger = LoggerFactory.getLogger(CustomLoggerUtils.class);
-    private final ExpressionManager expressionManager = null;
 
     public static Logger initLogger(String globalCategory, String category, String categorySuffix) {
         String c = DEFAULT_CATEGORY;
-        if (globalCategory != null && globalCategory != "") {
+        if (globalCategory != null && !globalCategory.equals("")) {
             c = trimCategory(globalCategory);
         }
 
-        if (categorySuffix != null && categorySuffix != "") {
+        if (categorySuffix != null && !categorySuffix.equals("")) {
             c = c + "." + trimCategory(categorySuffix);
         }
 
-        if (category != null && category != "") {
+        if (category != null && !category.equals("")) {
             c = trimCategory(category);
         }
 
@@ -41,7 +40,7 @@ public class CustomLoggerUtils {
     }
 
     private static String trimCategory(String category) {
-        if (category == null || category == "") {
+        if (category == null || category.equals("")) {
             return category;
         }
         while (category.startsWith(".")) {

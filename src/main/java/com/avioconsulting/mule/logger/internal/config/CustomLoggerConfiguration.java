@@ -3,6 +3,7 @@ package com.avioconsulting.mule.logger.internal.config;
 import com.avioconsulting.mule.logger.api.processor.LogProperties;
 import com.avioconsulting.mule.logger.internal.CustomLogger;
 import com.avioconsulting.mule.logger.internal.CustomLoggerOperation;
+import com.avioconsulting.mule.logger.internal.CustomLoggerRegistrationService;
 import com.avioconsulting.mule.logger.internal.CustomLoggerTimerScopeOperations;
 import com.avioconsulting.mule.logger.internal.listeners.CustomLoggerNotificationListener;
 import org.mule.runtime.api.exception.MuleException;
@@ -87,7 +88,11 @@ public class CustomLoggerConfiguration implements Startable {
     @Inject
     NotificationListenerRegistry notificationListenerRegistry;
 
+    @Inject
+    CustomLoggerRegistrationService customLoggerRegistrationService;
+
     private CustomLogger logger;
+    private CustomLoggerNotificationListener notificationListener;
 
     public String getApplicationName() {
         return applicationName;
@@ -128,9 +133,14 @@ public class CustomLoggerConfiguration implements Startable {
     @Override
     public void start() throws MuleException {
         this.logger = new CustomLogger();
-        if(enableFlowLogs) {
+        if(isEnableFlowLogs()) {
             classLogger.info("Flow logs enabled");
-            notificationListenerRegistry.registerListener(new CustomLoggerNotificationListener(this));
+            classLogger.info("Sending config to registration service");
+            customLoggerRegistrationService.setConfig(this);
+            notificationListener = new CustomLoggerNotificationListener(this);
+            notificationListenerRegistry.registerListener(notificationListener);
+        } else {
+            classLogger.info("Flow logs disabled");
         }
     }
 }

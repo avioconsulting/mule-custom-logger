@@ -13,6 +13,7 @@ import org.apache.logging.log4j.message.Message;
 import org.apache.logging.log4j.message.ObjectMessage;
 import org.mule.runtime.api.component.location.ComponentLocation;
 import org.mule.runtime.extension.api.runtime.parameter.ParameterResolver;
+import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
 import java.util.HashMap;
@@ -21,6 +22,7 @@ import java.util.Map;
 
 public class CustomLogger {
 
+    private static final org.slf4j.Logger classLogger = LoggerFactory.getLogger(CustomLogger.class);
     // TODO:  Create Logger Cache
 
     private static final Map<LogProperties.LogLevel, Level> levelMap = new HashMap<LogProperties.LogLevel, Level>() {{

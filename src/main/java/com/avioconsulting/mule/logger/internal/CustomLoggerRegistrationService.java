@@ -6,19 +6,19 @@ import org.slf4j.LoggerFactory;
 
 public class CustomLoggerRegistrationService {
 
-    private static final Logger logger = LoggerFactory.getLogger(CustomLoggerRegistrationService.class);
+  private static final Logger logger = LoggerFactory.getLogger(CustomLoggerRegistrationService.class);
 
-    private CustomLoggerConfiguration config;
+  private CustomLoggerConfiguration config;
 
-    public CustomLoggerRegistrationService() {
-        logger.info("Creating logger registration service...");
-    }
+  public CustomLoggerRegistrationService() {
+    logger.info("Creating logger registration service...");
+  }
 
-    public CustomLoggerConfiguration getConfig() {
-        return config;
-    }
+  public CustomLoggerConfiguration getConfig() {
+    return config;
+  }
 
-    public void setConfig(CustomLoggerConfiguration config) {
-        this.config = config;
-    }
+  public void setConfig(CustomLoggerConfiguration config) {
+    this.config = config;
+  }
 }

@@ -1,10 +1,9 @@
 package com.avioconsulting.mule.logger.api.processor;
 
-import org.mule.runtime.extension.api.annotation.param.Parameter;
-
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import org.mule.runtime.extension.api.annotation.param.Parameter;
 
 public abstract class KeyValuePair {
 

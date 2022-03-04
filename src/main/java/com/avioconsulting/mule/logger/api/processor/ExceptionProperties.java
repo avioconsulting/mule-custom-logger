@@ -8,32 +8,32 @@ import org.mule.runtime.extension.api.annotation.param.display.Summary;
 
 public class ExceptionProperties {
 
-    @Parameter
-    @DisplayName("Status Code")
-    @Summary("Exception Status Code")
-    @Optional
-    private String statusCode;
-    @Parameter
-    @DisplayName("Type")
-    @Summary("Type of Exception")
-    @Optional(defaultValue = CustomLoggerConstants.DEFAULT_EXCEPTION_TYPE)
-    private String type;
-    @Parameter
-    @DisplayName("Detail")
-    @Summary("Exception Detail")
-    @Optional(defaultValue = CustomLoggerConstants.DEFAULT_EXCEPTION_DETAIL)
-    private String detail;
+  @Parameter
+  @DisplayName("Status Code")
+  @Summary("Exception Status Code")
+  @Optional
+  private String statusCode;
+  @Parameter
+  @DisplayName("Type")
+  @Summary("Type of Exception")
+  @Optional(defaultValue = CustomLoggerConstants.DEFAULT_EXCEPTION_TYPE)
+  private String type;
+  @Parameter
+  @DisplayName("Detail")
+  @Summary("Exception Detail")
+  @Optional(defaultValue = CustomLoggerConstants.DEFAULT_EXCEPTION_DETAIL)
+  private String detail;
 
-    public String getStatusCode() {
-        return statusCode;
-    }
+  public String getStatusCode() {
+    return statusCode;
+  }
 
-    public String getType() {
-        return type;
-    }
+  public String getType() {
+    return type;
+  }
 
-    public String getDetail() {
-        return detail;
-    }
+  public String getDetail() {
+    return detail;
+  }
 
 }

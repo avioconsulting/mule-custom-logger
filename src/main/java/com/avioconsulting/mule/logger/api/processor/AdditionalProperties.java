@@ -8,18 +8,18 @@ import org.mule.runtime.extension.api.annotation.param.display.DisplayName;
 
 public class AdditionalProperties {
 
-    @Parameter
-    @DisplayName("Include Location Information")
-    @Optional(defaultValue = "false")
-    @Expression(ExpressionSupport.NOT_SUPPORTED)
-    private boolean includeLocationInfo = false;
+  @Parameter
+  @DisplayName("Include Location Information")
+  @Optional(defaultValue = "false")
+  @Expression(ExpressionSupport.NOT_SUPPORTED)
+  private boolean includeLocationInfo = false;
 
-    public boolean isIncludeLocationInfo() {
-        return includeLocationInfo;
-    }
+  public boolean isIncludeLocationInfo() {
+    return includeLocationInfo;
+  }
 
-    public void setIncludeLocationInfo(boolean includeLocationInfo) {
-        this.includeLocationInfo = includeLocationInfo;
-    }
+  public void setIncludeLocationInfo(boolean includeLocationInfo) {
+    this.includeLocationInfo = includeLocationInfo;
+  }
 
 }

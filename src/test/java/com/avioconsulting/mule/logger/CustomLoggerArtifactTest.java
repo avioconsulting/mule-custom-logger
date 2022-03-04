@@ -7,15 +7,15 @@ import org.mule.runtime.core.api.event.CoreEvent;
 
 public class CustomLoggerArtifactTest extends MuleArtifactFunctionalTestCase {
 
-    @Override
-    protected String getConfigFile() {
-        return "custom-logger-config.xml";
-    }
+  @Override
+  protected String getConfigFile() {
+    return "custom-logger-config.xml";
+  }
 
-    @Test
-    public void testLoggerConfigForCorrelationId() throws Exception {
-        //TODO: Intercept logs and validate entries
-        CoreEvent coreEvent = flowRunner("custom-logger-configFlow").run();
-        Assert.assertNotNull(coreEvent);
-    }
+  @Test
+  public void testLoggerConfigForCorrelationId() throws Exception {
+    // TODO: Intercept logs and validate entries
+    CoreEvent coreEvent = flowRunner("custom-logger-configFlow").run();
+    Assert.assertNotNull(coreEvent);
+  }
 }

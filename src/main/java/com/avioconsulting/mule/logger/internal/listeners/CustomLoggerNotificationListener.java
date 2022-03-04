@@ -15,57 +15,60 @@ import org.slf4j.LoggerFactory;
  * Listener for Mule notifications on flow start, end and completion.
  */
 public class CustomLoggerNotificationListener
-        implements PipelineMessageNotificationListener<PipelineMessageNotification> {
+    implements PipelineMessageNotificationListener<PipelineMessageNotification> {
 
-    private final org.slf4j.Logger classLogger = LoggerFactory.getLogger(CustomLoggerNotificationListener.class);
-    private final CustomLoggerConfiguration config;
+  private final org.slf4j.Logger classLogger = LoggerFactory.getLogger(CustomLoggerNotificationListener.class);
+  private final CustomLoggerConfiguration config;
 
-    public CustomLoggerNotificationListener(CustomLoggerConfiguration config) {
-        this.config = config;
-    }
+  public CustomLoggerNotificationListener(CustomLoggerConfiguration config) {
+    this.config = config;
+  }
 
-    @Override
-    public void onNotification(PipelineMessageNotification notification) {
-        classLogger.debug(
-                "Received Notification ["
-                        + notification.getClass().getName()
-                        + ":"
-                        + notification.getActionName()
-                        + "]");
-        if(config != null) {
-            try {
-                ComponentLocation location = notification.getComponent().getLocation();
-                CustomLogger logger = config.getLogger();
-                LogProperties logProperties = new LogProperties();
-                MessageAttributes messageAttributes = new MessageAttributes();
-                ExceptionProperties exceptionProperties = new ExceptionProperties();
-                AdditionalProperties additionalProperties = new AdditionalProperties();
-                additionalProperties.setIncludeLocationInfo(true);
-                String correlationId = notification.getEvent().getCorrelationId();
-                if (config.getFlowCategorySuffix() != null && !config.getFlowCategorySuffix().equals("")) {
-                    logProperties.setCategorySuffix(config.getFlowCategorySuffix());
-                }
-                logProperties.setLevel(config.getFlowLogLevel());
-                String logMessage = "Event not processed yet, this should never be shown";
-                switch (Integer.parseInt(notification.getAction().getIdentifier())) {
-                    case PipelineMessageNotification.PROCESS_START:
-                        logMessage = "Flow [" + notification.getResourceIdentifier() + "]" + " start";
-                        break;
-                    case PipelineMessageNotification.PROCESS_COMPLETE:
-                        logMessage = "Flow [" + notification.getResourceIdentifier() + "]" + " end";
-                        break;
-                    default:
-                        classLogger.debug("Not a flow start or complete event being processed, existing without logging.");
-                        return;
-                }
-                classLogger.debug(logMessage);
-                logProperties.setMessage(logMessage);
-                logger.log(logProperties, messageAttributes, exceptionProperties, additionalProperties, config, location, correlationId);
-            } catch (Exception e) {
-                classLogger.error("Error processing flow notification", e);
-            }
-        } else {
-            classLogger.warn("Configuration hasn't been supplied to notification listener yet, flow logs won't be generated.");
+  @Override
+  public void onNotification(PipelineMessageNotification notification) {
+    classLogger.debug(
+        "Received Notification ["
+            + notification.getClass().getName()
+            + ":"
+            + notification.getActionName()
+            + "]");
+    if (config != null) {
+      try {
+        ComponentLocation location = notification.getComponent().getLocation();
+        CustomLogger logger = config.getLogger();
+        LogProperties logProperties = new LogProperties();
+        MessageAttributes messageAttributes = new MessageAttributes();
+        ExceptionProperties exceptionProperties = new ExceptionProperties();
+        AdditionalProperties additionalProperties = new AdditionalProperties();
+        additionalProperties.setIncludeLocationInfo(true);
+        String correlationId = notification.getEvent().getCorrelationId();
+        if (config.getFlowCategorySuffix() != null && !config.getFlowCategorySuffix().equals("")) {
+          logProperties.setCategorySuffix(config.getFlowCategorySuffix());
         }
+        logProperties.setLevel(config.getFlowLogLevel());
+        String logMessage = "Event not processed yet, this should never be shown";
+        switch (Integer.parseInt(notification.getAction().getIdentifier())) {
+          case PipelineMessageNotification.PROCESS_START:
+            logMessage = "Flow [" + notification.getResourceIdentifier() + "]" + " start";
+            break;
+          case PipelineMessageNotification.PROCESS_COMPLETE:
+            logMessage = "Flow [" + notification.getResourceIdentifier() + "]" + " end";
+            break;
+          default:
+            classLogger
+                .debug("Not a flow start or complete event being processed, existing without logging.");
+            return;
+        }
+        classLogger.debug(logMessage);
+        logProperties.setMessage(logMessage);
+        logger.log(logProperties, messageAttributes, exceptionProperties, additionalProperties, config,
+            location, correlationId);
+      } catch (Exception e) {
+        classLogger.error("Error processing flow notification", e);
+      }
+    } else {
+      classLogger.warn(
+          "Configuration hasn't been supplied to notification listener yet, flow logs won't be generated.");
     }
+  }
 }

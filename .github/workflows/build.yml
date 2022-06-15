@@ -19,11 +19,16 @@ jobs:
           submodules: 'recursive'
 
       - name: Set up JDK 1.8
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v3
         with:
-          distribution: adopt-hotspot
+          distribution: temurin
           java-version: 8
           cache: maven
+          server-id: ossrh
+          server-username: OSSRH_USERNAME
+          server-password: OSSRH_PASSWORD
+          gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
+          gpg-passphrase:  MAVEN_GPG_PASSPHRASE
 
       - name: Set Version
         id: set-version
@@ -45,59 +50,78 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           files: ./**/surefire-reports/*.xml
 
-      - name: Create settings xml
-        uses: whelk-io/maven-settings-xml-action@v20
+      - name: Publish to Maven Central
+        id: publish-to-maven-central
+        if: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/master'}}
+        run: ./mvnw clean deploy -DskipTests -Drelease=true
+        env:
+          OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+
+      - name: Set up JDK for Exchange Publish
+        if: ${{ !contains(steps.set-version.outputs.version, 'SNAPSHOT') && github.event_name != 'pull_request' && github.ref == 'refs/heads/master'}}
+        uses: actions/setup-java@v3
         with:
-          servers: >
-            [
-              {
-                "id": "github",
-                "username": "${{secrets.GIT_USER}}",
-                "password": "${{secrets.GIT_TOKEN}}"
-              },
-              {
-                "id": "anypoint-exchange",
-                "username": "~~~Token~~~",
-                "password": "${token}"
-              }
-            ]
-            
+          distribution: temurin
+          java-version: 8
+          cache: maven
+          server-id: anypoint-exchange
+          server-username: ANYPOINT_USERNAME
+          server-password: ANYPOINT_PASSWORD
 
       - name: Get Exchange Token
         id: get-token
         if: ${{ !contains(steps.set-version.outputs.version, 'SNAPSHOT') && github.event_name != 'pull_request' && github.ref == 'refs/heads/master'}}
         run: |
-          echo ::set-output name=token::$(curl --location --request POST 'https://anypoint.mulesoft.com/accounts/api/v2/oauth2/token' --header 'Content-Type: application/x-www-form-urlencoded' --data-urlencode 'client_id=${{secrets.ANYPOINT_EXCHANGE_CLIENT_ID}}' --data-urlencode 'client_secret=${{secrets.ANYPOINT_EXCHANGE_CLIENT_SECRET}}' --data-urlencode 'grant_type=client_credentials')
+          echo ::set-output name=token::$(curl --location --request POST 'https://anypoint.mulesoft.com/accounts/api/v2/oauth2/token' --header 'Content-Type: application/x-www-form-urlencoded' --data-urlencode 'client_id=${{secrets.ANYPOINT_EXCHANGE_CLIENT_ID}}' --data-urlencode 'client_secret=${{secrets.ANYPOINT_EXCHANGE_CLIENT_SECRET}}' --data-urlencode 'grant_type=client_credentials' | jq -r .access_token)
 
       - name: Publish Exchange Artifact
         if: ${{ !contains(steps.set-version.outputs.version, 'SNAPSHOT') && github.event_name != 'pull_request' && github.ref == 'refs/heads/master'}}
-        run: ./deploy-to-exchange.sh ${{ secrets.ANYPOINT_ORG_ID }} ${{ fromJson(steps.get-token.outputs.token).access_token }}
+        env:
+          ANYPOINT_USERNAME: "~~~Token~~~"
+          ANYPOINT_PASSWORD: ${{ steps.get-token.outputs.token }}
+        run: ./deploy-to-exchange.sh ${{ secrets.ANYPOINT_ORG_ID }}
 
-      - name: Perform Release
-        if: ${{ !contains(steps.set-version.outputs.version, 'SNAPSHOT') && github.event_name != 'pull_request' && github.ref == 'refs/heads/master'}}
-        run: echo "Releasing version ${{ steps.set-version.outputs.version }}"
-
-      - name: Perform Release
+      - name: Tag Release
         if: ${{ !contains(steps.set-version.outputs.version, 'SNAPSHOT') && github.event_name != 'pull_request' && github.ref == 'refs/heads/master'}}
         env:
           GIT_USER: ${{ secrets.GIT_USER }}
           GIT_PASSWORD: ${{ secrets.GIT_TOKEN }}
         run: |
-          git config --local credential.helper "!f() { echo username=\\GIT_USER; echo password=\\$GIT_PASSWORD; }; f"
-          git config --global user.email "${{ secrets.GIT_EMAIL }}"
-          git config --global user.name "${{ secrets.GIT_USER }}"
-          git tag -a v${{ steps.set-version.outputs.version }} -m "Version ${{ steps.set-version.outputs.version }}"
-          ./mvnw clean build-helper:parse-version versions:set -DnewVersion=\${parsedVersion.majorVersion}.\${parsedVersion.minorVersion}.\${parsedVersion.nextIncrementalVersion}-SNAPSHOT -DprocessAllModules versions:commit
-          find . -name 'pom.xml' | xargs git add
-          git commit -m "Incrementing to next SNAPSHOT patch version"
+          git config --global user.email "${{ github.actor }}@users.noreply.github.com"
+          git config --global user.name "${{ github.actor }}"
+          git remote set-url origin "https://${{github.actor}}:${{ github.token }}@github.com/${{ github.repository }}.git"
+          git tag -a "v${{ steps.set-version.outputs.version }}" "${{ github.sha }}"  -m "Version ${{ steps.set-version.outputs.version }}"
           git push --follow-tags
-      
-      - name: Add Release Note and Create Github Release
+
+      - name: Increment Version
         if: ${{ !contains(steps.set-version.outputs.version, 'SNAPSHOT') && github.event_name != 'pull_request' && github.ref == 'refs/heads/master'}}
-        uses: release-drafter/release-drafter@v5
+        run: |
+          ./mvnw clean build-helper:parse-version versions:set -DnewVersion=\${parsedVersion.majorVersion}.\${parsedVersion.minorVersion}.\${parsedVersion.nextIncrementalVersion}-SNAPSHOT -DprocessAllModules versions:commit
+
+      - name: Set New Version Variable
+        if: ${{ !contains(steps.set-version.outputs.version, 'SNAPSHOT') && github.event_name != 'pull_request' && github.ref == 'refs/heads/master'}}
+        id: set-new-version
+        run: echo ::set-output name=version::$(./mvnw -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)
+
+      - name: Create Pull Request
+        if: ${{ !contains(steps.set-version.outputs.version, 'SNAPSHOT') && github.event_name != 'pull_request' && github.ref == 'refs/heads/master'}}
+        uses: peter-evans/create-pull-request@v4
         with:
-          version: ${{ steps.set-version.outputs.version }}
-          tag: v${{ steps.set-version.outputs.version }}
-          publish: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          branch: "feature/v${{ steps.set-new-version.outputs.version }}"
+          commit-message: "[create-pull-request] Auto increment to v${{ steps.set-new-version.outputs.version }}"
+          title: "Auto increment to v${{ steps.set-new-version.outputs.version }}"
+          delete-branch: true
+          assignees: ${{ github.actor }}
+          reviewers: adesjardin,adammead, manikmagar, kkingavio
+      
+#      - name: Add Release Note and Create Github Release
+#        if: ${{ !contains(steps.set-version.outputs.version, 'SNAPSHOT') && github.event_name != 'pull_request' && github.ref == 'refs/heads/master'}}
+#        uses: release-drafter/release-drafter@v5
+#        with:
+#          version: ${{ steps.set-version.outputs.version }}
+#          tag: v${{ steps.set-version.outputs.version }}
+#          publish: true
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,4 +1,4 @@
-package com.avio.customlogger;
+package com.avioconsulting.mule.logger;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -14,8 +14,8 @@ public class CustomLoggerArtifactTest extends MuleArtifactFunctionalTestCase {
 
   @Test
   public void testLoggerConfigForCorrelationId() throws Exception {
-    //TODO: Intercept logs and validate entries
-   CoreEvent coreEvent = flowRunner("custom-logger-configFlow").run();
+    // TODO: Intercept logs and validate entries
+    CoreEvent coreEvent = flowRunner("custom-logger-configFlow").run();
     Assert.assertNotNull(coreEvent);
   }
 }

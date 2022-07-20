@@ -46,6 +46,13 @@ public class CustomLoggerTimerScopeOperations {
     if (config == null) {
       classLogger
           .error("CustomerLoggerConfiguration is null, this should have been injected during config start.");
+      operations.process(
+          result -> {
+            callback.success(result);
+          },
+          (error, previous) -> {
+            callback.error(error);
+          });
     } else {
       CustomLogger logger = config.getLogger();
       ExceptionProperties exceptionProperties = new ExceptionProperties();

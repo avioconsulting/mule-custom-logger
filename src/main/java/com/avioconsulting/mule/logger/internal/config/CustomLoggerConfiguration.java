@@ -132,11 +132,12 @@ public class CustomLoggerConfiguration implements Startable {
 
   @Override
   public void start() throws MuleException {
+    classLogger.info("Starting CustomerLoggerConfiguration");
     this.logger = new CustomLogger();
+    classLogger.info("Setting config reference on CustomLoggerRegistrationService");
+    customLoggerRegistrationService.setConfig(this);
     if (isEnableFlowLogs()) {
-      classLogger.info("Flow logs enabled");
-      classLogger.info("Sending config to registration service");
-      customLoggerRegistrationService.setConfig(this);
+      classLogger.info("Flow logs enabled, creating notification listener");
       notificationListener = new CustomLoggerNotificationListener(this);
       notificationListenerRegistry.registerListener(notificationListener);
     } else {

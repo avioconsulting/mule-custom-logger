@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import javax.xml.namespace.QName;
+
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.mule.runtime.api.artifact.Registry;
@@ -18,20 +20,22 @@ import org.mule.runtime.core.api.expression.ExpressionRuntimeException;
 import org.slf4j.LoggerFactory;
 
 public class CustomLoggerUtils {
+  private CustomLoggerUtils() {
+  }
 
   private static final org.slf4j.Logger classLogger = LoggerFactory.getLogger(CustomLoggerUtils.class);
 
   public static Logger initLogger(String globalCategory, String category, String categorySuffix) {
     String c = DEFAULT_CATEGORY;
-    if (globalCategory != null && !globalCategory.equals("")) {
+    if (StringUtils.isNotBlank(globalCategory)) {
       c = trimCategory(globalCategory);
     }
 
-    if (categorySuffix != null && !categorySuffix.equals("")) {
+    if (StringUtils.isNotBlank(categorySuffix)) {
       c = c + "." + trimCategory(categorySuffix);
     }
 
-    if (category != null && !category.equals("")) {
+    if (StringUtils.isNotBlank(category)) {
       c = trimCategory(category);
     }
 
@@ -63,20 +67,19 @@ public class CustomLoggerUtils {
           .find(ComponentIdentifier.builder().namespace(prefix).name(name).build());
       if (globalConfigurations.size() == 1) {
         try {
-          classLogger.debug("Located " + configName + " global element, attempting to retrieve properties.");
+          classLogger.debug("Located {} global element, attempting to retrieve properties.", configName);
           globalConfigurationProperties = (Map<String, String>) globalConfigurations.get(0)
               .getAnnotation(QName.valueOf("{config}componentParameters"));
         } catch (Exception e) {
-          classLogger.error("Could not retrieve properties from " + configName + " global element.");
+          classLogger.error("Could not retrieve properties from {} global element.", configName);
         }
       } else if (globalConfigurations.size() > 1) {
-        classLogger.debug("Found more than one " + configName + ", using the last loaded configuration.");
+        classLogger.debug("Found more than one {}, using the last loaded configuration.", configName);
         globalConfigurationProperties = (Map<String, String>) globalConfigurations
             .get(globalConfigurations.size() - 1)
             .getAnnotation(QName.valueOf("{config}componentParameters"));
       } else {
-        classLogger.error("Unable to find " + configName + " global configuration to use.  Please add an "
-            + configName + " global configuration to your application.");
+        classLogger.error("Unable to find {} global configuration to use.  Please add an {} global configuration to your application.", configName);
         throw new NoSuchElementException(
             "Unable to find " + configName + " global configuration to use.  Please add an " + configName
                 + " global configuration to your application.");
@@ -107,10 +110,10 @@ public class CustomLoggerUtils {
     if (expression.startsWith("#[")) {
       try {
         Object value = expressionManager.evaluate(expression).getValue();
-        classLogger.debug(expression + " evaluated to: " + value);
+        classLogger.debug("{} evaluated to: {}" ,expression,value);
         return String.valueOf(value);
       } catch (ExpressionRuntimeException error) {
-        classLogger.error("There was an error evaluating the following expression: " + expression);
+        classLogger.error("There was an error evaluating the following expression: {}", expression);
         throw error;
       }
     } else {

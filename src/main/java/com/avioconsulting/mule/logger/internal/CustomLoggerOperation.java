@@ -26,7 +26,7 @@ public class CustomLoggerOperation {
       @Config CustomLoggerConfiguration loggerConfig,
       ComponentLocation location,
       CorrelationInfo correlationInfo) {
-    loggerConfig.getLogger().log(logProperties, messageAttributes, exceptionProperties, additionalProperties,
+    loggerConfig.getCustomLogger().log(logProperties, messageAttributes, exceptionProperties, additionalProperties,
         loggerConfig, location, correlationInfo.getCorrelationId());
   }
 }

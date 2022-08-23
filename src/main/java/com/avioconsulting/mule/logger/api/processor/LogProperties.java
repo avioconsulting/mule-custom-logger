@@ -1,5 +1,7 @@
 package com.avioconsulting.mule.logger.api.processor;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.mule.runtime.extension.api.annotation.param.Optional;
 import org.mule.runtime.extension.api.annotation.param.Parameter;
 import org.mule.runtime.extension.api.annotation.param.display.DisplayName;
@@ -7,6 +9,11 @@ import org.mule.runtime.extension.api.annotation.param.display.Example;
 import org.mule.runtime.extension.api.annotation.param.display.Summary;
 import org.mule.runtime.extension.api.runtime.parameter.ParameterResolver;
 
+/**
+ * This class contains the configuration fields that user will fill to set up a AVIO's logger component instance
+ */
+@Getter
+@Setter
 public class LogProperties {
 
   @Parameter
@@ -50,55 +57,4 @@ public class LogProperties {
     TRACE, DEBUG, INFO, WARN, ERROR, FATAL
   }
 
-  public String getMessage() {
-    return message;
-  }
-
-  public LogLevel getLevel() {
-    return level;
-  }
-
-  public String getCategory() {
-    return category;
-  }
-
-  public String getCategorySuffix() {
-    return categorySuffix;
-  }
-
-  public String getCorrelationId() {
-    return correlationId;
-  }
-
-  public ParameterResolver<String> getPayload() {
-    return payload;
-  }
-
-  public void setCorrelationId(String correlationId) {
-    this.correlationId = correlationId;
-  }
-
-  public void setMessage(String message) {
-    this.message = message;
-  }
-
-  public void setPayload(ParameterResolver<String> payload) {
-    this.payload = payload;
-  }
-
-  public void setLevel(LogLevel level) {
-    this.level = level;
-  }
-
-  public void setCategory(String category) {
-    this.category = category;
-  }
-
-  public void setCategorySuffix(String categorySuffix) {
-    this.categorySuffix = categorySuffix;
-  }
-
-  // public void setMessageAttributes(List<MessageAttribute> messageAttributes) {
-  // this.messageAttributes = messageAttributes;
-  // }
 }

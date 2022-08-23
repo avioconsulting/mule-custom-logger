@@ -7,6 +7,9 @@ import com.avioconsulting.mule.logger.internal.CustomLoggerRegistrationService;
 import com.avioconsulting.mule.logger.internal.CustomLoggerTimerScopeOperations;
 import com.avioconsulting.mule.logger.internal.listeners.CustomLoggerNotificationListener;
 import javax.inject.Inject;
+
+import lombok.AccessLevel;
+import lombok.Getter;
 import org.mule.runtime.api.exception.MuleException;
 import org.mule.runtime.api.lifecycle.Startable;
 import org.mule.runtime.api.meta.ExpressionSupport;
@@ -25,6 +28,7 @@ import org.slf4j.LoggerFactory;
  * are commonly used across multiple
  * operations since they represent something core from the extension.
  */
+@Getter
 @Operations({ CustomLoggerOperation.class, CustomLoggerTimerScopeOperations.class })
 public class CustomLoggerConfiguration implements Startable {
 
@@ -85,55 +89,23 @@ public class CustomLoggerConfiguration implements Startable {
   @Expression(ExpressionSupport.NOT_SUPPORTED)
   private boolean enableV1Compatibility;
 
+  @Getter(AccessLevel.NONE)
   @Inject
   NotificationListenerRegistry notificationListenerRegistry;
 
+  @Getter(AccessLevel.NONE)
   @Inject
   CustomLoggerRegistrationService customLoggerRegistrationService;
 
-  private CustomLogger logger;
+  private CustomLogger customLogger;
+
+  @Getter(AccessLevel.NONE)
   private CustomLoggerNotificationListener notificationListener;
-
-  public String getApplicationName() {
-    return applicationName;
-  }
-
-  public String getApplicationVersion() {
-    return applicationVersion;
-  }
-
-  public String getEnvironment() {
-    return environment;
-  }
-
-  public String getDefaultCategory() {
-    return defaultCategory;
-  }
-
-  public CustomLogger getLogger() {
-    return logger;
-  }
-
-  public boolean isEnableFlowLogs() {
-    return enableFlowLogs;
-  }
-
-  public LogProperties.LogLevel getFlowLogLevel() {
-    return flowLogLevel;
-  }
-
-  public String getFlowCategorySuffix() {
-    return flowCategorySuffix;
-  }
-
-  public boolean isEnableV1Compatibility() {
-    return enableV1Compatibility;
-  }
 
   @Override
   public void start() throws MuleException {
     classLogger.info("Starting CustomerLoggerConfiguration");
-    this.logger = new CustomLogger();
+    this.customLogger = new CustomLogger();
     classLogger.info("Setting config reference on CustomLoggerRegistrationService");
     customLoggerRegistrationService.setConfig(this);
     if (isEnableFlowLogs()) {

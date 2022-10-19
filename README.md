@@ -109,9 +109,28 @@ You can also override the global configuration elements by specifying properties
 
 # How?
 
-## Using maven dependency
-First, clone this repository and run ```mvn clean install``` to install this maven project in your local .m2 repository.
+## Use from Maven Central
 
+Mule Custom Logger v2.0.0 and later are published to [Maven Central](https://search.maven.org/artifact/com.avioconsulting.mule/mule-custom-logger). To use the module, you can simply add following dependency to your application's pom.xml -
+
+```xml
+<dependency>
+	<groupId>com.avioconsulting.mule</groupId>
+	<artifactId>mule-custom-logger</artifactId>
+	<version>LATEST_RELEASE_VERSION</version>
+	<classifier>mule-plugin</classifier>
+</dependency>
+```
+
+## Use from Local Maven Repository
+
+You can install the module to local maven repository and use it for testing purpose.
+
+* First, Clone this GitHub repository into your local machine.
+* Get your Anypoint's organization ID and
+	* Place it in pom.xml group id tag. ```<groupId>YOUR_ORG_ID</groupId>```.
+	
+Now run ```mvn clean install``` to install this maven project in your local .m2 repository.
 
 When you install this project into your machine's local .m2 repository, You can include this dependency(see below) in your mule projects. When you included this dependency in your project's pom.xml, AVIO's custom logger component automatically shows up in mule project's pallete and using this logger afterwards is just a drag away.
 
@@ -119,7 +138,7 @@ When you install this project into your machine's local .m2 repository, You can 
 <dependency>
     <groupId>YOUR_GROUP_ID</groupId>
     <artifactId>mule-custom-logger</artifactId>
-    <version>1.0.0</version>
+    <version>LATEST_VERSION_FROM_POM</version>
     <classifier>mule-plugin</classifier>
 </dependency>
 ```

@@ -85,10 +85,25 @@ public class CustomLogger {
       logContext.put("message", logProperties.getMessage());
       logContext.put("messageAttributes", messageAttributes.getAttributes());
 
-      // Evaluate payload only when we actually need it
+      /*
+       * Evaluate payload only when we actually need it
+       * Conditionally set payload to log, if encrypted or compressed,
+       * base64 encode string being logged
+       */
       ParameterResolver<String> payload = logProperties.getPayload();
       if (logger.isEnabled(level) && payload != null) {
-        logContext.put("payload", payload.resolve());
+        String payloadToLog;
+        String encryptedString = logProperties.getEncryptedPayload();
+        String compressedString = logProperties.getCompressedPayload();
+        String payloadString = payload.resolve();
+        if (encryptedString != null) {
+          payloadToLog = encryptedString;
+        } else if (compressedString != null) {
+          payloadToLog = compressedString;
+        } else {
+          payloadToLog = payloadString;
+        }
+        logContext.put("payload", payloadToLog);
       }
 
       if (exceptionProperties != null) {
@@ -186,5 +201,6 @@ public class CustomLogger {
     }
     logger.log(level, message);
   }
+
 
 }

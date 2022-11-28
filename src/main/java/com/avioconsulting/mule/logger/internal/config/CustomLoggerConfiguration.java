@@ -1,5 +1,7 @@
 package com.avioconsulting.mule.logger.internal.config;
 
+import com.avioconsulting.mule.logger.api.processor.Compressor;
+import com.avioconsulting.mule.logger.api.processor.EncryptionAlgorithm;
 import com.avioconsulting.mule.logger.api.processor.LogProperties;
 import com.avioconsulting.mule.logger.internal.CustomLogger;
 import com.avioconsulting.mule.logger.internal.CustomLoggerOperation;
@@ -15,9 +17,7 @@ import org.mule.runtime.extension.api.annotation.Expression;
 import org.mule.runtime.extension.api.annotation.Operations;
 import org.mule.runtime.extension.api.annotation.param.Optional;
 import org.mule.runtime.extension.api.annotation.param.Parameter;
-import org.mule.runtime.extension.api.annotation.param.display.DisplayName;
-import org.mule.runtime.extension.api.annotation.param.display.Example;
-import org.mule.runtime.extension.api.annotation.param.display.Summary;
+import org.mule.runtime.extension.api.annotation.param.display.*;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -85,6 +85,30 @@ public class CustomLoggerConfiguration implements Startable {
   @Expression(ExpressionSupport.NOT_SUPPORTED)
   private boolean enableV1Compatibility;
 
+  @Parameter
+  @DisplayName("Compression Strategy")
+  @Summary("Enumerated Compression Strategy value to compress payload before logging")
+  @Optional()
+  @Expression(ExpressionSupport.NOT_SUPPORTED)
+  @Placement(tab = "Compression", order = 1)
+  private Compressor compressor;
+
+  @Parameter
+  @DisplayName("Encryption Algorithm (with JCEwithPBE)")
+  @Summary("Choose an encryption algorithm from the enumerated list to use in conjunction with the password to encrypt the payload before logging")
+  @Optional()
+  @Expression(ExpressionSupport.NOT_SUPPORTED)
+  @Placement(tab = "Encryption", order = 1)
+  private EncryptionAlgorithm encryptionAlgorithm;
+
+  @Parameter
+  @DisplayName("Encryption Password")
+  @Summary("Password to use with encryption algorithm to encrypt payload value")
+  @Optional()
+  @Password
+  @Placement(tab = "Encryption", order = 2)
+  private String encryptionPassword;
+
   @Inject
   NotificationListenerRegistry notificationListenerRegistry;
 
@@ -128,6 +152,18 @@ public class CustomLoggerConfiguration implements Startable {
 
   public boolean isEnableV1Compatibility() {
     return enableV1Compatibility;
+  }
+
+  public Compressor getCompressor(){
+    return compressor;
+  }
+
+  public EncryptionAlgorithm getEncryptionAlgorithm() {
+    return encryptionAlgorithm;
+  }
+
+  public String getEncryptionPassword() {
+    return encryptionPassword;
   }
 
   @Override

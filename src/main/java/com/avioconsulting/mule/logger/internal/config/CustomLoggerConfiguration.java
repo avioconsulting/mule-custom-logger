@@ -154,7 +154,7 @@ public class CustomLoggerConfiguration implements Startable {
     return enableV1Compatibility;
   }
 
-  public Compressor getCompressor(){
+  public Compressor getCompressor() {
     return compressor;
   }
 

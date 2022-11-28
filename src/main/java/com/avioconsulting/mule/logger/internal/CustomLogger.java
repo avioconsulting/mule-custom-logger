@@ -202,5 +202,4 @@ public class CustomLogger {
     logger.log(level, message);
   }
 
-
 }

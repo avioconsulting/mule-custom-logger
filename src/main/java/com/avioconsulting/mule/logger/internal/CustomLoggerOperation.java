@@ -10,7 +10,6 @@ import java.io.InputStream;
 import javax.inject.Inject;
 import org.mule.extension.compression.api.strategy.CompressorStrategy;
 import org.mule.extension.compression.api.strategy.gzip.GzipCompressorStrategy;
-import org.mule.extension.compression.api.strategy.zip.ZipCompressorStrategy;
 import org.mule.runtime.api.component.location.ComponentLocation;
 import org.mule.runtime.api.streaming.CursorProvider;
 import org.mule.runtime.api.streaming.bytes.CursorStream;
@@ -37,13 +36,13 @@ public class CustomLoggerOperation {
 
   @MediaType(value = ANY, strict = false)
   public void log(@ParameterGroup(name = "Log") LogProperties logProperties,
-                  @ParameterGroup(name = "Message Attributes") MessageAttributes messageAttributes,
-                  @ParameterGroup(name = "Exception Details") ExceptionProperties exceptionProperties,
-                  @ParameterGroup(name = "Additional Options") AdditionalProperties additionalProperties,
-                  @Config CustomLoggerConfiguration loggerConfig,
-                  ComponentLocation location,
-                  CorrelationInfo correlationInfo,
-                  StreamingHelper streamingHelper) {
+      @ParameterGroup(name = "Message Attributes") MessageAttributes messageAttributes,
+      @ParameterGroup(name = "Exception Details") ExceptionProperties exceptionProperties,
+      @ParameterGroup(name = "Additional Options") AdditionalProperties additionalProperties,
+      @Config CustomLoggerConfiguration loggerConfig,
+      ComponentLocation location,
+      CorrelationInfo correlationInfo,
+      StreamingHelper streamingHelper) {
 
     // If a compressor is chosen, compress payload
     ParameterResolver<String> payload = logProperties.getPayload();
@@ -52,20 +51,15 @@ public class CustomLoggerOperation {
       String payloadString = payload.resolve();
       Compressor compressor = loggerConfig.getCompressor();
       if (compressor != null) {
-        CompressorStrategy compressorStrategy;
-        if (compressor.equals(Compressor.GZIP)) {
-          compressorStrategy = new GzipCompressorStrategy();
-        } else {
-          compressorStrategy = new ZipCompressorStrategy();
-        }
+        CompressorStrategy compressorStrategy = new GzipCompressorStrategy();
         DefaultOperationParametersBuilder parametersBuilder = DefaultOperationParameters.builder()
-                .addParameter("content", new ByteArrayInputStream(payloadString.getBytes()))
-                .addParameter("compressor", compressorStrategy);
+            .addParameter("content", new ByteArrayInputStream(payloadString.getBytes()))
+            .addParameter("compressor", compressorStrategy);
         try {
           executeCompress = extensionsClient.execute("Compression", "compress",
-                  parametersBuilder.build());
+              parametersBuilder.build());
           String compressedString = Base64
-                  .encodeBytes(convertToByteArray(executeCompress.getOutput(), streamingHelper));
+              .encodeBytes(convertToByteArray(executeCompress.getOutput(), streamingHelper));
           logProperties.setCompressedPayload(compressedString);
         } catch (Exception e) {
           throw new RuntimeException("Compression Exception", e);
@@ -81,23 +75,23 @@ public class CustomLoggerOperation {
       EncryptionAlgorithm encryptionAlgorithm = loggerConfig.getEncryptionAlgorithm();
       if (encryptionAlgorithm != null) {
         JceEncryptionPbeAlgorithm jceEncryptionPbeAlgorithm = JceEncryptionPbeAlgorithm
-                .valueOf(encryptionAlgorithm.toString());
+            .valueOf(encryptionAlgorithm.toString());
         InputStream content;
         if (executeCompress != null) {
           content = new ByteArrayInputStream(
-                  convertToByteArray(executeCompress.getOutput(), streamingHelper));
+              convertToByteArray(executeCompress.getOutput(), streamingHelper));
         } else {
           content = new ByteArrayInputStream(payloadString.getBytes());
         }
         DefaultOperationParametersBuilder encryptionParametersBuilder = DefaultOperationParameters.builder()
-                .addParameter("content", content)
-                .addParameter("algorithm", jceEncryptionPbeAlgorithm)
-                .addParameter("password", loggerConfig.getEncryptionPassword());
+            .addParameter("content", content)
+            .addParameter("algorithm", jceEncryptionPbeAlgorithm)
+            .addParameter("password", loggerConfig.getEncryptionPassword());
         try {
           Result<InputStream, Void> executeEncrypt = extensionsClient.execute("Crypto", "jceEncryptPbe",
-                  encryptionParametersBuilder.build());
+              encryptionParametersBuilder.build());
           String encryptedString = Base64
-                  .encodeBytes(convertToByteArray(executeEncrypt.getOutput(), streamingHelper));
+              .encodeBytes(convertToByteArray(executeEncrypt.getOutput(), streamingHelper));
           logProperties.setEncryptedPayload(encryptedString);
         } catch (Exception e) {
           throw new RuntimeException("Encryption Error", e);
@@ -106,11 +100,10 @@ public class CustomLoggerOperation {
     }
 
     loggerConfig.getLogger().log(logProperties, messageAttributes, exceptionProperties, additionalProperties,
-            loggerConfig, location, correlationInfo.getCorrelationId());
+        loggerConfig, location, correlationInfo.getCorrelationId());
   }
 
-
-  public static byte[] convertToByteArray(Object payload, StreamingHelper streamingHelper) {
+  private static byte[] convertToByteArray(Object payload, StreamingHelper streamingHelper) {
     Object resolved = streamingHelper.resolveCursorProvider(payload);
     if (resolved instanceof CursorProvider) {
       CursorStream cursorStream = ((CursorProvider<CursorStream>) resolved).openCursor();

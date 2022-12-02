@@ -44,72 +44,90 @@ public class CustomLoggerOperation {
       CorrelationInfo correlationInfo,
       StreamingHelper streamingHelper) {
 
-    // If a compressor is chosen, compress payload
-    ParameterResolver<String> payload = logProperties.getPayload();
-    Result<InputStream, Void> executeCompress = null;
-    if (payload != null) {
-      String payloadString = payload.resolve();
-      Compressor compressor = loggerConfig.getCompressor();
-      if (compressor != null) {
-        CompressorStrategy compressorStrategy = new GzipCompressorStrategy();
-        DefaultOperationParametersBuilder parametersBuilder = DefaultOperationParameters.builder()
-            .addParameter("content", new ByteArrayInputStream(payloadString.getBytes()))
-            .addParameter("compressor", compressorStrategy);
-        try {
-          executeCompress = extensionsClient.execute("Compression", "compress",
-              parametersBuilder.build());
-          String compressedString = Base64
-              .encodeBytes(convertToByteArray(executeCompress.getOutput(), streamingHelper));
-          logProperties.setCompressedPayload(compressedString);
-        } catch (Exception e) {
-          throw new RuntimeException("Compression Exception", e);
-        }
-      }
-
-      /*
-       * If encryption algorithm is not null, encrypt the payload
-       * Check if payload has already been compressed, if so encyrpt the compressed
-       * string.
-       * If no compression, encrypt raw payload
-       */
-      EncryptionAlgorithm encryptionAlgorithm = loggerConfig.getEncryptionAlgorithm();
-      if (encryptionAlgorithm != null) {
-        JceEncryptionPbeAlgorithm jceEncryptionPbeAlgorithm = JceEncryptionPbeAlgorithm
-            .valueOf(encryptionAlgorithm.toString());
-        InputStream content;
-        if (executeCompress != null) {
-          content = new ByteArrayInputStream(
-              convertToByteArray(executeCompress.getOutput(), streamingHelper));
-        } else {
-          content = new ByteArrayInputStream(payloadString.getBytes());
-        }
-        DefaultOperationParametersBuilder encryptionParametersBuilder = DefaultOperationParameters.builder()
-            .addParameter("content", content)
-            .addParameter("algorithm", jceEncryptionPbeAlgorithm)
-            .addParameter("password", loggerConfig.getEncryptionPassword());
-        try {
-          Result<InputStream, Void> executeEncrypt = extensionsClient.execute("Crypto", "jceEncryptPbe",
-              encryptionParametersBuilder.build());
-          String encryptedString = Base64
-              .encodeBytes(convertToByteArray(executeEncrypt.getOutput(), streamingHelper));
-          logProperties.setEncryptedPayload(encryptedString);
-        } catch (Exception e) {
-          throw new RuntimeException("Encryption Error", e);
-        }
-      }
-    }
-
+    transformPayload(logProperties, loggerConfig, streamingHelper);
     loggerConfig.getLogger().log(logProperties, messageAttributes, exceptionProperties, additionalProperties,
         loggerConfig, location, correlationInfo.getCorrelationId());
   }
 
-  private static byte[] convertToByteArray(Object payload, StreamingHelper streamingHelper) {
+  byte[] convertToByteArray(Object payload, StreamingHelper streamingHelper) {
     Object resolved = streamingHelper.resolveCursorProvider(payload);
     if (resolved instanceof CursorProvider) {
       CursorStream cursorStream = ((CursorProvider<CursorStream>) resolved).openCursor();
       return IOUtils.toByteArray(cursorStream);
     } else {
       return null;
+    }
+  }
+
+  void transformPayload(LogProperties logProperties, CustomLoggerConfiguration loggerConfig,
+      StreamingHelper streamingHelper) {
+    ParameterResolver<String> payload = logProperties.getPayload();
+    if (payload == null)
+      return;
+    Result<InputStream, Void> executeCompress = null;
+    executeCompress = setCompressedPayloadIfNeeded(logProperties, streamingHelper, loggerConfig);
+    setEncryptedPayloadIfNeeded(logProperties, loggerConfig, streamingHelper, executeCompress);
+  }
+
+  Result<InputStream, Void> setCompressedPayloadIfNeeded(LogProperties logProperties,
+      StreamingHelper streamingHelper,
+      CustomLoggerConfiguration loggerConfig) {
+    /*
+     * If compressor is not null, compress payload with provided compressor strategy
+     * as of 12/02/22, GZIP is the only compressor supported
+     */
+    Result<InputStream, Void> executeCompress = null;
+    Compressor compressor = loggerConfig.getCompressor();
+    if (compressor != null) {
+      CompressorStrategy compressorStrategy = new GzipCompressorStrategy();
+      DefaultOperationParametersBuilder parametersBuilder = DefaultOperationParameters.builder()
+          .addParameter("content", new ByteArrayInputStream(logProperties.getPayload().resolve().getBytes()))
+          .addParameter("compressor", compressorStrategy);
+      try {
+        executeCompress = extensionsClient.execute("Compression", "compress",
+            parametersBuilder.build());
+        String compressedString = Base64
+            .encodeBytes(convertToByteArray(executeCompress.getOutput(), streamingHelper));
+        logProperties.setCompressedPayload(compressedString);
+      } catch (Exception e) {
+        throw new RuntimeException("Compression Exception", e);
+      }
+    }
+    return executeCompress;
+  }
+
+  void setEncryptedPayloadIfNeeded(LogProperties logProperties, CustomLoggerConfiguration loggerConfig,
+      StreamingHelper streamingHelper, Result<InputStream, Void> executeCompress) {
+    /*
+     * If encryption algorithm is not null, encrypt the payload
+     * Check if payload has already been compressed, if so encyrpt the compressed
+     * string.
+     * If no compression, encrypt raw payload
+     */
+    EncryptionAlgorithm encryptionAlgorithm = loggerConfig.getEncryptionAlgorithm();
+    if (encryptionAlgorithm != null) {
+      JceEncryptionPbeAlgorithm jceEncryptionPbeAlgorithm = JceEncryptionPbeAlgorithm
+          .valueOf(encryptionAlgorithm.toString());
+      InputStream content;
+      if (executeCompress != null) {
+        content = new ByteArrayInputStream(
+            convertToByteArray(executeCompress.getOutput(), streamingHelper));
+      } else {
+        content = new ByteArrayInputStream(logProperties.getPayload().resolve().getBytes());
+      }
+      DefaultOperationParametersBuilder encryptionParametersBuilder = DefaultOperationParameters.builder()
+          .addParameter("content", content)
+          .addParameter("algorithm", jceEncryptionPbeAlgorithm)
+          .addParameter("password", loggerConfig.getEncryptionPassword());
+      try {
+        Result<InputStream, Void> executeEncrypt = extensionsClient.execute("Crypto", "jceEncryptPbe",
+            encryptionParametersBuilder.build());
+        String encryptedString = Base64
+            .encodeBytes(convertToByteArray(executeEncrypt.getOutput(), streamingHelper));
+        logProperties.setEncryptedPayload(encryptedString);
+      } catch (Exception e) {
+        throw new RuntimeException("Encryption Error", e);
+      }
     }
   }
 }

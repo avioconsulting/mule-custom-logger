@@ -49,6 +49,14 @@ public class CustomLoggerOperation {
         loggerConfig, location, correlationInfo.getCorrelationId());
   }
 
+  /**
+   * Convert payload object to Byte Array when payload resolves to a
+   * CursorProvider instance
+   * otherwise, return null
+   *
+   * @since 2.1.0
+   * @return byte array or null
+   */
   byte[] convertToByteArray(Object payload, StreamingHelper streamingHelper) {
     Object resolved = streamingHelper.resolveCursorProvider(payload);
     if (resolved instanceof CursorProvider) {
@@ -59,6 +67,11 @@ public class CustomLoggerOperation {
     }
   }
 
+  /**
+   * Make transformations to payload based on logger configuration
+   *
+   * @since 2.1.0
+   */
   void transformPayload(LogProperties logProperties, CustomLoggerConfiguration loggerConfig,
       StreamingHelper streamingHelper) {
     ParameterResolver<String> payload = logProperties.getPayload();
@@ -69,12 +82,20 @@ public class CustomLoggerOperation {
     setEncryptedPayloadIfNeeded(logProperties, loggerConfig, streamingHelper, executeCompress);
   }
 
+  /**
+   * If compressor configuration is not null, build request to mule compression
+   * module
+   * utilizing extensionsClient and set the compressed payload in logProperties to
+   * base64 string
+   *
+   * @since 2.1.0
+   * @return Compressed stream
+   */
   Result<InputStream, Void> setCompressedPayloadIfNeeded(LogProperties logProperties,
       StreamingHelper streamingHelper,
       CustomLoggerConfiguration loggerConfig) {
     /*
      * If compressor is not null, compress payload with provided compressor strategy
-     * as of 12/02/22, GZIP is the only compressor supported
      */
     Result<InputStream, Void> executeCompress = null;
     Compressor compressor = loggerConfig.getCompressor();
@@ -96,6 +117,14 @@ public class CustomLoggerOperation {
     return executeCompress;
   }
 
+  /**
+   * If encryption algorithm configuration is not null, build request to mule
+   * crypto module
+   * utilizing extensionsClient and set the encryption payload in logProperties to
+   * base64 string
+   *
+   * @since 2.1.0
+   */
   void setEncryptedPayloadIfNeeded(LogProperties logProperties, CustomLoggerConfiguration loggerConfig,
       StreamingHelper streamingHelper, Result<InputStream, Void> executeCompress) {
     /*

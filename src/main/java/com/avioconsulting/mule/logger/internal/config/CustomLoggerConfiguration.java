@@ -1,5 +1,7 @@
 package com.avioconsulting.mule.logger.internal.config;
 
+import static org.mule.runtime.api.i18n.I18nMessageFactory.createStaticMessage;
+
 import com.avioconsulting.mule.logger.api.processor.Compressor;
 import com.avioconsulting.mule.logger.api.processor.EncryptionAlgorithm;
 import com.avioconsulting.mule.logger.api.processor.LogProperties;
@@ -10,6 +12,8 @@ import com.avioconsulting.mule.logger.internal.CustomLoggerTimerScopeOperations;
 import com.avioconsulting.mule.logger.internal.listeners.CustomLoggerNotificationListener;
 import javax.inject.Inject;
 import org.mule.runtime.api.exception.MuleException;
+import org.mule.runtime.api.lifecycle.Initialisable;
+import org.mule.runtime.api.lifecycle.InitialisationException;
 import org.mule.runtime.api.lifecycle.Startable;
 import org.mule.runtime.api.meta.ExpressionSupport;
 import org.mule.runtime.api.notification.NotificationListenerRegistry;
@@ -26,7 +30,7 @@ import org.slf4j.LoggerFactory;
  * operations since they represent something core from the extension.
  */
 @Operations({ CustomLoggerOperation.class, CustomLoggerTimerScopeOperations.class })
-public class CustomLoggerConfiguration implements Startable {
+public class CustomLoggerConfiguration implements Startable, Initialisable {
 
   private final org.slf4j.Logger classLogger = LoggerFactory.getLogger(CustomLoggerConfiguration.class);
   public static final String DEFAULT_CATEGORY = "com.avioconsulting.api";
@@ -179,5 +183,27 @@ public class CustomLoggerConfiguration implements Startable {
     } else {
       classLogger.info("Flow logs disabled");
     }
+  }
+
+  /**
+   * Validation for any parameters. Such as, two optional parameters that, when
+   * used, are depdendent on each other
+   *
+   * @since 2.1.0
+   * @throws InitialisationException
+   */
+  @Override
+  public void initialise() throws InitialisationException {
+    EncryptionAlgorithm encryptionAlgorithm = this.getEncryptionAlgorithm();
+    String encryptionPassword = this.getEncryptionPassword();
+    if (encryptionAlgorithm != null && encryptionPassword == null) {
+      throw new InitialisationException(
+          createStaticMessage("Encryption Password must be provided if encryption algorithm is being used"),
+          this);
+    } else if (encryptionAlgorithm == null && encryptionPassword != null) {
+      throw new InitialisationException(createStaticMessage(
+          "Encryption Algorithm must be provided if encryption password is being supplied"), this);
+    } else
+      return;
   }
 }

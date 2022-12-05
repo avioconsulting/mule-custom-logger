@@ -19,9 +19,7 @@ One of the reasons for developing this custom module is to feed JSON logs to log
 # Changes
 ## 2.1.0
 * Added
-	- Dependencies for mule's cryptography and compression modules
-	- Implementation to compress, encrypt, both or neither to the logger operation
-	- Unit tests for operations class
+	- Implementation to optionally compress or encrypt the payload within the logger operations
 * Updated
 	- Custom Logger class log method to optionally log the encrypted, compressed or raw payload string
 ## 1.2.1
@@ -89,6 +87,17 @@ There are several attributes provided by this JSONLayout that you can play with.
 The compression and encyrption functionality allows you to compress, encrypt, or apply both to the payload string that is being logged. The mule modules for Crypto and Compression are being utilized seemlessly incorporate this functionality into your Mule project. 
 
 To use this functionality, be sure you are using at or above v2.1.0, navigate to your AVIO Logger configuration. Once in the configuration you can access the new tabs `Compression` and `Encryption`. In the Compression tab, select from the list of support compressing strategies. For the Encryption tab, select the algorithm you want to utilize, and finally supply the password that will be used to encrypt.
+
+Example of logger configuration that utilizes compression with the `compressor` attribute: 
+```
+	<avio-logger:config name="ts-logger-test-config-compression-applied" doc:name="AVIO Logger Config" doc:id="5b6cabea-3a64-48ae-81a7-1c28c45e70cb" applicationVersion="#[p('api.version')]" defaultCategory="com.avioconsulting.mule" compressor="GZIP"/>
+```
+
+Example of logger configuration that is utilizing `encryptionAlgorithm` and `encryptionPassword` to implement encryption of the payload
+```
+	<avio-logger:config name="ts-logger-test-config-encryption" doc:name="AVIO Logger Config" doc:id="e4f60146-7ee7-404a-a177-ac187c874bdd" applicationVersion="#[p('api.version')]" defaultCategory="com.avioconsulting.mule" encryptionAlgorithm="PBEWithHmacSHA512AndAES_128" encryptionPassword="${secure::encryption.password}"/>
+```
+
 
 # Using the Timer Scope
 The timer scope allows you to unobtrusively measure the time taken to execute the processors within the scope. For example, 

@@ -1,5 +1,9 @@
 package com.avioconsulting.mule.logger.internal.config;
 
+import static org.mule.runtime.api.i18n.I18nMessageFactory.createStaticMessage;
+
+import com.avioconsulting.mule.logger.api.processor.Compressor;
+import com.avioconsulting.mule.logger.api.processor.EncryptionAlgorithm;
 import com.avioconsulting.mule.logger.api.processor.LogProperties;
 import com.avioconsulting.mule.logger.internal.CustomLogger;
 import com.avioconsulting.mule.logger.internal.CustomLoggerOperation;
@@ -8,6 +12,8 @@ import com.avioconsulting.mule.logger.internal.CustomLoggerTimerScopeOperations;
 import com.avioconsulting.mule.logger.internal.listeners.CustomLoggerNotificationListener;
 import javax.inject.Inject;
 import org.mule.runtime.api.exception.MuleException;
+import org.mule.runtime.api.lifecycle.Initialisable;
+import org.mule.runtime.api.lifecycle.InitialisationException;
 import org.mule.runtime.api.lifecycle.Startable;
 import org.mule.runtime.api.meta.ExpressionSupport;
 import org.mule.runtime.api.notification.NotificationListenerRegistry;
@@ -15,9 +21,7 @@ import org.mule.runtime.extension.api.annotation.Expression;
 import org.mule.runtime.extension.api.annotation.Operations;
 import org.mule.runtime.extension.api.annotation.param.Optional;
 import org.mule.runtime.extension.api.annotation.param.Parameter;
-import org.mule.runtime.extension.api.annotation.param.display.DisplayName;
-import org.mule.runtime.extension.api.annotation.param.display.Example;
-import org.mule.runtime.extension.api.annotation.param.display.Summary;
+import org.mule.runtime.extension.api.annotation.param.display.*;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -26,7 +30,7 @@ import org.slf4j.LoggerFactory;
  * operations since they represent something core from the extension.
  */
 @Operations({ CustomLoggerOperation.class, CustomLoggerTimerScopeOperations.class })
-public class CustomLoggerConfiguration implements Startable {
+public class CustomLoggerConfiguration implements Startable, Initialisable {
 
   private final org.slf4j.Logger classLogger = LoggerFactory.getLogger(CustomLoggerConfiguration.class);
   public static final String DEFAULT_CATEGORY = "com.avioconsulting.api";
@@ -85,6 +89,30 @@ public class CustomLoggerConfiguration implements Startable {
   @Expression(ExpressionSupport.NOT_SUPPORTED)
   private boolean enableV1Compatibility;
 
+  @Parameter
+  @DisplayName("Compression Strategy")
+  @Summary("Enumerated Compression Strategy value to compress payload before logging")
+  @Optional()
+  @Expression(ExpressionSupport.NOT_SUPPORTED)
+  @Placement(tab = "Compression", order = 1)
+  private Compressor compressor;
+
+  @Parameter
+  @DisplayName("Encryption Algorithm (with JCEwithPBE)")
+  @Summary("Choose an encryption algorithm from the enumerated list to use in conjunction with the password to encrypt the payload before logging")
+  @Optional()
+  @Expression(ExpressionSupport.NOT_SUPPORTED)
+  @Placement(tab = "Encryption", order = 1)
+  private EncryptionAlgorithm encryptionAlgorithm;
+
+  @Parameter
+  @DisplayName("Encryption Password")
+  @Summary("Password to use with encryption algorithm to encrypt payload value")
+  @Optional()
+  @Password
+  @Placement(tab = "Encryption", order = 2)
+  private String encryptionPassword;
+
   @Inject
   NotificationListenerRegistry notificationListenerRegistry;
 
@@ -130,6 +158,18 @@ public class CustomLoggerConfiguration implements Startable {
     return enableV1Compatibility;
   }
 
+  public Compressor getCompressor() {
+    return compressor;
+  }
+
+  public EncryptionAlgorithm getEncryptionAlgorithm() {
+    return encryptionAlgorithm;
+  }
+
+  public String getEncryptionPassword() {
+    return encryptionPassword;
+  }
+
   @Override
   public void start() throws MuleException {
     classLogger.info("Starting CustomerLoggerConfiguration");
@@ -142,6 +182,27 @@ public class CustomLoggerConfiguration implements Startable {
       notificationListenerRegistry.registerListener(notificationListener);
     } else {
       classLogger.info("Flow logs disabled");
+    }
+  }
+
+  /**
+   * Validation for any parameters. Such as, two optional parameters that, when
+   * used, are depdendent on each other
+   *
+   * @since 2.1.0
+   * @throws InitialisationException
+   */
+  @Override
+  public void initialise() throws InitialisationException {
+    EncryptionAlgorithm encryptionAlgorithm = this.getEncryptionAlgorithm();
+    String encryptionPassword = this.getEncryptionPassword();
+    if (encryptionAlgorithm != null && encryptionPassword == null) {
+      throw new InitialisationException(
+          createStaticMessage("Encryption Password must be provided if encryption algorithm is being used"),
+          this);
+    } else if (encryptionAlgorithm == null && encryptionPassword != null) {
+      throw new InitialisationException(createStaticMessage(
+          "Encryption Algorithm must be provided if encryption password is being supplied"), this);
     }
   }
 }

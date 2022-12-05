@@ -203,7 +203,6 @@ public class CustomLoggerConfiguration implements Startable, Initialisable {
     } else if (encryptionAlgorithm == null && encryptionPassword != null) {
       throw new InitialisationException(createStaticMessage(
           "Encryption Algorithm must be provided if encryption password is being supplied"), this);
-    } else
-      return;
+    }
   }
 }

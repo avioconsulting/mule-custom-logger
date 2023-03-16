@@ -122,6 +122,8 @@ public class CustomLoggerConfiguration implements Startable, Initialisable {
   private CustomLogger logger;
   private CustomLoggerNotificationListener notificationListener;
 
+  private static boolean isNotificationListenerRegistered = false;
+
   public String getApplicationName() {
     return applicationName;
   }
@@ -177,9 +179,13 @@ public class CustomLoggerConfiguration implements Startable, Initialisable {
     classLogger.info("Setting config reference on CustomLoggerRegistrationService");
     customLoggerRegistrationService.setConfig(this);
     if (isEnableFlowLogs()) {
-      classLogger.info("Flow logs enabled, creating notification listener");
-      notificationListener = new CustomLoggerNotificationListener(this);
-      notificationListenerRegistry.registerListener(notificationListener);
+      classLogger.info("Flow logs enabled");
+      if (!isNotificationListenerRegistered) {
+        classLogger.info("Creating and registering notification listener");
+        notificationListener = new CustomLoggerNotificationListener(this);
+        notificationListenerRegistry.registerListener(notificationListener);
+        isNotificationListenerRegistered = true;
+      }
     } else {
       classLogger.info("Flow logs disabled");
     }

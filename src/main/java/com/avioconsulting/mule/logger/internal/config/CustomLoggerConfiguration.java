@@ -172,6 +172,19 @@ public class CustomLoggerConfiguration implements Startable, Initialisable {
     return encryptionPassword;
   }
 
+  /**
+   * This method is invoked by the MuleSoft application when the AVIO Custom
+   * Logger is invoked to create the connection.
+   * It creates a CustomLogger object based on the config properties provided by
+   * configuration provided in MuleSoft application.
+   * Static variables are used to prevent more than one notification listener is
+   * created and registered.
+   * Synchronized utilized to prevent prallelism from creating more than one
+   * notification listener
+   *
+   * @throws MuleException
+   *
+   */
   @Override
   public void start() throws MuleException {
     classLogger.info("Starting CustomerLoggerConfiguration");
@@ -180,11 +193,13 @@ public class CustomLoggerConfiguration implements Startable, Initialisable {
     customLoggerRegistrationService.setConfig(this);
     if (isEnableFlowLogs()) {
       classLogger.info("Flow logs enabled");
-      if (!isNotificationListenerRegistered) {
-        classLogger.info("Creating and registering notification listener");
-        notificationListener = new CustomLoggerNotificationListener(this);
-        notificationListenerRegistry.registerListener(notificationListener);
-        isNotificationListenerRegistered = true;
+      synchronized (CustomLoggerConfiguration.class) {
+        if (!isNotificationListenerRegistered) {
+          classLogger.info("Creating and registering notification listener");
+          notificationListener = new CustomLoggerNotificationListener(this);
+          notificationListenerRegistry.registerListener(notificationListener);
+          isNotificationListenerRegistered = true;
+        }
       }
     } else {
       classLogger.info("Flow logs disabled");

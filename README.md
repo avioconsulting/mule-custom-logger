@@ -17,6 +17,9 @@ One of the reasons for developing this custom module is to feed JSON logs to log
 * Tracepoints compatibility to measure request, response times and such.
 
 # Changes
+## 2.1.1
+* Fixes
+	- Fixed implementation to only create and register one Notification Listener. Duplicates were being created and registered leading to duplicate flow logs
 ## 2.1.0
 * Added
 	- Implementation to optionally compress or encrypt the payload within the logger operations
@@ -108,24 +111,16 @@ To use the timer scope, pull it in from the AVIO Core section of the palette and
 After that, check the App Level properties and validate they're what you desire. Now you're good to go!
 
 # Using the Custom Logger Notification Listener
-The custom logger notification listener implements an interface that allows it to be notified when flows start and end. It's also able to retrieve 
-your ```avio-core:config``` global element and match its App Level properties to your custom loggers'. Note that (unless overriden) 
-all flow start/stop messages will have a category suffix of ```.flow```.
+The custom logger notification listener implements an interface that allows it to be notified when flows start and end. It's also able to retrieve your `avio-logger:config` global element and match its App Level properties to your custom loggers'. Note that (unless overriden) 
+all flow start/stop messages will have a category suffix of `.flow`.
 
-To use the custom logger notification listener, you must instantiate the object inside your Mule runtime. You do this by using the ```<object>``` 
-global element. An example has been included below:
+To use the custom logger notification listener navigate to your logger's global configuration and check the box for `Enable Flow Logs`
 
-```xml
-
-<object doc:name="Object" doc:id="4df721fe-16b2-4ce3-819e-878fb4dd53c1"
-        name="CustomLoggerNotificationListener"
-        class="com.avioconsulting.mule.logger.internal.listeners.CustomLoggerNotificationListener"/>
-```
 You can also override the global configuration elements by specifying properties. The available properties are as follows:
  * appName
  * appVersion
  * env
- * category - Note, this completely overrides the category, i.e. it does not use the ```baseCategory``` from the global configuration 
+ * category - Note, this completely overrides the category, i.e. it does not use the `baseCategory` from the global configuration 
  as a prefix.
 
 # How?

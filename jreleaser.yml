@@ -1,0 +1,72 @@
+project:
+  name: mule-custom-logger
+  description: MuleSoft Custom Logger to replace default logger 
+  longDescription: |
+    The purpose of this Mule extension is to provide a robust and highly customizable logger for MuleSoft users
+
+  links:
+    homepage: https://github.com/avioconsulting/
+    documentation: https://avioconsulting.github.io/mule-custom-logger/
+    license: https://github.com/avioconsulting/mule-custom-logger/blob/main/LICENSE
+    contribute: https://github.com/avioconsulting/mule-custom-logger/blob/main/CONTRIBUTING.adoc
+  authors:
+    - Adam DesJardin
+    - Manik Magar
+    - Tim Gonzales
+    - Chakri Bonthala
+    - David Wouch
+    - Kevin King
+    - Tanner Sherman
+  license: BSD 2-Clause
+  inceptionYear: 2019
+  tags:
+    - mule
+  java:
+    groupId: com.avioconsulting.mule
+    version: 8
+
+release:
+  github:
+    owner: 'avioconsulting'
+    overwrite: true
+    draft: false
+    sign: true
+    releaseName: '{{tagName}}'
+    skipTag: false
+    milestone:
+      close: false
+    changelog:
+      skipMergeCommits: true
+      formatted: ALWAYS
+      preset: conventional-commits
+      format: '- {{commitShortHash}} {{commitTitle}}'
+      contributors:
+        format: '- {{contributorName}}{{#contributorUsernameAsLink}} ({{.}}){{/contributorUsernameAsLink}}'
+      labelers:
+        - label: 'dependencies'
+          title: 'chore(deps):'
+          order: 130
+      categories:
+        - title: '⚙️  Dependencies'
+          key: 'dependencies'
+          order: 80
+          labels:
+            - 'dependencies'
+      hide:
+        categories:
+          - 'merge'
+        contributors:
+          - 'GitHub'
+
+checksum:
+  individual: true
+
+signing:
+  active: ALWAYS
+  armored: true
+  mode: MEMORY
+
+distributions:
+  mule-health-check-api:
+    artifacts:
+      - path: target/mule-custom-logger-{{projectVersion}}-mule-plugin.jar

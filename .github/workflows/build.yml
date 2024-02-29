@@ -1,127 +1,47 @@
-name: Maven Build and Deploy
+name: Maven Build and Release for AVIO Logger
 
 on:
   push:
     branches:
-      - 'master'
-      - 'feature/**'
+      - 'main'
+      - 'chore/**'
+      - 'feat/**'
+      - 'fix/**'
   pull_request:
     branches:
-      - 'master'
+      - 'main'
 
 jobs:
-  Build:
-    runs-on: ubuntu-latest
+  Build-Maven:
+    uses: avioconsulting/shared-workflows/.github/workflows/maven-build.yml@main
+    secrets: inherit
+    with:
+      include-mule-ee-repo: true
+    #   java-distribution: adopt-hotspot
+    #   java-version: 8
+    #   include-test-results: true
+    #   maven-args: -X
 
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: 'recursive'
+  Release-Maven:
+    needs: Build-Maven
+    uses: avioconsulting/shared-workflows/.github/workflows/maven-release.yml@main
+    secrets: inherit
+    with:
+      app-version: ${{ needs.Build-Maven.outputs.app-version }}
+      publish-maven-central: true
+    #   java-distribution: adopt-hotspot
+    #   java-version: 8
+    #   maven-args: -X
+    #   main-branch: main
 
-      - name: Set up JDK 1.8
-        uses: actions/setup-java@v3
-        with:
-          distribution: temurin
-          java-version: 8
-          cache: maven
-          server-id: ossrh
-          server-username: OSSRH_USERNAME
-          server-password: OSSRH_PASSWORD
-          gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
-          gpg-passphrase:  MAVEN_GPG_PASSPHRASE
-
-      - name: Set Version
-        id: set-version
-        run: echo ::set-output name=version::$(./mvnw -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)
-
-      - name: Print Version
-        run: echo "Version ${{ steps.set-version.outputs.version }}"
-
-      - name: Compile
-        run: ./mvnw compile
-
-      - name: Verify
-        run: ./mvnw --batch-mode verify
-
-      - name: Publish Unit Test Results
-        uses: EnricoMi/publish-unit-test-result-action@v1
-        if: always()
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          files: ./**/surefire-reports/*.xml
-
-      - name: Publish to Maven Central
-        id: publish-to-maven-central
-        if: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/master'}}
-        run: ./mvnw clean deploy -DskipTests -Drelease=true
-        env:
-          OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-          OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
-          MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
-
-      - name: Set up JDK for Exchange Publish
-        if: ${{ !contains(steps.set-version.outputs.version, 'SNAPSHOT') && github.event_name != 'pull_request' && github.ref == 'refs/heads/master'}}
-        uses: actions/setup-java@v3
-        with:
-          distribution: temurin
-          java-version: 8
-          cache: maven
-          server-id: anypoint-exchange
-          server-username: ANYPOINT_USERNAME
-          server-password: ANYPOINT_PASSWORD
-
-      - name: Get Exchange Token
-        id: get-token
-        if: ${{ !contains(steps.set-version.outputs.version, 'SNAPSHOT') && github.event_name != 'pull_request' && github.ref == 'refs/heads/master'}}
-        run: |
-          echo ::set-output name=token::$(curl --location --request POST 'https://anypoint.mulesoft.com/accounts/api/v2/oauth2/token' --header 'Content-Type: application/x-www-form-urlencoded' --data-urlencode 'client_id=${{secrets.ANYPOINT_EXCHANGE_CLIENT_ID}}' --data-urlencode 'client_secret=${{secrets.ANYPOINT_EXCHANGE_CLIENT_SECRET}}' --data-urlencode 'grant_type=client_credentials' | jq -r .access_token)
-
-      - name: Publish Exchange Artifact
-        if: ${{ !contains(steps.set-version.outputs.version, 'SNAPSHOT') && github.event_name != 'pull_request' && github.ref == 'refs/heads/master'}}
-        env:
-          ANYPOINT_USERNAME: "~~~Token~~~"
-          ANYPOINT_PASSWORD: ${{ steps.get-token.outputs.token }}
-        run: ./deploy-to-exchange.sh ${{ secrets.ANYPOINT_ORG_ID }}
-
-      - name: Tag Release
-        if: ${{ !contains(steps.set-version.outputs.version, 'SNAPSHOT') && github.event_name != 'pull_request' && github.ref == 'refs/heads/master'}}
-        env:
-          GIT_USER: ${{ secrets.GIT_USER }}
-          GIT_PASSWORD: ${{ secrets.GIT_TOKEN }}
-        run: |
-          git config --global user.email "${{ github.actor }}@users.noreply.github.com"
-          git config --global user.name "${{ github.actor }}"
-          git remote set-url origin "https://${{github.actor}}:${{ github.token }}@github.com/${{ github.repository }}.git"
-          git tag -a "v${{ steps.set-version.outputs.version }}" "${{ github.sha }}"  -m "Version ${{ steps.set-version.outputs.version }}"
-          git push --follow-tags
-
-      - name: Increment Version
-        if: ${{ !contains(steps.set-version.outputs.version, 'SNAPSHOT') && github.event_name != 'pull_request' && github.ref == 'refs/heads/master'}}
-        run: |
-          ./mvnw clean build-helper:parse-version versions:set -DnewVersion=\${parsedVersion.majorVersion}.\${parsedVersion.minorVersion}.\${parsedVersion.nextIncrementalVersion}-SNAPSHOT -DprocessAllModules versions:commit
-
-      - name: Set New Version Variable
-        if: ${{ !contains(steps.set-version.outputs.version, 'SNAPSHOT') && github.event_name != 'pull_request' && github.ref == 'refs/heads/master'}}
-        id: set-new-version
-        run: echo ::set-output name=version::$(./mvnw -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)
-
-      - name: Create Pull Request
-        if: ${{ !contains(steps.set-version.outputs.version, 'SNAPSHOT') && github.event_name != 'pull_request' && github.ref == 'refs/heads/master'}}
-        uses: peter-evans/create-pull-request@v4
-        with:
-          branch: "feature/v${{ steps.set-new-version.outputs.version }}"
-          commit-message: "[create-pull-request] Auto increment to v${{ steps.set-new-version.outputs.version }}"
-          title: "Auto increment to v${{ steps.set-new-version.outputs.version }}"
-          delete-branch: true
-          assignees: ${{ github.actor }}
-          reviewers: adesjardin,adammead, manikmagar, kkingavio
-      
-#      - name: Add Release Note and Create Github Release
-#        if: ${{ !contains(steps.set-version.outputs.version, 'SNAPSHOT') && github.event_name != 'pull_request' && github.ref == 'refs/heads/master'}}
-#        uses: release-drafter/release-drafter@v5
-#        with:
-#          version: ${{ steps.set-version.outputs.version }}
-#          tag: v${{ steps.set-version.outputs.version }}
-#          publish: true
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  Post-Release-Maven:
+    needs: [Build-Maven, Release-Maven]
+    uses: avioconsulting/shared-workflows/.github/workflows/maven-post-release.yml@main
+    secrets: inherit
+    with:
+      app-version: ${{ needs.Build-Maven.outputs.app-version }}
+    #   java-distribution: adopt-hotspot
+    #   java-version: 8
+    #   maven-args: -X
+    #   main-branch: main
+    #   pr-reviewers: adesjardin, manikmagar, kkingavio

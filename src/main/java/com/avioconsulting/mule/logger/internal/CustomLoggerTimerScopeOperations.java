@@ -69,7 +69,8 @@ public class CustomLoggerTimerScopeOperations {
       long startTime = System.currentTimeMillis();
       MessageAttribute timerNameAtt = new MessageAttribute("timerName", timerName);
       messageAttributes.getAttributeList().add(timerNameAtt);
-      if (logProperties.getCategorySuffix() == null || logProperties.getCategorySuffix().equals("")) {
+      if (logProperties.getCategorySuffix() == null ||
+          logProperties.getCategorySuffix().equals("")) {
         logProperties.setCategorySuffix(DEFAULT_CATEGORY_SUFFIX);
       }
       operations.process(
@@ -78,11 +79,14 @@ public class CustomLoggerTimerScopeOperations {
             MessageAttribute elapsed = new MessageAttribute("elapsedTimeMs",
                 String.valueOf(elapsedMilliseconds));
             messageAttributes.getAttributeList().add(elapsed);
-            if (logProperties.getMessage() == null || logProperties.getMessage().equals("")) {
+            if (logProperties.getMessage() == null ||
+                logProperties.getMessage().equals("")) {
               logProperties.setMessage(
-                  "Timer scope [" + timerName + "] completed in " + elapsedMilliseconds + "ms");
+                  "Timer scope [" + timerName + "] completed in " + elapsedMilliseconds +
+                      "ms");
             }
-            logger.log(logProperties, messageAttributes, exceptionProperties, additionalProperties, config,
+            logger.log(logProperties, messageAttributes, exceptionProperties,
+                additionalProperties, config,
                 location, correlationId);
             callback.success(result);
           },
@@ -91,12 +95,14 @@ public class CustomLoggerTimerScopeOperations {
             MessageAttribute elapsed = new MessageAttribute("elapsedTimeMs",
                 String.valueOf(elapsedMilliseconds));
             messageAttributes.getAttributeList().add(elapsed);
-            if (logProperties.getMessage() == null || logProperties.getMessage().equals("")) {
+            if (logProperties.getMessage() == null ||
+                logProperties.getMessage().equals("")) {
               logProperties.setMessage("Timer scope [" + timerName + "] completed with errors in "
                   + elapsedMilliseconds + "ms");
             }
             logProperties.setLevel(LogProperties.LogLevel.ERROR);
-            logger.log(logProperties, messageAttributes, exceptionProperties, additionalProperties, config,
+            logger.log(logProperties, messageAttributes, exceptionProperties,
+                additionalProperties, config,
                 location, correlationId);
             callback.error(error);
           });

@@ -17,6 +17,15 @@ One of the reasons for developing this custom module is to feed JSON logs to log
 * Tracepoints compatibility to measure request, response times and such.
 
 # Changes
+## 2.2.0
+* Added
+	- Support for AVIO OpenTelemtry Module
+    - If you are using the OpenTelemetry Module then all logs will export the following messageAttributes to every log
+      - traceId
+      - traceIdLongLowPart
+      - spanId
+      - spanIdLong
+    - If you are not utilizing the OpenTelemetry module then none of these values will be added to messageAttributes
 ## 2.1.1
 * Fixes
 	- Fixed implementation to only create and register one Notification Listener. Duplicates were being created and registered leading to duplicate flow logs

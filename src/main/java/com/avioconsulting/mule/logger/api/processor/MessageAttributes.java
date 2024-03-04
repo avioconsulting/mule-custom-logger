@@ -21,7 +21,7 @@ public class MessageAttributes {
   @Optional(defaultValue = "#[vars.OTEL_TRACE_CONTEXT]")
   @Expression(ExpressionSupport.REQUIRED)
   @ParameterDsl(allowInlineDefinition = false, allowReferences = false)
-  @DisplayName("Open Telemetry Context")
+  @DisplayName("OpenTelemetry Context")
   @Summary("The object that contains the open telemetry context variables to add the log message attributes. If you are using AVIO's Open Telemetry Module there is no more configuration necessary")
   private ParameterResolver<TypedValue<Object>> oTelContext;
   @Parameter

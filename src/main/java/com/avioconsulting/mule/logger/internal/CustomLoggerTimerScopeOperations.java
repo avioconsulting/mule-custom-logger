@@ -42,7 +42,8 @@ public class CustomLoggerTimerScopeOperations {
   public void timerScope(@DisplayName(value = "Timer Name") String timerName,
       @ParameterGroup(name = "Log") LogProperties logProperties,
       @ParameterGroup(name = "Options") AdditionalProperties additionalProperties,
-      @DisplayName("Open Telemetry Context") @Optional(defaultValue = "#[vars.OTEL_TRACE_CONTEXT]") @Placement(tab = "Open Telemetry") ParameterResolver<TypedValue<Object>> oTelContext,
+      @DisplayName("OpenTelemetry Context") @Optional(defaultValue = "#[vars.OTEL_TRACE_CONTEXT]") @Placement(tab = "Message Attributes") ParameterResolver<TypedValue<Object>> oTelContext,
+
       ComponentLocation location,
       CorrelationInfo correlationInfo,
       Chain operations,

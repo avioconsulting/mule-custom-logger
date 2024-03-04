@@ -7,11 +7,15 @@ import com.avioconsulting.mule.logger.internal.config.CustomLoggerConfiguration;
 import javax.inject.Inject;
 import org.mule.runtime.api.artifact.Registry;
 import org.mule.runtime.api.component.location.ComponentLocation;
+import org.mule.runtime.api.metadata.TypedValue;
 import org.mule.runtime.core.api.el.ExpressionManager;
 import org.mule.runtime.extension.api.annotation.param.MediaType;
+import org.mule.runtime.extension.api.annotation.param.Optional;
 import org.mule.runtime.extension.api.annotation.param.ParameterGroup;
 import org.mule.runtime.extension.api.annotation.param.display.DisplayName;
+import org.mule.runtime.extension.api.annotation.param.display.Placement;
 import org.mule.runtime.extension.api.runtime.parameter.CorrelationInfo;
+import org.mule.runtime.extension.api.runtime.parameter.ParameterResolver;
 import org.mule.runtime.extension.api.runtime.process.CompletionCallback;
 import org.mule.runtime.extension.api.runtime.route.Chain;
 import org.slf4j.LoggerFactory;
@@ -38,6 +42,7 @@ public class CustomLoggerTimerScopeOperations {
   public void timerScope(@DisplayName(value = "Timer Name") String timerName,
       @ParameterGroup(name = "Log") LogProperties logProperties,
       @ParameterGroup(name = "Options") AdditionalProperties additionalProperties,
+      @DisplayName("Open Telemetry Context") @Optional(defaultValue = "#[vars.OTEL_TRACE_CONTEXT]") @Placement(tab = "Open Telemetry") ParameterResolver<TypedValue<Object>> oTelContext,
       ComponentLocation location,
       CorrelationInfo correlationInfo,
       Chain operations,
@@ -57,6 +62,7 @@ public class CustomLoggerTimerScopeOperations {
       CustomLogger logger = config.getLogger();
       ExceptionProperties exceptionProperties = new ExceptionProperties();
       MessageAttributes messageAttributes = new MessageAttributes();
+      messageAttributes.setOTelContext(oTelContext);
 
       String correlationId = correlationInfo.getCorrelationId();
       long startTime = System.currentTimeMillis();

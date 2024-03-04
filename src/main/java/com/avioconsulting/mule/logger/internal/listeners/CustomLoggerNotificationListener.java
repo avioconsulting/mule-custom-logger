@@ -38,6 +38,11 @@ public class CustomLoggerNotificationListener
         CustomLogger logger = config.getLogger();
         LogProperties logProperties = new LogProperties();
         MessageAttributes messageAttributes = new MessageAttributes();
+        if (notification.getEvent().getVariables().get("OTEL_TRACE_CONTEXT") != null) {
+          Object oTelContextObject = notification.getEvent().getVariables().get("OTEL_TRACE_CONTEXT")
+              .getValue();
+          messageAttributes.setOTelContextObject(oTelContextObject);
+        }
         ExceptionProperties exceptionProperties = new ExceptionProperties();
         AdditionalProperties additionalProperties = new AdditionalProperties();
         additionalProperties.setIncludeLocationInfo(true);
@@ -45,6 +50,7 @@ public class CustomLoggerNotificationListener
         if (config.getFlowCategorySuffix() != null && !config.getFlowCategorySuffix().equals("")) {
           logProperties.setCategorySuffix(config.getFlowCategorySuffix());
         }
+
         logProperties.setLevel(config.getFlowLogLevel());
         String logMessage = "Event not processed yet, this should never be shown";
         switch (Integer.parseInt(notification.getAction().getIdentifier())) {

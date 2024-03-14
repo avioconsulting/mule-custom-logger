@@ -3,6 +3,7 @@ package com.avioconsulting.mule.logger.internal;
 import com.avioconsulting.mule.logger.api.processor.AdditionalProperties;
 import com.avioconsulting.mule.logger.api.processor.ExceptionProperties;
 import com.avioconsulting.mule.logger.api.processor.LogProperties;
+import com.avioconsulting.mule.logger.api.processor.MessageAttribute;
 import com.avioconsulting.mule.logger.api.processor.MessageAttributes;
 import com.avioconsulting.mule.logger.internal.config.CustomLoggerConfiguration;
 import com.avioconsulting.mule.logger.internal.utils.CustomLoggerUtils;
@@ -75,6 +76,7 @@ public class CustomLogger {
       Level level = levelMap.get(logProperties.getLevel());
       String correlation = logProperties.getCorrelationId() != null ? logProperties.getCorrelationId()
           : correlationId;
+      Object oTelContext = messageAttributes.getOTelContextObject();
 
       Map<String, Object> logContext = new LinkedHashMap<>();
       logContext.put("timestamp", Instant.now().toString());
@@ -83,6 +85,26 @@ public class CustomLogger {
       logContext.put("env", environment);
       logContext.put("correlationId", correlation);
       logContext.put("message", logProperties.getMessage());
+
+      /*
+       * If oTelContext is not null, then add message attributes for traceId and
+       * spanId from the context
+       */
+      if (oTelContext != null) {
+        Map<String, String> oTelContextMap = (Map<String, String>) oTelContext;
+        MessageAttribute traceId = new MessageAttribute("traceId",
+            oTelContextMap.get("traceId"));
+        messageAttributes.getAttributeList().add(traceId);
+        MessageAttribute traceIdLongLowPart = new MessageAttribute("traceIdLongLowPart",
+            oTelContextMap.get("traceIdLongLowPart"));
+        messageAttributes.getAttributeList().add(traceIdLongLowPart);
+        MessageAttribute spanId = new MessageAttribute("spanId",
+            oTelContextMap.get("spanId"));
+        messageAttributes.getAttributeList().add(spanId);
+        MessageAttribute spanIdLong = new MessageAttribute("spanIdLong",
+            oTelContextMap.get("spanIdLong"));
+        messageAttributes.getAttributeList().add(spanIdLong);
+      }
       logContext.put("messageAttributes", messageAttributes.getAttributes());
 
       /*

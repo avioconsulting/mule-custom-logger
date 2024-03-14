@@ -17,6 +17,9 @@ One of the reasons for developing this custom module is to feed JSON logs to log
 * Tracepoints compatibility to measure request, response times and such.
 
 # Changes
+
+## Please refer to Github releases for continued changelog
+
 ## 2.1.1
 * Fixes
 	- Fixed implementation to only create and register one Notification Listener. Duplicates were being created and registered leading to duplicate flow logs
@@ -100,6 +103,16 @@ Example of logger configuration that is utilizing `encryptionAlgorithm` and `enc
 ```
 	<avio-logger:config name="ts-logger-test-config-encryption" doc:name="AVIO Logger Config" doc:id="e4f60146-7ee7-404a-a177-ac187c874bdd" applicationVersion="#[p('api.version')]" defaultCategory="com.avioconsulting.mule" encryptionAlgorithm="PBEWithHmacSHA512AndAES_128" encryptionPassword="${secure::encryption.password}"/>
 ```
+
+# Support for automatically including trace and span IDs in each log (v2.2.x)
+
+This feature is designed to be used in tandom with the [Mule OpenTelemetry Module.](https://github.com/avioconsulting/mule-opentelemetry-module) If the Mule OpenTelemetry Module is included in your project, AVIO Logger will automatically include the following attributes in each log's `messageAttributes` section.
+	1. `traceId` - Trace id of the current request
+	2. `spanId` - Span Id for the component used for creating context
+	3. `spanIdLong` - Long number value of the `spanId` for services that require a long number for Span IDs (i.e DataDog)
+	4. `traceIdLongLowPart` - Long value of the Trace Id Low part
+
+If the OpenTelemetry Module is not in use, there is no configuration necessary and the logs will not include these additional messageAttributes. 
 
 
 # Using the Timer Scope

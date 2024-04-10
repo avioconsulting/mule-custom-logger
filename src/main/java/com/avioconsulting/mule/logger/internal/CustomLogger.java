@@ -8,6 +8,8 @@ import com.avioconsulting.mule.logger.api.processor.MessageAttributes;
 import com.avioconsulting.mule.logger.internal.config.CustomLoggerConfiguration;
 import com.avioconsulting.mule.logger.internal.utils.CustomLoggerUtils;
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -35,6 +37,12 @@ public class CustomLogger {
       put(LogProperties.LogLevel.FATAL, Level.FATAL);
     }
   };
+
+  /**
+   * Formats dates in ISO 8601 format with milliseconds and UTC timezone.
+   */
+  private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter
+      .ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").withZone(ZoneId.of("UTC"));
 
   public void log(LogProperties logProperties,
       MessageAttributes messageAttributes,
@@ -79,7 +87,7 @@ public class CustomLogger {
       Object oTelContext = messageAttributes.getOTelContextObject();
 
       Map<String, Object> logContext = new LinkedHashMap<>();
-      logContext.put("timestamp", Instant.now().toString());
+      logContext.put("timestamp", dateTimeFormatter.format(Instant.now()));
       logContext.put("appName", applicationName);
       logContext.put("appVersion", applicationVersion);
       logContext.put("env", environment);

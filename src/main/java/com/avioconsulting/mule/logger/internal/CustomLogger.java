@@ -7,6 +7,7 @@ import com.avioconsulting.mule.logger.api.processor.MessageAttribute;
 import com.avioconsulting.mule.logger.api.processor.MessageAttributes;
 import com.avioconsulting.mule.logger.internal.config.CustomLoggerConfiguration;
 import com.avioconsulting.mule.logger.internal.utils.CustomLoggerUtils;
+import com.google.gson.Gson;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -18,6 +19,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.message.MapMessage;
 import org.apache.logging.log4j.message.Message;
 import org.apache.logging.log4j.message.ObjectMessage;
+import org.apache.logging.log4j.message.SimpleMessage;
 import org.mule.runtime.api.component.location.ComponentLocation;
 import org.mule.runtime.extension.api.runtime.parameter.ParameterResolver;
 import org.slf4j.LoggerFactory;
@@ -58,7 +60,8 @@ public class CustomLogger {
         loggerConfig.getApplicationVersion(),
         loggerConfig.getEnvironment(),
         loggerConfig.getDefaultCategory(),
-        loggerConfig.isEnableV1Compatibility());
+        loggerConfig.isEnableV1Compatibility(),
+        loggerConfig.isFormatAsJson());
   }
 
   public void log(LogProperties logProperties,
@@ -71,13 +74,14 @@ public class CustomLogger {
       String applicationVersion,
       String environment,
       String defaultCategory,
-      boolean enableV1Compatibility) {
+      boolean enableV1Compatibility,
+      boolean formatAsJson) {
     if (enableV1Compatibility) {
       logV1(logProperties, messageAttributes,
           exceptionProperties, additionalProperties,
           location, correlationId,
           applicationName, applicationVersion,
-          environment, defaultCategory);
+          environment, defaultCategory, formatAsJson);
     } else {
       Logger logger = CustomLoggerUtils.initLogger(defaultCategory, logProperties.getCategory(),
           logProperties.getCategorySuffix());
@@ -147,20 +151,27 @@ public class CustomLogger {
         logContext.put("location", getLocationInformation(location));
       }
 
-      /*
-       * Check system property avio.logger.useMapMessage to turn on MapMessage usage
-       * in studio.
-       * This allows pattern layout to display specific attributes of the MapMessage
-       */
-      Message message;
-      if ("true".equalsIgnoreCase(System.getProperty("avio.logger.useMapMessage"))) {
-        message = new MapMessage<>(logContext);
-      } else {
-        message = new ObjectMessage(logContext);
-      }
-
-      logger.log(level, message);
+      writeLog(logContext, logger, level, formatAsJson);
     }
+  }
+
+  private void writeLog(Map<String, Object> logContext, Logger logger, Level level, boolean formatAsJson) {
+    /*
+     * Check system property avio.logger.useMapMessage to turn on MapMessage usage
+     * in studio.
+     * This allows pattern layout to display specific attributes of the MapMessage
+     */
+    Message message;
+    if ("true".equalsIgnoreCase(System.getProperty("avio.logger.useMapMessage"))) {
+      message = new MapMessage<>(logContext);
+    } else if (formatAsJson) {
+      Gson gson = new Gson();
+      String json = gson.toJson(logContext);
+      message = new SimpleMessage(json);
+    } else {
+      message = new ObjectMessage(logContext);
+    }
+    logger.log(level, message);
   }
 
   public static Map<String, String> getLocationInformation(ComponentLocation location) {
@@ -182,7 +193,8 @@ public class CustomLogger {
       String applicationName,
       String applicationVersion,
       String environment,
-      String defaultCategory) {
+      String defaultCategory,
+      boolean formatAsJson) {
 
     Logger logger = CustomLoggerUtils.initLogger(defaultCategory, logProperties.getCategory(),
         logProperties.getCategorySuffix());
@@ -220,16 +232,7 @@ public class CustomLogger {
       logContext.put("location", getLocationInformation(location));
     }
 
-    /* 1.2.1 - Changed to MapMessage instead of ObjectMessage */
-    /* Check system property - avio.custom.logger.env */
-    /* this lets us differentiate to use simplified logging locally */
-    Message message;
-    if ("true".equalsIgnoreCase(System.getProperty("avio.logger.useMapMessage"))) {
-      message = new MapMessage<>(logContext);
-    } else {
-      message = new ObjectMessage(logContext);
-    }
-    logger.log(level, message);
+    writeLog(logContext, logger, level, formatAsJson);
   }
 
 }

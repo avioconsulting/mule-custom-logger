@@ -104,16 +104,43 @@ Example of logger configuration that is utilizing `encryptionAlgorithm` and `enc
 	<avio-logger:config name="ts-logger-test-config-encryption" doc:name="AVIO Logger Config" doc:id="e4f60146-7ee7-404a-a177-ac187c874bdd" applicationVersion="#[p('api.version')]" defaultCategory="com.avioconsulting.mule" encryptionAlgorithm="PBEWithHmacSHA512AndAES_128" encryptionPassword="${secure::encryption.password}"/>
 ```
 
-# Support for automatically including trace and span IDs in each log (v2.2.x)
+# Support for automatically including trace and span IDs in each log (v2.2.x+)
 
 This feature is designed to be used in tandom with the [Mule OpenTelemetry Module.](https://github.com/avioconsulting/mule-opentelemetry-module) If the Mule OpenTelemetry Module is included in your project, AVIO Logger will automatically include the following attributes in each log's `messageAttributes` section.
-	1. `traceId` - Trace id of the current request
-	2. `spanId` - Span Id for the component used for creating context
-	3. `spanIdLong` - Long number value of the `spanId` for services that require a long number for Span IDs (i.e DataDog)
-	4. `traceIdLongLowPart` - Long value of the Trace Id Low part
+
+- `traceId` - Trace id of the current request
+- `spanId` - Span Id for the component used for creating context
+- `spanIdLong` - Long number value of the `spanId` for services that require a long number for Span IDs (i.e DataDog)
+- `traceIdLongLowPart` - Long value of the Trace Id Low part
 
 If the OpenTelemetry Module is not in use, there is no configuration necessary and the logs will not include these additional messageAttributes. 
 
+# Format As Json (v2.3 onwards)
+Some Log4J appenders (eg. OpenTelemetry Appender) may not support using Log4j Layouts but the log aggregation backend may require log messages in JSON format. In such scenarios, it is possible to format the lag message as JSON string. 
+
+Mule Custom Logger v2.3 introduced a new configuration flag to format the log message as a JSON string -  
+
+```xml
+	<avio-logger:config name="AVIO_Logger_Config_Json" 
+		applicationName="${otel.service.name}" 
+		applicationVersion="1.0" 
+		environment="#[p('mule.env')]" 
+		formatAsJson="true">	// Configure to format as JSON
+	</avio-logger:config>
+```
+Following two sample log statements shows the difference.
+
+Log without JSON formatting prints the java string version of the object -
+
+`
+INFO  2024-07-16 12:58:53,183 [[MuleRuntime].uber.10: [simple-otel].simple-otel-log-flow-custom-logger.CPU_LITE @2306b18c] [processor: simple-otel-log-flow-custom-logger/processors/1; event: 0d99c380-4345-11ef-b9db-ca89f39a1b65] com.avioconsulting.api: {timestamp=2024-07-16T07:28:53.183Z, appName=simple-otel, appVersion=1.0, env=dev, correlationId=0d99c380-4345-11ef-b9db-ca89f39a1b65, message=Sample otel custom log, messageAttributes={traceId=fc010d3d5393cfd1606e2dd3adc56049, traceIdLongLowPart=6948541662255997001, spanId=8d267add2300b701, spanIdLong=10170951898656454401}, exception={statusCode=null, detail=null}}
+`
+
+Log with JSON formatting prints correctly formatted JSON string -
+
+`
+INFO  2024-07-16 12:58:53,189 [[MuleRuntime].uber.10: [simple-otel].simple-otel-log-flow-custom-logger.CPU_LITE @2306b18c] [processor: simple-otel-log-flow-custom-logger/processors/2; event: 0d99c380-4345-11ef-b9db-ca89f39a1b65] com.avioconsulting.api: {"timestamp":"2024-07-16T07:28:53.188Z","appName":"simple-otel","appVersion":"1.0","env":"dev","correlationId":"0d99c380-4345-11ef-b9db-ca89f39a1b65","message":"Sample otel custom log Json","messageAttributes":{"traceId":"fc010d3d5393cfd1606e2dd3adc56049","traceIdLongLowPart":"6948541662255997001","spanId":"8d267add2300b701","spanIdLong":"10170951898656454401"},"exception":{}}
+`
 
 # Using the Timer Scope
 The timer scope allows you to unobtrusively measure the time taken to execute the processors within the scope. For example, 

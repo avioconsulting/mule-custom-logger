@@ -60,7 +60,40 @@ public class CustomLoggerTest {
         applicationVersion,
         environment,
         defaultCategory,
-        enableV1Compatibility);
+        enableV1Compatibility, false);
+
+    // Assertions
+    // Assert log properties
+    Assert.assertEquals(null, spyLogProperties.getPayload());
+    // Assert Message Attributes
+    Assert.assertEquals(null, spyMessageAttributes.getOTelContext());
+    ArrayList emptyList = new ArrayList();
+    Assert.assertEquals(emptyList, spyMessageAttributes.getAttributeList());
+
+  }
+
+  @Test
+  public void log_verifyJsonLogWriting() {
+    // Initialize, create mocks and spys
+    CustomLogger customLogger = new CustomLogger();
+    LogProperties logProperties = new LogProperties();
+    LogProperties spyLogProperties = spy(logProperties);
+    MessageAttributes messageAttributes = new MessageAttributes();
+    MessageAttributes spyMessageAttributes = spy(messageAttributes);
+    when(spyLogProperties.getPayload()).thenReturn(null);
+
+    // Call method
+    customLogger.log(spyLogProperties,
+        spyMessageAttributes,
+        mock(ExceptionProperties.class),
+        mock(AdditionalProperties.class),
+        mock(ComponentLocation.class),
+        correlationId,
+        applicationName,
+        applicationVersion,
+        environment,
+        defaultCategory,
+        enableV1Compatibility, true);
 
     // Assertions
     // Assert log properties
@@ -103,7 +136,7 @@ public class CustomLoggerTest {
         applicationVersion,
         environment,
         defaultCategory,
-        enableV1Compatibility);
+        enableV1Compatibility, false);
 
     // Assertions
     // Assert log properties

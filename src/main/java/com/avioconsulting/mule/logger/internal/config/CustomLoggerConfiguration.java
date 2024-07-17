@@ -90,6 +90,13 @@ public class CustomLoggerConfiguration implements Startable, Initialisable {
   private boolean enableV1Compatibility;
 
   @Parameter
+  @DisplayName("Format as JSON")
+  @Summary("Writes the Log message as JSON String. This can be useful where appenders (eg. OpenTelemetry) does not support using layouts but backend system requires a JSON formatted message.")
+  @Optional(defaultValue = "false")
+  @Expression(ExpressionSupport.NOT_SUPPORTED)
+  private boolean formatAsJson;
+
+  @Parameter
   @DisplayName("Compression Strategy")
   @Summary("Enumerated Compression Strategy value to compress payload before logging")
   @Optional()
@@ -158,6 +165,10 @@ public class CustomLoggerConfiguration implements Startable, Initialisable {
 
   public boolean isEnableV1Compatibility() {
     return enableV1Compatibility;
+  }
+
+  public boolean isFormatAsJson() {
+    return formatAsJson;
   }
 
   public Compressor getCompressor() {

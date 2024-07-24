@@ -4,6 +4,7 @@ import static org.mockito.Mockito.*;
 
 import com.avioconsulting.mule.logger.api.processor.*;
 import com.avioconsulting.mule.logger.internal.config.CustomLoggerConfiguration;
+import com.avioconsulting.mule.logger.internal.utils.PayloadTransformer;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import org.junit.Assert;
@@ -32,10 +33,10 @@ public class CustomLoggerOperationTest {
   public void log_verifyNoPayloadTransformation_test() {
     CustomLoggerOperation customLoggerOperation = new CustomLoggerOperation();
     ExtensionsClient extensionsClient = mock(ExtensionsClient.class);
-    customLoggerOperation.extensionsClient = extensionsClient;
 
     // create mock for custom logger and mock log() method so it's never called
     CustomLoggerConfiguration loggerConfig = mock(CustomLoggerConfiguration.class);
+    when(loggerConfig.getExtensionsClient()).thenReturn(extensionsClient);
     CustomLogger logger = mock(CustomLogger.class);
     doNothing().when(logger).log(any(), any(), any(), any(), any(), any(), any());
     when(loggerConfig.getLogger()).thenReturn(logger);
@@ -62,12 +63,12 @@ public class CustomLoggerOperationTest {
     CustomLoggerOperation spyCustomLoggerOperation = spy(customLoggerOperation);
     LogProperties logProperties = new LogProperties();
     LogProperties spyLogProperties = spy(logProperties);
-    ExtensionsClient extensionsClient = mock(ExtensionsClient.class);
-    spyCustomLoggerOperation.extensionsClient = extensionsClient;
     ParameterResolver<String> resolver = mock(ParameterResolver.class);
 
     // create mock for custom logger and mock log() method so it's never called
     CustomLoggerConfiguration loggerConfig = mock(CustomLoggerConfiguration.class);
+    ExtensionsClient extensionsClient = mock(ExtensionsClient.class);
+    when(loggerConfig.getExtensionsClient()).thenReturn(extensionsClient);
     CustomLogger logger = mock(CustomLogger.class);
     doNothing().when(logger).log(any(), any(), any(), any(), any(), any(), any());
     when(loggerConfig.getLogger()).thenReturn(logger);
@@ -82,12 +83,15 @@ public class CustomLoggerOperationTest {
     doReturn(new ByteArrayInputStream(examplePayload.getBytes())).when(mockResult).getOutput();
     doReturn(mockResult).when(extensionsClient).execute(eq("Compression"), eq("compress"), any());
 
+    PayloadTransformer payloadTransformer = new PayloadTransformer();
+    PayloadTransformer spyTransformer = spy(payloadTransformer);
+
     // mock response from convertToByteArray
-    doReturn(examplePayload.getBytes()).when(spyCustomLoggerOperation)
+    doReturn(examplePayload.getBytes()).when(spyTransformer)
         .convertToByteArray(any(), any());
 
     // call method
-    spyCustomLoggerOperation.setCompressedPayloadIfNeeded(spyLogProperties,
+    spyTransformer.setCompressedPayloadIfNeeded(spyLogProperties,
         mock(StreamingHelper.class),
         loggerConfig);
 
@@ -103,14 +107,14 @@ public class CustomLoggerOperationTest {
     CustomLoggerOperation spyCustomLoggerOperation = spy(customLoggerOperation);
     LogProperties logProperties = new LogProperties();
     LogProperties spyLogProperties = spy(logProperties);
-    ExtensionsClient extensionsClient = mock(ExtensionsClient.class);
-    spyCustomLoggerOperation.extensionsClient = extensionsClient;
     Result<InputStream, Void> executeCompress = null;
     ParameterResolver<String> resolver = mock(ParameterResolver.class);
     String password = "example-password";
 
     // create mock for custom logger and mock log() method so it's never called
     CustomLoggerConfiguration loggerConfig = mock(CustomLoggerConfiguration.class);
+    ExtensionsClient extensionsClient = mock(ExtensionsClient.class);
+    when(loggerConfig.getExtensionsClient()).thenReturn(extensionsClient);
     CustomLogger logger = mock(CustomLogger.class);
     doNothing().when(logger).log(any(), any(), any(), any(), any(), any(), any());
     when(loggerConfig.getLogger()).thenReturn(logger);
@@ -126,12 +130,15 @@ public class CustomLoggerOperationTest {
     doReturn(new ByteArrayInputStream(examplePayload.getBytes())).when(mockResult).getOutput();
     doReturn(mockResult).when(extensionsClient).execute(eq("Crypto"), eq("jceEncryptPbe"), any());
 
+    PayloadTransformer payloadTransformer = new PayloadTransformer();
+    PayloadTransformer spyTransformer = spy(payloadTransformer);
+
     // mock response from convertToByteArray
-    doReturn(examplePayload.getBytes()).when(spyCustomLoggerOperation)
+    doReturn(examplePayload.getBytes()).when(spyTransformer)
         .convertToByteArray(any(), any());
 
     // call method
-    spyCustomLoggerOperation.setEncryptedPayloadIfNeeded(spyLogProperties,
+    spyTransformer.setEncryptedPayloadIfNeeded(spyLogProperties,
         loggerConfig,
         mock(StreamingHelper.class),
         executeCompress);
@@ -148,13 +155,14 @@ public class CustomLoggerOperationTest {
     CustomLoggerOperation spyCustomLoggerOperation = spy(customLoggerOperation);
     LogProperties logProperties = new LogProperties();
     LogProperties spyLogProperties = spy(logProperties);
-    ExtensionsClient extensionsClient = mock(ExtensionsClient.class);
-    spyCustomLoggerOperation.extensionsClient = extensionsClient;
     ParameterResolver<String> resolver = mock(ParameterResolver.class);
     String password = "example-password";
 
     // create mock for custom logger and mock log() method so it's never called
     CustomLoggerConfiguration loggerConfig = mock(CustomLoggerConfiguration.class);
+    ExtensionsClient extensionsClient = mock(ExtensionsClient.class);
+    when(loggerConfig.getExtensionsClient()).thenReturn(extensionsClient);
+
     CustomLogger logger = mock(CustomLogger.class);
     doNothing().when(logger).log(any(), any(), any(), any(), any(), any(), any());
     when(loggerConfig.getLogger()).thenReturn(logger);
@@ -170,12 +178,15 @@ public class CustomLoggerOperationTest {
     doReturn(new ByteArrayInputStream(examplePayload.getBytes())).when(executeCompress).getOutput();
     doReturn(executeCompress).when(extensionsClient).execute(eq("Crypto"), eq("jceEncryptPbe"), any());
 
+    PayloadTransformer payloadTransformer = new PayloadTransformer();
+    PayloadTransformer spyTransformer = spy(payloadTransformer);
+
     // mock response from convertToByteArray
-    doReturn(examplePayload.getBytes()).when(spyCustomLoggerOperation)
+    doReturn(examplePayload.getBytes()).when(spyTransformer)
         .convertToByteArray(any(), any());
 
     // call method
-    spyCustomLoggerOperation.setEncryptedPayloadIfNeeded(spyLogProperties,
+    spyTransformer.setEncryptedPayloadIfNeeded(spyLogProperties,
         loggerConfig,
         mock(StreamingHelper.class),
         executeCompress);

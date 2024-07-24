@@ -8,6 +8,7 @@ import com.avioconsulting.mule.logger.api.processor.AdditionalProperties;
 import com.avioconsulting.mule.logger.api.processor.ExceptionProperties;
 import com.avioconsulting.mule.logger.api.processor.LogProperties;
 import com.avioconsulting.mule.logger.api.processor.MessageAttributes;
+import com.avioconsulting.mule.logger.internal.config.CustomLoggerConfiguration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -17,26 +18,32 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mule.runtime.api.component.location.ComponentLocation;
 import org.mule.runtime.api.exception.MuleException;
+import org.mule.runtime.module.extension.internal.runtime.resolver.StaticParameterResolver;
 
 public class CustomLoggerTest {
 
   private String examplePayload;
   private String correlationId;
-  private String applicationName;
-  private String applicationVersion;
-  private String environment;
-  private String defaultCategory;
-  private Boolean enableV1Compatibility;
+  private CustomLoggerConfiguration loggerConfiguration;
 
   @Before
   public void init() {
     examplePayload = "Example Payload Text";
     correlationId = "ab9195f8-0ff6-4611-ab78-63c60c824c95";
-    applicationName = "example-app-name";
-    applicationVersion = "1.0.0";
-    environment = "dev";
-    defaultCategory = "com.avioconsulting.mule";
-    enableV1Compatibility = false;
+    String applicationName = "example-app-name";
+    String applicationVersion = "1.0.0";
+    String environment = "dev";
+    String defaultCategory = "com.avioconsulting.mule";
+    Boolean enableV1Compatibility = false;
+
+    loggerConfiguration = mock(CustomLoggerConfiguration.class);
+    when(loggerConfiguration.getApplicationName()).thenReturn(applicationName);
+    when(loggerConfiguration.getApplicationVersion()).thenReturn(applicationVersion);
+    when(loggerConfiguration.getEnvironment()).thenReturn(environment);
+    when(loggerConfiguration.getDefaultCategory()).thenReturn(defaultCategory);
+    when(loggerConfiguration.isEnableV1Compatibility()).thenReturn(enableV1Compatibility);
+    when(loggerConfiguration.isFormatAsJson()).thenReturn(false);
+
   }
 
   @Test
@@ -54,19 +61,45 @@ public class CustomLoggerTest {
         spyMessageAttributes,
         mock(ExceptionProperties.class),
         mock(AdditionalProperties.class),
+        loggerConfiguration,
         mock(ComponentLocation.class),
-        correlationId,
-        applicationName,
-        applicationVersion,
-        environment,
-        defaultCategory,
-        enableV1Compatibility, false);
+        correlationId);
 
     // Assertions
     // Assert log properties
-    Assert.assertEquals(null, spyLogProperties.getPayload());
+    Assert.assertNull(spyLogProperties.getPayload());
     // Assert Message Attributes
-    Assert.assertEquals(null, spyMessageAttributes.getOTelContext());
+    Assert.assertNull(spyMessageAttributes.getOTelContext());
+    ArrayList emptyList = new ArrayList();
+    Assert.assertEquals(emptyList, spyMessageAttributes.getAttributeList());
+
+  }
+
+  @Test
+  public void log_verifyLogPropertiesWithPayloadAttributes_test() {
+    // Initialize, create mocks and spys
+    CustomLogger customLogger = new CustomLogger();
+    LogProperties logProperties = new LogProperties();
+    logProperties.setPayload(new StaticParameterResolver<>(examplePayload));
+    LogProperties spyLogProperties = spy(logProperties);
+    MessageAttributes messageAttributes = new MessageAttributes();
+    MessageAttributes spyMessageAttributes = spy(messageAttributes);
+    when(spyLogProperties.getPayload()).thenReturn(null);
+
+    // Call method
+    customLogger.log(spyLogProperties,
+        spyMessageAttributes,
+        mock(ExceptionProperties.class),
+        mock(AdditionalProperties.class),
+        loggerConfiguration,
+        mock(ComponentLocation.class),
+        correlationId);
+
+    // Assertions
+    // Assert log properties
+    Assert.assertNull(spyLogProperties.getPayload());
+    // Assert Message Attributes
+    Assert.assertNull(spyMessageAttributes.getOTelContext());
     ArrayList emptyList = new ArrayList();
     Assert.assertEquals(emptyList, spyMessageAttributes.getAttributeList());
 
@@ -81,25 +114,21 @@ public class CustomLoggerTest {
     MessageAttributes messageAttributes = new MessageAttributes();
     MessageAttributes spyMessageAttributes = spy(messageAttributes);
     when(spyLogProperties.getPayload()).thenReturn(null);
-
+    when(loggerConfiguration.isFormatAsJson()).thenReturn(true);
     // Call method
     customLogger.log(spyLogProperties,
         spyMessageAttributes,
         mock(ExceptionProperties.class),
         mock(AdditionalProperties.class),
+        loggerConfiguration,
         mock(ComponentLocation.class),
-        correlationId,
-        applicationName,
-        applicationVersion,
-        environment,
-        defaultCategory,
-        enableV1Compatibility, true);
+        correlationId);
 
     // Assertions
     // Assert log properties
-    Assert.assertEquals(null, spyLogProperties.getPayload());
+    Assert.assertNull(spyLogProperties.getPayload());
     // Assert Message Attributes
-    Assert.assertEquals(null, spyMessageAttributes.getOTelContext());
+    Assert.assertNull(spyMessageAttributes.getOTelContext());
     ArrayList emptyList = new ArrayList();
     Assert.assertEquals(emptyList, spyMessageAttributes.getAttributeList());
 
@@ -130,19 +159,15 @@ public class CustomLoggerTest {
         spyMessageAttributes,
         mock(ExceptionProperties.class),
         mock(AdditionalProperties.class),
+        loggerConfiguration,
         mock(ComponentLocation.class),
-        correlationId,
-        applicationName,
-        applicationVersion,
-        environment,
-        defaultCategory,
-        enableV1Compatibility, false);
+        correlationId);
 
     // Assertions
     // Assert log properties
-    Assert.assertEquals(null, spyLogProperties.getPayload());
+    Assert.assertNull(spyLogProperties.getPayload());
     // Assert Message Attributes
-    Assert.assertTrue(spyMessageAttributes.getOTelContextObject() != null);
+    Assert.assertNotNull(spyMessageAttributes.getOTelContextObject());
     Assert.assertEquals(4, spyMessageAttributes.getAttributeList().size());
     Assert.assertEquals("76d5bcae3d49ff2e1b5ace9f0dcbee42", spyMessageAttributes.getAttributes().get("traceId"));
     Assert.assertEquals("1971114969454603842", spyMessageAttributes.getAttributes().get("traceIdLongLowPart"));

@@ -22,6 +22,7 @@ import org.mule.runtime.extension.api.annotation.Operations;
 import org.mule.runtime.extension.api.annotation.param.Optional;
 import org.mule.runtime.extension.api.annotation.param.Parameter;
 import org.mule.runtime.extension.api.annotation.param.display.*;
+import org.mule.runtime.extension.api.client.ExtensionsClient;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -126,6 +127,9 @@ public class CustomLoggerConfiguration implements Startable, Initialisable {
   @Inject
   CustomLoggerRegistrationService customLoggerRegistrationService;
 
+  @Inject
+  ExtensionsClient extensionsClient;
+
   private CustomLogger logger;
   private CustomLoggerNotificationListener notificationListener;
 
@@ -181,6 +185,10 @@ public class CustomLoggerConfiguration implements Startable, Initialisable {
 
   public String getEncryptionPassword() {
     return encryptionPassword;
+  }
+
+  public ExtensionsClient getExtensionsClient() {
+    return extensionsClient;
   }
 
   /**

@@ -142,21 +142,11 @@ public class CustomLogger {
        */
       ParameterResolver<String> payload = logProperties.getPayload();
       if (logger.isEnabled(level) && payload != null) {
-        if (streamingHelper != null) {
-          payloadTransformer.transformPayload(logProperties, loggerConfig, streamingHelper);
-        }
-        String payloadToLog;
-        String encryptedString = logProperties.getEncryptedPayload();
-        String compressedString = logProperties.getCompressedPayload();
         String payloadString = payload.resolve();
-        if (encryptedString != null) {
-          payloadToLog = encryptedString;
-        } else if (compressedString != null) {
-          payloadToLog = compressedString;
-        } else {
-          payloadToLog = payloadString;
+        if (streamingHelper != null) {
+          payloadString = payloadTransformer.transformPayload(loggerConfig, streamingHelper, payloadString);
         }
-        logContext.put("payload", payloadToLog);
+        logContext.put("payload", payloadString);
       }
 
       if (exceptionProperties != null) {

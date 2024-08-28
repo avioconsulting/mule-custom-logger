@@ -46,26 +46,6 @@ public class LogProperties {
   @Summary("Append this suffix to the globally configured log category")
   private String categorySuffix;
 
-  private String compressedPayload;
-
-  private String encryptedPayload;
-
-  public String getEncryptedPayload() {
-    return encryptedPayload;
-  }
-
-  public String getCompressedPayload() {
-    return compressedPayload;
-  }
-
-  public void setCompressedPayload(String compressedPayload) {
-    this.compressedPayload = compressedPayload;
-  }
-
-  public void setEncryptedPayload(String encryptedPayload) {
-    this.encryptedPayload = encryptedPayload;
-  }
-
   public enum LogLevel {
     TRACE, DEBUG, INFO, WARN, ERROR, FATAL
   }

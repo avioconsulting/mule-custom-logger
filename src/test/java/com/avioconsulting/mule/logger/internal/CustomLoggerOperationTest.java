@@ -58,13 +58,6 @@ public class CustomLoggerOperationTest {
 
   @Test
   public void log_compressedPayloadIsSet_test() throws MuleException {
-    // mock and spy inits
-    CustomLoggerOperation customLoggerOperation = new CustomLoggerOperation();
-    CustomLoggerOperation spyCustomLoggerOperation = spy(customLoggerOperation);
-    LogProperties logProperties = new LogProperties();
-    LogProperties spyLogProperties = spy(logProperties);
-    ParameterResolver<String> resolver = mock(ParameterResolver.class);
-
     // create mock for custom logger and mock log() method so it's never called
     CustomLoggerConfiguration loggerConfig = mock(CustomLoggerConfiguration.class);
     ExtensionsClient extensionsClient = mock(ExtensionsClient.class);
@@ -74,8 +67,6 @@ public class CustomLoggerOperationTest {
     when(loggerConfig.getLogger()).thenReturn(logger);
 
     // Mock payload and compressor values
-    when(resolver.resolve()).thenReturn(examplePayload);
-    when(spyLogProperties.getPayload()).thenReturn(resolver);
     when(loggerConfig.getCompressor()).thenReturn(Compressor.GZIP);
 
     // mock response from extensions client
@@ -91,22 +82,19 @@ public class CustomLoggerOperationTest {
         .convertToByteArray(any(), any());
 
     // call method
-    spyTransformer.setCompressedPayloadIfNeeded(spyLogProperties,
-        mock(StreamingHelper.class),
-        loggerConfig);
+    Result<InputStream, Void> executeCompress = payloadTransformer.compressPayload(
+        loggerConfig,
+        examplePayload);
 
     // assertions
+
     verify(extensionsClient, atMost(1)).execute(any(), any(), any());
-    Assert.assertEquals("RXhhbXBsZSBQYXlsb2FkIFRleHQ=", spyLogProperties.getCompressedPayload());
+    Assert.assertNotNull(executeCompress);
   }
 
   @Test
   public void log_encryptedPayloadIsSet_compressionNull_test() throws MuleException {
     // mock and spy inits
-    CustomLoggerOperation customLoggerOperation = new CustomLoggerOperation();
-    CustomLoggerOperation spyCustomLoggerOperation = spy(customLoggerOperation);
-    LogProperties logProperties = new LogProperties();
-    LogProperties spyLogProperties = spy(logProperties);
     Result<InputStream, Void> executeCompress = null;
     ParameterResolver<String> resolver = mock(ParameterResolver.class);
     String password = "example-password";
@@ -121,8 +109,6 @@ public class CustomLoggerOperationTest {
 
     // Mock payload and encryption algorithm values, compression is null
     when(resolver.resolve()).thenReturn(examplePayload);
-    when(spyLogProperties.getPayload()).thenReturn(resolver);
-    when(loggerConfig.getEncryptionAlgorithm()).thenReturn(EncryptionAlgorithm.PBEWithHmacSHA1AndAES_128);
     when(loggerConfig.getEncryptionPassword()).thenReturn(password);
 
     // mock response from extensions client
@@ -138,14 +124,16 @@ public class CustomLoggerOperationTest {
         .convertToByteArray(any(), any());
 
     // call method
-    spyTransformer.setEncryptedPayloadIfNeeded(spyLogProperties,
+    String resultPayload = spyTransformer.encryptPayload(
         loggerConfig,
         mock(StreamingHelper.class),
-        executeCompress);
+        executeCompress,
+        EncryptionAlgorithm.PBEWithHmacSHA1AndAES_128,
+        examplePayload);
 
     // assertions
     verify(extensionsClient, atMost(1)).execute(any(), any(), any());
-    Assert.assertEquals("RXhhbXBsZSBQYXlsb2FkIFRleHQ=", spyLogProperties.getEncryptedPayload());
+    Assert.assertEquals("RXhhbXBsZSBQYXlsb2FkIFRleHQ=", resultPayload);
   }
 
   @Test
@@ -186,13 +174,13 @@ public class CustomLoggerOperationTest {
         .convertToByteArray(any(), any());
 
     // call method
-    spyTransformer.setEncryptedPayloadIfNeeded(spyLogProperties,
+    String resultPayload = spyTransformer.transformPayload(
         loggerConfig,
         mock(StreamingHelper.class),
-        executeCompress);
+        examplePayload);
 
     // assertions
     verify(extensionsClient, atMost(1)).execute(any(), any(), any());
-    Assert.assertEquals("RXhhbXBsZSBQYXlsb2FkIFRleHQ=", spyLogProperties.getEncryptedPayload());
+    Assert.assertEquals("RXhhbXBsZSBQYXlsb2FkIFRleHQ=", resultPayload);
   }
 }

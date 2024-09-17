@@ -52,20 +52,23 @@ public class PayloadTransformer {
     if (payloadString == null)
       return payloadString;
     Compressor compressor = loggerConfig.getCompressor();
-    Result<InputStream, Void> executeCompress = null;
+    Result<InputStream, Void> executionResult = null;
     if (compressor != null) {
-      executeCompress = compressPayload(loggerConfig, payloadString);
-      try {
-        payloadString = Base64.encodeBytes(convertToByteArray(executeCompress.getOutput(), streamingHelper));
-      } catch (IOException e) {
-        throw new RuntimeException("Exception while transforming payload", e);
-      }
+      executionResult = compressPayload(loggerConfig, payloadString);
     }
 
     EncryptionAlgorithm encryptionAlgorithm = loggerConfig.getEncryptionAlgorithm();
     if (encryptionAlgorithm != null) {
-      payloadString = encryptPayload(loggerConfig, streamingHelper, executeCompress, encryptionAlgorithm,
+      executionResult = encryptPayload(loggerConfig, streamingHelper, executionResult, encryptionAlgorithm,
           payloadString);
+    }
+
+    if (executionResult != null) {
+      try {
+        payloadString = Base64.encodeBytes(convertToByteArray(executionResult.getOutput(), streamingHelper));
+      } catch (IOException e) {
+        throw new RuntimeException("Exception while transforming payload", e);
+      }
     }
 
     return payloadString;
@@ -88,12 +91,11 @@ public class PayloadTransformer {
         .addParameter("content", new ByteArrayInputStream(payload.getBytes()))
         .addParameter("compressor", compressorStrategy);
     try {
-      executeCompress = loggerConfig.getExtensionsClient().execute("Compression", "compress",
+      return loggerConfig.getExtensionsClient().execute("Compression", "compress",
           parametersBuilder.build());
     } catch (Exception e) {
       throw new RuntimeException("Compression Exception", e);
     }
-    return executeCompress;
   }
 
   /**
@@ -106,7 +108,7 @@ public class PayloadTransformer {
    * @since 2.1.0
    * @return encrypted string
    */
-  public String encryptPayload(CustomLoggerConfiguration loggerConfig,
+  public Result<InputStream, Void> encryptPayload(CustomLoggerConfiguration loggerConfig,
       StreamingHelper streamingHelper, Result<InputStream, Void> executeCompress,
       EncryptionAlgorithm encryptionAlgorithm, String payload) {
     /*
@@ -127,11 +129,9 @@ public class PayloadTransformer {
         .addParameter("algorithm", jceEncryptionPbeAlgorithm)
         .addParameter("password", loggerConfig.getEncryptionPassword());
     try {
-      Result<InputStream, Void> executeEncrypt = loggerConfig.getExtensionsClient().execute("Crypto",
+      return loggerConfig.getExtensionsClient().execute("Crypto",
           "jceEncryptPbe",
           encryptionParametersBuilder.build());
-      return Base64
-          .encodeBytes(convertToByteArray(executeEncrypt.getOutput(), streamingHelper));
     } catch (Exception e) {
       throw new RuntimeException("Encryption Error", e);
     }

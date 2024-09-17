@@ -118,13 +118,12 @@ public class CustomLoggerOperationTest {
 
     PayloadTransformer payloadTransformer = new PayloadTransformer();
     PayloadTransformer spyTransformer = spy(payloadTransformer);
-
     // mock response from convertToByteArray
     doReturn(examplePayload.getBytes()).when(spyTransformer)
         .convertToByteArray(any(), any());
 
     // call method
-    String resultPayload = spyTransformer.encryptPayload(
+    Result<InputStream, Void> executionResult = spyTransformer.encryptPayload(
         loggerConfig,
         mock(StreamingHelper.class),
         executeCompress,
@@ -133,7 +132,7 @@ public class CustomLoggerOperationTest {
 
     // assertions
     verify(extensionsClient, atMost(1)).execute(any(), any(), any());
-    Assert.assertEquals("RXhhbXBsZSBQYXlsb2FkIFRleHQ=", resultPayload);
+    Assert.assertNotNull(executionResult);
   }
 
   @Test

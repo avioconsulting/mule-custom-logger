@@ -36,4 +36,18 @@ public class ExceptionProperties {
     return detail;
   }
 
+  public ExceptionProperties setStatusCode(String statusCode) {
+    this.statusCode = statusCode;
+    return this;
+  }
+
+  public ExceptionProperties setType(String type) {
+    this.type = type;
+    return this;
+  }
+
+  public ExceptionProperties setDetail(String detail) {
+    this.detail = detail;
+    return this;
+  }
 }

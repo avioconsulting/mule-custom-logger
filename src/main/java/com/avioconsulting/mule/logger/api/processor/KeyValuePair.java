@@ -22,6 +22,16 @@ public abstract class KeyValuePair {
     this.value = value;
   }
 
+  public KeyValuePair setKey(String key) {
+    this.key = key;
+    return this;
+  }
+
+  public KeyValuePair setValue(String value) {
+    this.value = value;
+    return this;
+  }
+
   public String getKey() {
     return key;
   }

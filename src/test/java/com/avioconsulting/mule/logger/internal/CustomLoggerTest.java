@@ -12,12 +12,18 @@ import com.avioconsulting.mule.logger.internal.config.CustomLoggerConfiguration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.Optional;
+import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mule.runtime.api.component.ComponentIdentifier;
+import org.mule.runtime.api.component.TypedComponentIdentifier;
 import org.mule.runtime.api.component.location.ComponentLocation;
 import org.mule.runtime.api.exception.MuleException;
+import org.mule.runtime.dsl.api.component.config.DefaultComponentLocation;
 import org.mule.runtime.module.extension.internal.runtime.resolver.StaticParameterResolver;
 
 public class CustomLoggerTest {
@@ -174,4 +180,37 @@ public class CustomLoggerTest {
     Assert.assertEquals("fa6fbe46daf007b9", spyMessageAttributes.getAttributes().get("spanId"));
     Assert.assertEquals("18045851443427018681", spyMessageAttributes.getAttributes().get("spanIdLong"));
   }
+
+  @Test
+  public void getLocationInformation() {
+
+    DefaultComponentLocation.DefaultLocationPart root = new DefaultComponentLocation.DefaultLocationPart(
+        "root-flow",
+        Optional.ofNullable(TypedComponentIdentifier.builder()
+            .identifier(ComponentIdentifier.builder().name("flow").namespace("mule").build())
+            .type(TypedComponentIdentifier.ComponentType.FLOW)
+            .build()),
+        Optional.of("test-config.xml"),
+        Optional.of(1),
+        Optional.of(1));
+    DefaultComponentLocation.DefaultLocationPart part = new DefaultComponentLocation.DefaultLocationPart("1",
+        Optional.ofNullable(TypedComponentIdentifier.builder()
+            .identifier(ComponentIdentifier.builder().name("logger").namespace("mule").build())
+            .type(TypedComponentIdentifier.ComponentType.OPERATION)
+            .build()),
+        Optional.of("test-config.xml"),
+        Optional.of(10),
+        Optional.of(1));
+    DefaultComponentLocation defaultComponentLocation = new DefaultComponentLocation(Optional.of("mule:logger"),
+        Arrays.asList(root, part));
+    Map<String, String> locationInformation = CustomLogger.getLocationInformation(defaultComponentLocation);
+    Assertions.assertThat(locationInformation)
+        .containsEntry("component", "logger")
+        .containsEntry("location", "root-flow/1")
+        .containsEntry("rootContainer", "root-flow")
+        .containsEntry("lineInFile", "10")
+        .containsEntry("fileName", "test-config.xml");
+
+  }
+
 }

@@ -22,6 +22,7 @@ import org.mule.runtime.extension.api.annotation.Operations;
 import org.mule.runtime.extension.api.annotation.param.Optional;
 import org.mule.runtime.extension.api.annotation.param.Parameter;
 import org.mule.runtime.extension.api.annotation.param.display.*;
+import org.mule.runtime.extension.api.client.ExtensionsClient;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -126,6 +127,42 @@ public class CustomLoggerConfiguration implements Startable, Initialisable {
   @Inject
   CustomLoggerRegistrationService customLoggerRegistrationService;
 
+  @Inject
+  ExtensionsClient extensionsClient;
+
+  /**
+   * Default constructor for auto-initialization
+   */
+  public CustomLoggerConfiguration() {
+  }
+
+  /**
+   * Constructor for using in tests
+   *
+   * @param customLoggerRegistrationService
+   * @param notificationListenerRegistry
+   * @param extensionsClient
+   */
+  public CustomLoggerConfiguration(CustomLoggerRegistrationService customLoggerRegistrationService,
+      NotificationListenerRegistry notificationListenerRegistry, ExtensionsClient extensionsClient) {
+    this.customLoggerRegistrationService = customLoggerRegistrationService;
+    this.notificationListenerRegistry = notificationListenerRegistry;
+    this.extensionsClient = extensionsClient;
+  }
+
+  /**
+   * Constructor for using in tests
+   *
+   * @param customLoggerRegistrationService
+   * @param notificationListenerRegistry
+   * @param extensionsClient
+   */
+  public CustomLoggerConfiguration(CustomLoggerRegistrationService customLoggerRegistrationService,
+      NotificationListenerRegistry notificationListenerRegistry) {
+    this.customLoggerRegistrationService = customLoggerRegistrationService;
+    this.notificationListenerRegistry = notificationListenerRegistry;
+  }
+
   private CustomLogger logger;
   private CustomLoggerNotificationListener notificationListener;
 
@@ -135,52 +172,116 @@ public class CustomLoggerConfiguration implements Startable, Initialisable {
     return applicationName;
   }
 
+  public CustomLoggerConfiguration setApplicationName(String applicationName) {
+    this.applicationName = applicationName;
+    return this;
+  }
+
   public String getApplicationVersion() {
     return applicationVersion;
+  }
+
+  public CustomLoggerConfiguration setApplicationVersion(String applicationVersion) {
+    this.applicationVersion = applicationVersion;
+    return this;
   }
 
   public String getEnvironment() {
     return environment;
   }
 
+  public CustomLoggerConfiguration setEnvironment(String environment) {
+    this.environment = environment;
+    return this;
+  }
+
   public String getDefaultCategory() {
     return defaultCategory;
   }
 
-  public CustomLogger getLogger() {
-    return logger;
+  public CustomLoggerConfiguration setDefaultCategory(String defaultCategory) {
+    this.defaultCategory = defaultCategory;
+    return this;
   }
 
   public boolean isEnableFlowLogs() {
     return enableFlowLogs;
   }
 
+  public CustomLoggerConfiguration setEnableFlowLogs(boolean enableFlowLogs) {
+    this.enableFlowLogs = enableFlowLogs;
+    return this;
+  }
+
   public LogProperties.LogLevel getFlowLogLevel() {
     return flowLogLevel;
+  }
+
+  public CustomLoggerConfiguration setFlowLogLevel(LogProperties.LogLevel flowLogLevel) {
+    this.flowLogLevel = flowLogLevel;
+    return this;
   }
 
   public String getFlowCategorySuffix() {
     return flowCategorySuffix;
   }
 
+  public CustomLoggerConfiguration setFlowCategorySuffix(String flowCategorySuffix) {
+    this.flowCategorySuffix = flowCategorySuffix;
+    return this;
+  }
+
   public boolean isEnableV1Compatibility() {
     return enableV1Compatibility;
+  }
+
+  public CustomLoggerConfiguration setEnableV1Compatibility(boolean enableV1Compatibility) {
+    this.enableV1Compatibility = enableV1Compatibility;
+    return this;
   }
 
   public boolean isFormatAsJson() {
     return formatAsJson;
   }
 
+  public CustomLoggerConfiguration setFormatAsJson(boolean formatAsJson) {
+    this.formatAsJson = formatAsJson;
+    return this;
+  }
+
   public Compressor getCompressor() {
     return compressor;
+  }
+
+  public CustomLoggerConfiguration setCompressor(Compressor compressor) {
+    this.compressor = compressor;
+    return this;
   }
 
   public EncryptionAlgorithm getEncryptionAlgorithm() {
     return encryptionAlgorithm;
   }
 
+  public CustomLoggerConfiguration setEncryptionAlgorithm(EncryptionAlgorithm encryptionAlgorithm) {
+    this.encryptionAlgorithm = encryptionAlgorithm;
+    return this;
+  }
+
   public String getEncryptionPassword() {
     return encryptionPassword;
+  }
+
+  public CustomLoggerConfiguration setEncryptionPassword(String encryptionPassword) {
+    this.encryptionPassword = encryptionPassword;
+    return this;
+  }
+
+  public CustomLogger getLogger() {
+    return logger;
+  }
+
+  public ExtensionsClient getExtensionsClient() {
+    return extensionsClient;
   }
 
   /**

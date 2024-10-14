@@ -7,6 +7,7 @@ import com.avioconsulting.mule.logger.api.processor.MessageAttribute;
 import com.avioconsulting.mule.logger.api.processor.MessageAttributes;
 import com.avioconsulting.mule.logger.internal.config.CustomLoggerConfiguration;
 import com.avioconsulting.mule.logger.internal.utils.CustomLoggerUtils;
+import com.avioconsulting.mule.logger.internal.utils.PayloadTransformer;
 import com.google.gson.Gson;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -22,6 +23,7 @@ import org.apache.logging.log4j.message.ObjectMessage;
 import org.apache.logging.log4j.message.SimpleMessage;
 import org.mule.runtime.api.component.location.ComponentLocation;
 import org.mule.runtime.extension.api.runtime.parameter.ParameterResolver;
+import org.mule.runtime.extension.api.runtime.streaming.StreamingHelper;
 import org.slf4j.LoggerFactory;
 
 public class CustomLogger {
@@ -29,16 +31,19 @@ public class CustomLogger {
   private static final org.slf4j.Logger classLogger = LoggerFactory.getLogger(CustomLogger.class);
   // TODO: Create Logger Cache
 
-  private static final Map<LogProperties.LogLevel, Level> levelMap = new HashMap<LogProperties.LogLevel, Level>() {
-    {
-      put(LogProperties.LogLevel.INFO, Level.INFO);
-      put(LogProperties.LogLevel.DEBUG, Level.DEBUG);
-      put(LogProperties.LogLevel.TRACE, Level.TRACE);
-      put(LogProperties.LogLevel.ERROR, Level.ERROR);
-      put(LogProperties.LogLevel.WARN, Level.WARN);
-      put(LogProperties.LogLevel.FATAL, Level.FATAL);
-    }
-  };
+  private static final Map<LogProperties.LogLevel, Level> levelMap = new HashMap<LogProperties.LogLevel, Level>();
+
+  static {
+    levelMap.put(LogProperties.LogLevel.FATAL, Level.FATAL);
+    levelMap.put(LogProperties.LogLevel.WARN, Level.WARN);
+    levelMap.put(LogProperties.LogLevel.ERROR, Level.ERROR);
+    levelMap.put(LogProperties.LogLevel.TRACE, Level.TRACE);
+    levelMap.put(LogProperties.LogLevel.DEBUG, Level.DEBUG);
+    levelMap.put(LogProperties.LogLevel.INFO, Level.INFO);
+  }
+
+  // Tests can mock this with this visibility
+  public PayloadTransformer payloadTransformer = new PayloadTransformer();
 
   /**
    * Formats dates in ISO 8601 format with milliseconds and UTC timezone.
@@ -53,15 +58,22 @@ public class CustomLogger {
       CustomLoggerConfiguration loggerConfig,
       ComponentLocation location,
       String correlationId) {
+    log(logProperties, messageAttributes, exceptionProperties, additionalProperties, loggerConfig, location,
+        correlationId, null);
+  }
+
+  public void log(LogProperties logProperties,
+      MessageAttributes messageAttributes,
+      ExceptionProperties exceptionProperties,
+      AdditionalProperties additionalProperties,
+      CustomLoggerConfiguration loggerConfig,
+      ComponentLocation location,
+      String correlationId, StreamingHelper streamingHelper) {
     log(logProperties, messageAttributes,
         exceptionProperties, additionalProperties,
         location, correlationId,
-        loggerConfig.getApplicationName(),
-        loggerConfig.getApplicationVersion(),
-        loggerConfig.getEnvironment(),
-        loggerConfig.getDefaultCategory(),
-        loggerConfig.isEnableV1Compatibility(),
-        loggerConfig.isFormatAsJson());
+        loggerConfig,
+        streamingHelper);
   }
 
   public void log(LogProperties logProperties,
@@ -70,12 +82,16 @@ public class CustomLogger {
       AdditionalProperties additionalProperties,
       ComponentLocation location,
       String correlationId,
-      String applicationName,
-      String applicationVersion,
-      String environment,
-      String defaultCategory,
-      boolean enableV1Compatibility,
-      boolean formatAsJson) {
+      CustomLoggerConfiguration loggerConfig,
+      StreamingHelper streamingHelper) {
+
+    String applicationName = loggerConfig.getApplicationName();
+    String applicationVersion = loggerConfig.getApplicationVersion();
+    String environment = loggerConfig.getEnvironment();
+    String defaultCategory = loggerConfig.getDefaultCategory();
+    boolean enableV1Compatibility = loggerConfig.isEnableV1Compatibility();
+    boolean formatAsJson = loggerConfig.isFormatAsJson();
+
     if (enableV1Compatibility) {
       logV1(logProperties, messageAttributes,
           exceptionProperties, additionalProperties,
@@ -126,18 +142,11 @@ public class CustomLogger {
        */
       ParameterResolver<String> payload = logProperties.getPayload();
       if (logger.isEnabled(level) && payload != null) {
-        String payloadToLog;
-        String encryptedString = logProperties.getEncryptedPayload();
-        String compressedString = logProperties.getCompressedPayload();
         String payloadString = payload.resolve();
-        if (encryptedString != null) {
-          payloadToLog = encryptedString;
-        } else if (compressedString != null) {
-          payloadToLog = compressedString;
-        } else {
-          payloadToLog = payloadString;
+        if (streamingHelper != null) {
+          payloadString = payloadTransformer.transformPayload(loggerConfig, streamingHelper, payloadString);
         }
-        logContext.put("payload", payloadToLog);
+        logContext.put("payload", payloadString);
       }
 
       if (exceptionProperties != null) {

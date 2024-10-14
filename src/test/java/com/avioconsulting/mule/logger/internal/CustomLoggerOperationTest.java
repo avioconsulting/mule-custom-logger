@@ -1,49 +1,75 @@
 package com.avioconsulting.mule.logger.internal;
 
+import static com.avioconsulting.mule.logger.api.processor.EncryptionAlgorithm.PBEWithHmacSHA256AndAES_128;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 import com.avioconsulting.mule.logger.api.processor.*;
 import com.avioconsulting.mule.logger.internal.config.CustomLoggerConfiguration;
-import java.io.ByteArrayInputStream;
+import com.mulesoft.modules.cryptography.api.jce.config.JceEncryptionPbeAlgorithm;
 import java.io.InputStream;
-import org.junit.Assert;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.Logger;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.test.appender.ListAppender;
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mule.runtime.api.component.location.ComponentLocation;
 import org.mule.runtime.api.exception.MuleException;
+import org.mule.runtime.api.notification.NotificationListenerRegistry;
+import org.mule.runtime.core.api.util.IOUtils;
+import org.mule.runtime.core.internal.streaming.bytes.ByteArrayCursorStreamProvider;
+import org.mule.runtime.extension.api.client.DefaultOperationParameters;
 import org.mule.runtime.extension.api.client.ExtensionsClient;
 import org.mule.runtime.extension.api.runtime.operation.Result;
 import org.mule.runtime.extension.api.runtime.parameter.CorrelationInfo;
 import org.mule.runtime.extension.api.runtime.parameter.ParameterResolver;
 import org.mule.runtime.extension.api.runtime.streaming.StreamingHelper;
+import org.slf4j.LoggerFactory;
 
 public class CustomLoggerOperationTest {
 
+  private static final org.slf4j.Logger log = LoggerFactory.getLogger(CustomLoggerOperationTest.class);
   private String examplePayload;
+  private static ListAppender appender;
+
+  @BeforeClass
+  public static void init() {
+    LoggerContext loggerContext = LoggerContext.getContext(false);
+    Logger logger = loggerContext.getLogger("com.avioconsulting.api");
+    logger.setLevel(Level.DEBUG);
+    appender = new ListAppender("list");
+    appender.start();
+    loggerContext.getConfiguration().addLoggerAppender(logger, appender);
+  }
 
   @Before
-  public void init() {
-
-    examplePayload = "Example Payload Text";
-
+  public void clear() {
+    appender.clear();
   }
 
   @Test
-  public void log_verifyNoPayloadTransformation_test() {
+  public void log_verifyNoPayloadTransformation_test() throws MuleException {
     CustomLoggerOperation customLoggerOperation = new CustomLoggerOperation();
     ExtensionsClient extensionsClient = mock(ExtensionsClient.class);
-    customLoggerOperation.extensionsClient = extensionsClient;
-
-    // create mock for custom logger and mock log() method so it's never called
-    CustomLoggerConfiguration loggerConfig = mock(CustomLoggerConfiguration.class);
-    CustomLogger logger = mock(CustomLogger.class);
-    doNothing().when(logger).log(any(), any(), any(), any(), any(), any(), any());
-    when(loggerConfig.getLogger()).thenReturn(logger);
-
-    LogProperties logProperties = mock(LogProperties.class);
-    when(logProperties.getPayload()).thenReturn(null);
-
-    customLoggerOperation.log(logProperties,
+    NotificationListenerRegistry notificationListenerRegistry = mock(NotificationListenerRegistry.class);
+    CustomLoggerConfiguration loggerConfig = new CustomLoggerConfiguration(new CustomLoggerRegistrationService(),
+        notificationListenerRegistry, extensionsClient);
+    loggerConfig.setApplicationName("test-application");
+    loggerConfig.setApplicationVersion("1.0-test");
+    loggerConfig.setEnvironment("test");
+    loggerConfig.start();
+    LogProperties lp = new LogProperties();
+    lp.setLevel(LogProperties.LogLevel.ERROR);
+    lp.setCategory("com.avioconsulting.api");
+    lp.setMessage("Some test message");
+    customLoggerOperation.log(lp,
         mock(MessageAttributes.class),
         mock(ExceptionProperties.class),
         mock(AdditionalProperties.class),
@@ -51,137 +77,240 @@ public class CustomLoggerOperationTest {
         mock(ComponentLocation.class),
         mock(CorrelationInfo.class),
         mock(StreamingHelper.class));
-
+    List<String> loggedStrings = appender.getEvents().stream().map(event -> event.getMessage().toString())
+        .collect(Collectors.toList());
+    assertThat(loggedStrings).hasSize(1)
+        .element(0)
+        .asInstanceOf(InstanceOfAssertFactories.STRING)
+        .containsSubsequence("message=Some test message")
+        .containsSubsequence("env=test")
+        .containsSubsequence("appName=test-application")
+        .containsSubsequence("appVersion=1.0-test");
     verifyZeroInteractions(extensionsClient);
   }
 
   @Test
   public void log_compressedPayloadIsSet_test() throws MuleException {
-    // mock and spy inits
+
+    String payloadText = "PayloadText";
     CustomLoggerOperation customLoggerOperation = new CustomLoggerOperation();
-    CustomLoggerOperation spyCustomLoggerOperation = spy(customLoggerOperation);
-    LogProperties logProperties = new LogProperties();
-    LogProperties spyLogProperties = spy(logProperties);
     ExtensionsClient extensionsClient = mock(ExtensionsClient.class);
-    spyCustomLoggerOperation.extensionsClient = extensionsClient;
-    ParameterResolver<String> resolver = mock(ParameterResolver.class);
-
-    // create mock for custom logger and mock log() method so it's never called
-    CustomLoggerConfiguration loggerConfig = mock(CustomLoggerConfiguration.class);
-    CustomLogger logger = mock(CustomLogger.class);
-    doNothing().when(logger).log(any(), any(), any(), any(), any(), any(), any());
-    when(loggerConfig.getLogger()).thenReturn(logger);
-
-    // Mock payload and compressor values
-    when(resolver.resolve()).thenReturn(examplePayload);
-    when(spyLogProperties.getPayload()).thenReturn(resolver);
-    when(loggerConfig.getCompressor()).thenReturn(Compressor.GZIP);
-
-    // mock response from extensions client
-    Result<InputStream, Void> mockResult = mock(Result.class);
-    doReturn(new ByteArrayInputStream(examplePayload.getBytes())).when(mockResult).getOutput();
-    doReturn(mockResult).when(extensionsClient).execute(eq("Compression"), eq("compress"), any());
-
-    // mock response from convertToByteArray
-    doReturn(examplePayload.getBytes()).when(spyCustomLoggerOperation)
-        .convertToByteArray(any(), any());
-
-    // call method
-    spyCustomLoggerOperation.setCompressedPayloadIfNeeded(spyLogProperties,
-        mock(StreamingHelper.class),
-        loggerConfig);
-
-    // assertions
-    verify(extensionsClient, atMost(1)).execute(any(), any(), any());
-    Assert.assertEquals("RXhhbXBsZSBQYXlsb2FkIFRleHQ=", spyLogProperties.getCompressedPayload());
+    ArgumentCaptor<DefaultOperationParameters> captor = ArgumentCaptor.forClass(DefaultOperationParameters.class);
+    when(extensionsClient.execute(eq("Compression"), eq("compress"),
+        captor.capture())).thenReturn(Result.builder().output(payloadText).build());
+    NotificationListenerRegistry notificationListenerRegistry = mock(NotificationListenerRegistry.class);
+    CustomLoggerConfiguration loggerConfig = new CustomLoggerConfiguration(new CustomLoggerRegistrationService(),
+        notificationListenerRegistry, extensionsClient);
+    loggerConfig.setApplicationName("test-application");
+    loggerConfig.setApplicationVersion("1.0-test");
+    loggerConfig.setEnvironment("test");
+    loggerConfig.setCompressor(Compressor.GZIP);
+    loggerConfig.start();
+    LogProperties lp = new LogProperties();
+    lp.setLevel(LogProperties.LogLevel.ERROR);
+    lp.setCategory("com.avioconsulting.api");
+    lp.setMessage("Some test message");
+    lp.setPayload(TestParameterResolver.of(payloadText));
+    StreamingHelper streamingHelper = mock(StreamingHelper.class);
+    when(streamingHelper.resolveCursorProvider(payloadText))
+        .thenReturn(new ByteArrayCursorStreamProvider(payloadText.getBytes()));
+    customLoggerOperation.log(lp,
+        mock(MessageAttributes.class),
+        mock(ExceptionProperties.class),
+        mock(AdditionalProperties.class),
+        loggerConfig,
+        mock(ComponentLocation.class),
+        mock(CorrelationInfo.class),
+        streamingHelper);
+    List<String> loggedStrings = appender.getEvents().stream().map(event -> event.getMessage().toString())
+        .collect(Collectors.toList());
+    assertThat(loggedStrings).hasSize(1)
+        .element(0)
+        .asInstanceOf(InstanceOfAssertFactories.STRING)
+        .containsSubsequence("message=Some test message")
+        .containsSubsequence("env=test")
+        .containsSubsequence("appName=test-application")
+        .containsSubsequence("appVersion=1.0-test")
+        .containsSubsequence("payload=UGF5bG9hZFRleHQ=");
+    assertThat(captor.getValue())
+        .as("Operation config with extension client invocation")
+        .isNotNull()
+        .asInstanceOf(InstanceOfAssertFactories.type(DefaultOperationParameters.class))
+        .extracting(DefaultOperationParameters::get)
+        .asInstanceOf(InstanceOfAssertFactories.MAP)
+        .extractingByKey("content")
+        .asInstanceOf(InstanceOfAssertFactories.type(InputStream.class))
+        .as("Actual Payload text sent to the Compress operation")
+        .satisfies(o -> assertThat(IOUtils.toString(o)).isEqualTo("PayloadText"));
   }
 
   @Test
   public void log_encryptedPayloadIsSet_compressionNull_test() throws MuleException {
-    // mock and spy inits
+
+    String payloadText = "PayloadText";
     CustomLoggerOperation customLoggerOperation = new CustomLoggerOperation();
-    CustomLoggerOperation spyCustomLoggerOperation = spy(customLoggerOperation);
-    LogProperties logProperties = new LogProperties();
-    LogProperties spyLogProperties = spy(logProperties);
     ExtensionsClient extensionsClient = mock(ExtensionsClient.class);
-    spyCustomLoggerOperation.extensionsClient = extensionsClient;
-    Result<InputStream, Void> executeCompress = null;
-    ParameterResolver<String> resolver = mock(ParameterResolver.class);
-    String password = "example-password";
-
-    // create mock for custom logger and mock log() method so it's never called
-    CustomLoggerConfiguration loggerConfig = mock(CustomLoggerConfiguration.class);
-    CustomLogger logger = mock(CustomLogger.class);
-    doNothing().when(logger).log(any(), any(), any(), any(), any(), any(), any());
-    when(loggerConfig.getLogger()).thenReturn(logger);
-
-    // Mock payload and encryption algorithm values, compression is null
-    when(resolver.resolve()).thenReturn(examplePayload);
-    when(spyLogProperties.getPayload()).thenReturn(resolver);
-    when(loggerConfig.getEncryptionAlgorithm()).thenReturn(EncryptionAlgorithm.PBEWithHmacSHA1AndAES_128);
-    when(loggerConfig.getEncryptionPassword()).thenReturn(password);
-
-    // mock response from extensions client
-    Result<InputStream, Void> mockResult = mock(Result.class);
-    doReturn(new ByteArrayInputStream(examplePayload.getBytes())).when(mockResult).getOutput();
-    doReturn(mockResult).when(extensionsClient).execute(eq("Crypto"), eq("jceEncryptPbe"), any());
-
-    // mock response from convertToByteArray
-    doReturn(examplePayload.getBytes()).when(spyCustomLoggerOperation)
-        .convertToByteArray(any(), any());
-
-    // call method
-    spyCustomLoggerOperation.setEncryptedPayloadIfNeeded(spyLogProperties,
+    ArgumentCaptor<DefaultOperationParameters> captor = ArgumentCaptor.forClass(DefaultOperationParameters.class);
+    String encryptedText = "EncryptedText";
+    when(extensionsClient.execute(eq("Crypto"), eq("jceEncryptPbe"),
+        captor.capture())).thenReturn(Result.builder().output(encryptedText).build());
+    NotificationListenerRegistry notificationListenerRegistry = mock(NotificationListenerRegistry.class);
+    CustomLoggerConfiguration loggerConfig = new CustomLoggerConfiguration(new CustomLoggerRegistrationService(),
+        notificationListenerRegistry, extensionsClient);
+    loggerConfig.setApplicationName("test-application");
+    loggerConfig.setApplicationVersion("1.0-test");
+    loggerConfig.setEnvironment("test");
+    loggerConfig.setEncryptionAlgorithm(PBEWithHmacSHA256AndAES_128);
+    loggerConfig.setEncryptionPassword("something123");
+    loggerConfig.start();
+    LogProperties lp = new LogProperties();
+    lp.setLevel(LogProperties.LogLevel.ERROR);
+    lp.setCategory("com.avioconsulting.api");
+    lp.setMessage("Some test message");
+    lp.setPayload(TestParameterResolver.of(payloadText));
+    StreamingHelper streamingHelper = mock(StreamingHelper.class);
+    when(streamingHelper.resolveCursorProvider(encryptedText))
+        .thenReturn(new ByteArrayCursorStreamProvider(encryptedText.getBytes()));
+    customLoggerOperation.log(lp,
+        mock(MessageAttributes.class),
+        mock(ExceptionProperties.class),
+        mock(AdditionalProperties.class),
         loggerConfig,
-        mock(StreamingHelper.class),
-        executeCompress);
+        mock(ComponentLocation.class),
+        mock(CorrelationInfo.class),
+        streamingHelper);
+    List<String> loggedStrings = appender.getEvents().stream().map(event -> event.getMessage().toString())
+        .collect(Collectors.toList());
+    assertThat(loggedStrings).hasSize(1)
+        .element(0)
+        .asInstanceOf(InstanceOfAssertFactories.STRING)
+        .containsSubsequence("message=Some test message")
+        .containsSubsequence("env=test")
+        .containsSubsequence("appName=test-application")
+        .containsSubsequence("appVersion=1.0-test")
+        .containsSubsequence("payload=RW5jcnlwdGVkVGV4dA==");
+    assertThat(captor.getValue())
+        .as("Operation config with extension client invocation")
+        .isNotNull()
+        .asInstanceOf(InstanceOfAssertFactories.type(DefaultOperationParameters.class))
+        .extracting(DefaultOperationParameters::get)
+        .asInstanceOf(InstanceOfAssertFactories.MAP)
+        .containsEntry("algorithm", JceEncryptionPbeAlgorithm.PBEWithHmacSHA256AndAES_128)
+        .containsEntry("password", "something123")
+        .extractingByKey("content")
+        .asInstanceOf(InstanceOfAssertFactories.type(InputStream.class))
+        .as("Actual Payload text sent to the Encryption operation")
+        .satisfies(o -> assertThat(IOUtils.toString(o)).isEqualTo("PayloadText"));
 
-    // assertions
-    verify(extensionsClient, atMost(1)).execute(any(), any(), any());
-    Assert.assertEquals("RXhhbXBsZSBQYXlsb2FkIFRleHQ=", spyLogProperties.getEncryptedPayload());
   }
 
   @Test
   public void log_encryptedPayloadIsSet_compressionNotNull_test() throws MuleException {
-    // mock and spy inits
+
+    String payloadText = "PayloadText";
     CustomLoggerOperation customLoggerOperation = new CustomLoggerOperation();
-    CustomLoggerOperation spyCustomLoggerOperation = spy(customLoggerOperation);
-    LogProperties logProperties = new LogProperties();
-    LogProperties spyLogProperties = spy(logProperties);
     ExtensionsClient extensionsClient = mock(ExtensionsClient.class);
-    spyCustomLoggerOperation.extensionsClient = extensionsClient;
-    ParameterResolver<String> resolver = mock(ParameterResolver.class);
-    String password = "example-password";
+    ArgumentCaptor<DefaultOperationParameters> compression = ArgumentCaptor
+        .forClass(DefaultOperationParameters.class);
+    String compressedPayload = "CompressedPayload";
+    when(extensionsClient.execute(eq("Compression"), eq("compress"),
+        compression.capture())).thenReturn(Result.builder().output(compressedPayload).build());
 
-    // create mock for custom logger and mock log() method so it's never called
-    CustomLoggerConfiguration loggerConfig = mock(CustomLoggerConfiguration.class);
-    CustomLogger logger = mock(CustomLogger.class);
-    doNothing().when(logger).log(any(), any(), any(), any(), any(), any(), any());
-    when(loggerConfig.getLogger()).thenReturn(logger);
+    ArgumentCaptor<DefaultOperationParameters> encryption = ArgumentCaptor
+        .forClass(DefaultOperationParameters.class);
+    String encryptedResult = "CompressedEncryptedResult";
+    when(extensionsClient.execute(eq("Crypto"), eq("jceEncryptPbe"),
+        encryption.capture())).thenReturn(Result.builder().output(encryptedResult).build());
 
-    // Mock payload and encryption algorithm values, compression is null
-    when(resolver.resolve()).thenReturn(examplePayload);
-    when(spyLogProperties.getPayload()).thenReturn(resolver);
-    when(loggerConfig.getEncryptionAlgorithm()).thenReturn(EncryptionAlgorithm.PBEWithHmacSHA1AndAES_128);
-    when(loggerConfig.getEncryptionPassword()).thenReturn(password);
+    NotificationListenerRegistry notificationListenerRegistry = mock(NotificationListenerRegistry.class);
+    CustomLoggerConfiguration loggerConfig = new CustomLoggerConfiguration(new CustomLoggerRegistrationService(),
+        notificationListenerRegistry, extensionsClient);
+    loggerConfig.setApplicationName("test-application");
+    loggerConfig.setApplicationVersion("1.0-test");
+    loggerConfig.setEnvironment("test");
+    loggerConfig.setCompressor(Compressor.GZIP);
+    loggerConfig.setEncryptionAlgorithm(PBEWithHmacSHA256AndAES_128);
+    loggerConfig.setEncryptionPassword("something123");
+    loggerConfig.start();
+    LogProperties lp = new LogProperties();
+    lp.setLevel(LogProperties.LogLevel.ERROR);
+    lp.setCategory("com.avioconsulting.api");
+    lp.setMessage("Some test message");
+    lp.setPayload(TestParameterResolver.of(payloadText));
+    StreamingHelper streamingHelper = mock(StreamingHelper.class);
 
-    // mock response from extensions client
-    Result<InputStream, Void> executeCompress = mock(Result.class);
-    doReturn(new ByteArrayInputStream(examplePayload.getBytes())).when(executeCompress).getOutput();
-    doReturn(executeCompress).when(extensionsClient).execute(eq("Crypto"), eq("jceEncryptPbe"), any());
+    when(streamingHelper.resolveCursorProvider(compressedPayload))
+        .thenReturn(new ByteArrayCursorStreamProvider(compressedPayload.getBytes()));
 
-    // mock response from convertToByteArray
-    doReturn(examplePayload.getBytes()).when(spyCustomLoggerOperation)
-        .convertToByteArray(any(), any());
+    when(streamingHelper.resolveCursorProvider(encryptedResult))
+        .thenReturn(new ByteArrayCursorStreamProvider(encryptedResult.getBytes()));
 
-    // call method
-    spyCustomLoggerOperation.setEncryptedPayloadIfNeeded(spyLogProperties,
+    customLoggerOperation.log(lp,
+        mock(MessageAttributes.class),
+        mock(ExceptionProperties.class),
+        mock(AdditionalProperties.class),
         loggerConfig,
-        mock(StreamingHelper.class),
-        executeCompress);
+        mock(ComponentLocation.class),
+        mock(CorrelationInfo.class),
+        streamingHelper);
 
-    // assertions
-    verify(extensionsClient, atMost(1)).execute(any(), any(), any());
-    Assert.assertEquals("RXhhbXBsZSBQYXlsb2FkIFRleHQ=", spyLogProperties.getEncryptedPayload());
+    List<String> loggedStrings = appender.getEvents().stream().map(event -> event.getMessage().toString())
+        .collect(Collectors.toList());
+    assertThat(loggedStrings).hasSize(1)
+        .element(0)
+        .asInstanceOf(InstanceOfAssertFactories.STRING)
+        .containsSubsequence("message=Some test message")
+        .containsSubsequence("env=test")
+        .containsSubsequence("appName=test-application")
+        .containsSubsequence("appVersion=1.0-test")
+        .containsSubsequence("payload=Q29tcHJlc3NlZEVuY3J5cHRlZFJlc3VsdA==");
+
+    assertThat(compression.getValue())
+        .as("Operation config with extension client invocation")
+        .isNotNull()
+        .asInstanceOf(InstanceOfAssertFactories.type(DefaultOperationParameters.class))
+        .extracting(DefaultOperationParameters::get)
+        .asInstanceOf(InstanceOfAssertFactories.MAP)
+        .extractingByKey("content")
+        .asInstanceOf(InstanceOfAssertFactories.type(InputStream.class))
+        .as("Actual Payload text sent to the Compress operation")
+        .satisfies(o -> assertThat(IOUtils.toString(o)).isEqualTo(payloadText));
+
+    assertThat(encryption.getValue())
+        .as("Operation config with extension client invocation")
+        .isNotNull()
+        .asInstanceOf(InstanceOfAssertFactories.type(DefaultOperationParameters.class))
+        .extracting(DefaultOperationParameters::get)
+        .asInstanceOf(InstanceOfAssertFactories.MAP)
+        .containsEntry("algorithm", JceEncryptionPbeAlgorithm.PBEWithHmacSHA256AndAES_128)
+        .containsEntry("password", "something123")
+        .extractingByKey("content")
+        .asInstanceOf(InstanceOfAssertFactories.type(InputStream.class))
+        .as("Compressed Payload text sent to the Encryption operation")
+        .satisfies(o -> assertThat(IOUtils.toString(o)).isEqualTo(compressedPayload));
+
+  }
+
+  public static class TestParameterResolver implements ParameterResolver<String> {
+
+    private final String value;
+
+    public TestParameterResolver(String value) {
+      this.value = value;
+    }
+
+    public static TestParameterResolver of(String value) {
+      return new TestParameterResolver(value);
+    }
+
+    @Override
+    public String resolve() {
+      return value;
+    }
+
+    @Override
+    public Optional<String> getExpression() {
+      return Optional.empty();
+    }
   }
 }

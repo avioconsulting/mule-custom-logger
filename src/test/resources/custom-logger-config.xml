@@ -22,4 +22,13 @@ http://www.mulesoft.org/schema/mule/avio-logger http://www.mulesoft.org/schema/m
         <avio-logger:log doc:name="Custom logger" doc:id="322979c8-a722-4fea-a272-cf579529c78c"
                          config-ref="AVIO_Logger_Config_Json" message="#['Logger printed as JSON String']"/>
     </flow>
+    <flow name="custom-logger-flow-ref" doc:id="0068e855-24dc-41a4-8e13-41ca38de99ba">
+        <set-variable value="#[{'traceId': '76d5bcae3d49ff2e1b5ace9f0dcbee42','spanId': 'fa6fbe46daf007b9','spanIdLong': '18045851443427018681','traceparent': '00-76d5bcae3d49ff2e1b5ace9f0dcbee42-fa6fbe46daf007b9-01','TRACE_TRANSACTION_ID': 'bfacf7c0-d583-11ee-adfa-bcd074a0357f','traceIdLongLowPart': '1971114969454603842'}]" doc:name="Set Variable" doc:id="d7a7dade-4453-40cb-97bc-3ca7034372c6" variableName="OTEL_TRACE_CONTEXT"/>
+        <flow-ref name="simple-subflow"/>
+    </flow>
+    <sub-flow name="simple-subflow">
+        <avio-logger:log doc:name="Custom logger"
+                         config-ref="AVIO_Logger_Config_Json"
+                         message="#['Logger printed as JSON String']"/>
+    </sub-flow>
 </mule>

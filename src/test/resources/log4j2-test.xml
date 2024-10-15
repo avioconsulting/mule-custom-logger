@@ -4,14 +4,16 @@
         <Console name="Console" target="SYSTEM_OUT">
             <PatternLayout pattern="%-5p %d [%t] %c: %m%n"/>
         </Console>
-        <File name="file" fileName="test.log">
-            <PatternLayout pattern="%-5p %d [%t] [processor: %X{processorPath}; event: %X{correlationId}] %c: %m%n"/>
+        <File name="file" fileName="unit-test.log">
+            <PatternLayout pattern="%m%n"/>
         </File>
     </Appenders>
 
     <Loggers>
         <AsyncRoot level="INFO">
+            <!-- Test read from this unit-test.log for verifying statements -->
             <AppenderRef ref="file"/>
+            <AppenderRef ref="Console"/>
         </AsyncRoot>
     </Loggers>
 

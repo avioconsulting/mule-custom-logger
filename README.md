@@ -37,7 +37,13 @@ One of the reasons for developing this custom module is to feed JSON logs to log
 # Using the Custom Logger Processor
 Here is how mule-custom-logger looks like in action.
 
-![image](https://user-images.githubusercontent.com/34731865/57938654-361bee00-788e-11e9-9ff6-6eadf9b77a1b.png)
+**Global configuration:**
+
+![global-configuration](./src/main/docs/images/global-config.png)
+
+**Log Operation:**
+
+![log-operation-configuration](./src/main/docs/images/log-operation-config.png)
 
 
 This will log Java HashMap as shown below.

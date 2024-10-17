@@ -91,7 +91,7 @@ public class CustomLoggerConfiguration implements Startable, Initialisable {
   private boolean enableV1Compatibility;
 
   @Parameter
-  @DisplayName("Format as JSON")
+  @DisplayName("Format Message as JSON String")
   @Summary("Writes the Log message as JSON String. This can be useful where appenders (eg. OpenTelemetry) does not support using layouts but backend system requires a JSON formatted message.")
   @Optional(defaultValue = "false")
   @Expression(ExpressionSupport.NOT_SUPPORTED)

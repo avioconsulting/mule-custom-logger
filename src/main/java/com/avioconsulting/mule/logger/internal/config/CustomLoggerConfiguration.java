@@ -35,33 +35,37 @@ public class CustomLoggerConfiguration implements Startable, Initialisable {
 
   private final org.slf4j.Logger classLogger = LoggerFactory.getLogger(CustomLoggerConfiguration.class);
   public static final String DEFAULT_CATEGORY = "com.avioconsulting.api";
-  public static final String DEFAULT_APP_NAME = "#[app.name]";
-  public static final String DEFAULT_ENV = "#[p('env')]";
-  public static final String EXAMPLE_APP_VERSION = "#[p('appVersion')]";
+  public static final String DEFAULT_APP_NAME = "${app.name}";
+  public static final String DEFAULT_ENV = "${env}";
+  public static final String DEFAULT_APP_VERSION = "${app.version}";
   public static final String DEFAULT_FLOW_CATEGORY = "flow";
 
   @Parameter
   @DisplayName("Application Name")
   @Summary("Name of the MuleSoft Application")
   @Optional(defaultValue = DEFAULT_APP_NAME)
+  @Expression(ExpressionSupport.NOT_SUPPORTED)
   private String applicationName;
 
   @Parameter
   @DisplayName("Application Version")
   @Summary("Version of the MuleSoft Application")
-  @Example(EXAMPLE_APP_VERSION)
+  @Optional(defaultValue = DEFAULT_APP_VERSION)
+  @Expression(ExpressionSupport.NOT_SUPPORTED)
   private String applicationVersion;
 
   @Parameter
   @DisplayName("Environment")
   @Summary("MuleSoft Environment")
   @Optional(defaultValue = DEFAULT_ENV)
+  @Expression(ExpressionSupport.NOT_SUPPORTED)
   private String environment;
 
   @Parameter
   @DisplayName("Default Log Category")
   @Summary("A string which will be prefixed to all log category suffixes defined in the loggers")
   @Optional(defaultValue = DEFAULT_CATEGORY)
+  @Expression(ExpressionSupport.NOT_SUPPORTED)
   private String defaultCategory;
 
   @Parameter
@@ -75,12 +79,14 @@ public class CustomLoggerConfiguration implements Startable, Initialisable {
   @DisplayName("Flow Log Level")
   @Summary("The level flow logs will be logged at if enabled")
   @Optional(defaultValue = "DEBUG")
+  @Expression(ExpressionSupport.NOT_SUPPORTED)
   private LogProperties.LogLevel flowLogLevel;
 
   @Parameter
   @DisplayName("Flow Log Category Suffix")
   @Summary("This category will be appended to the default logger category and used for all flow logs")
   @Optional(defaultValue = DEFAULT_FLOW_CATEGORY)
+  @Expression(ExpressionSupport.NOT_SUPPORTED)
   private String flowCategorySuffix;
 
   @Parameter
@@ -119,6 +125,7 @@ public class CustomLoggerConfiguration implements Startable, Initialisable {
   @Optional()
   @Password
   @Placement(tab = "Encryption", order = 2)
+  @Expression(ExpressionSupport.NOT_SUPPORTED)
   private String encryptionPassword;
 
   @Inject
@@ -155,7 +162,6 @@ public class CustomLoggerConfiguration implements Startable, Initialisable {
    *
    * @param customLoggerRegistrationService
    * @param notificationListenerRegistry
-   * @param extensionsClient
    */
   public CustomLoggerConfiguration(CustomLoggerRegistrationService customLoggerRegistrationService,
       NotificationListenerRegistry notificationListenerRegistry) {

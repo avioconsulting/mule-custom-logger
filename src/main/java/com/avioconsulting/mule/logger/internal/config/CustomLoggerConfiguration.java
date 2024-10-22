@@ -9,7 +9,8 @@ import com.avioconsulting.mule.logger.internal.CustomLogger;
 import com.avioconsulting.mule.logger.internal.CustomLoggerOperation;
 import com.avioconsulting.mule.logger.internal.CustomLoggerRegistrationService;
 import com.avioconsulting.mule.logger.internal.CustomLoggerTimerScopeOperations;
-import com.avioconsulting.mule.logger.internal.listeners.CustomLoggerNotificationListener;
+import com.avioconsulting.mule.logger.internal.listeners.CustomLoggerFlowRefNotificationListener;
+import com.avioconsulting.mule.logger.internal.listeners.CustomLoggerPipelineNotificationListener;
 import javax.inject.Inject;
 import org.mule.runtime.api.exception.MuleException;
 import org.mule.runtime.api.lifecycle.Initialisable;
@@ -170,7 +171,7 @@ public class CustomLoggerConfiguration implements Startable, Initialisable {
   }
 
   private CustomLogger logger;
-  private CustomLoggerNotificationListener notificationListener;
+  private CustomLoggerPipelineNotificationListener notificationListener;
 
   private static boolean isNotificationListenerRegistered = false;
 
@@ -314,8 +315,9 @@ public class CustomLoggerConfiguration implements Startable, Initialisable {
       synchronized (CustomLoggerConfiguration.class) {
         if (!isNotificationListenerRegistered) {
           classLogger.info("Creating and registering notification listener");
-          notificationListener = new CustomLoggerNotificationListener(this);
+          notificationListener = new CustomLoggerPipelineNotificationListener(this);
           notificationListenerRegistry.registerListener(notificationListener);
+          notificationListenerRegistry.registerListener(new CustomLoggerFlowRefNotificationListener(this));
           isNotificationListenerRegistered = true;
         }
       }

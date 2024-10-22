@@ -3,3 +3,4 @@
 target/
 *.iml
 anypoint-pom.xml
+unit-test.log

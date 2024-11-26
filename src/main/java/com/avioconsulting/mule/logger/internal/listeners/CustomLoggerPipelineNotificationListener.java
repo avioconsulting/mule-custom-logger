@@ -6,6 +6,8 @@ import org.mule.runtime.api.notification.PipelineMessageNotificationListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map;
+
 /*
  * Listener for Mule notifications on flow start, end and completion.
  */
@@ -49,9 +51,10 @@ public class CustomLoggerPipelineNotificationListener
             return;
         }
         classLogger.debug(message);
+        Map<String, String> flowLogAttributes = getFlowLogAttributes(notification);
         logMessage(notification.getComponent().getLocation(), notification.getEvent(), message,
             config.getFlowCategorySuffix(),
-            config.getFlowLogLevel());
+            config.getFlowLogLevel(), flowLogAttributes);
       } catch (Exception e) {
         classLogger.error("Error processing flow notification", e);
       }

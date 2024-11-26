@@ -4,3 +4,6 @@ target/
 *.iml
 anypoint-pom.xml
 unit-test.log
+
+docs/
+.flattened-pom.xml

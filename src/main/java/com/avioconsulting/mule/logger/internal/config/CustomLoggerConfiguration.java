@@ -4,6 +4,7 @@ import static org.mule.runtime.api.i18n.I18nMessageFactory.createStaticMessage;
 
 import com.avioconsulting.mule.logger.api.processor.Compressor;
 import com.avioconsulting.mule.logger.api.processor.EncryptionAlgorithm;
+import com.avioconsulting.mule.logger.api.processor.FlowLogAttributesExpression;
 import com.avioconsulting.mule.logger.api.processor.LogProperties;
 import com.avioconsulting.mule.logger.internal.CustomLogger;
 import com.avioconsulting.mule.logger.internal.CustomLoggerOperation;
@@ -18,13 +19,19 @@ import org.mule.runtime.api.lifecycle.InitialisationException;
 import org.mule.runtime.api.lifecycle.Startable;
 import org.mule.runtime.api.meta.ExpressionSupport;
 import org.mule.runtime.api.notification.NotificationListenerRegistry;
+import org.mule.runtime.core.api.el.ExpressionManager;
 import org.mule.runtime.extension.api.annotation.Expression;
 import org.mule.runtime.extension.api.annotation.Operations;
+import org.mule.runtime.extension.api.annotation.param.NullSafe;
 import org.mule.runtime.extension.api.annotation.param.Optional;
 import org.mule.runtime.extension.api.annotation.param.Parameter;
 import org.mule.runtime.extension.api.annotation.param.display.*;
 import org.mule.runtime.extension.api.client.ExtensionsClient;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * This class represents an extension configuration, values set in this class
@@ -84,6 +91,14 @@ public class CustomLoggerConfiguration implements Startable, Initialisable {
   private LogProperties.LogLevel flowLogLevel;
 
   @Parameter
+  @DisplayName("Flow Log Attributes")
+  @Summary("The level flow logs will be logged at if enabled")
+  @NullSafe
+  @Optional
+  @Expression(ExpressionSupport.NOT_SUPPORTED)
+  private List<FlowLogAttributesExpression> flowLogAttributes;
+
+  @Parameter
   @DisplayName("Flow Log Category Suffix")
   @Summary("This category will be appended to the default logger category and used for all flow logs")
   @Optional(defaultValue = DEFAULT_FLOW_CATEGORY)
@@ -138,6 +153,10 @@ public class CustomLoggerConfiguration implements Startable, Initialisable {
   @Inject
   ExtensionsClient extensionsClient;
 
+  @Inject
+  ExpressionManager expressionManager;
+  private Map<String, String> flowLogAttributesMap;
+
   /**
    * Default constructor for auto-initialization
    */
@@ -174,6 +193,15 @@ public class CustomLoggerConfiguration implements Startable, Initialisable {
   private CustomLoggerPipelineNotificationListener notificationListener;
 
   private static boolean isNotificationListenerRegistered = false;
+
+  public Map<String, String> getFlowLogAttributesMap() {
+    return flowLogAttributesMap;
+  }
+
+  public CustomLoggerConfiguration setFlowLogAttributes(List<FlowLogAttributesExpression> flowLogAttributes) {
+    this.flowLogAttributes = flowLogAttributes;
+    return this;
+  }
 
   public String getApplicationName() {
     return applicationName;
@@ -291,6 +319,10 @@ public class CustomLoggerConfiguration implements Startable, Initialisable {
     return extensionsClient;
   }
 
+  public ExpressionManager getExpressionManager() {
+    return expressionManager;
+  }
+
   /**
    * This method is invoked by the MuleSoft application when the AVIO Custom
    * Logger is invoked to create the connection.
@@ -312,6 +344,8 @@ public class CustomLoggerConfiguration implements Startable, Initialisable {
     customLoggerRegistrationService.setConfig(this);
     if (isEnableFlowLogs()) {
       classLogger.info("Flow logs enabled");
+      flowLogAttributesMap = flowLogAttributes.stream().collect(Collectors
+          .toMap(FlowLogAttributesExpression::getFlowName, FlowLogAttributesExpression::getExpressionText));
       synchronized (CustomLoggerConfiguration.class) {
         if (!isNotificationListenerRegistered) {
           classLogger.info("Creating and registering notification listener");

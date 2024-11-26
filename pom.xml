@@ -10,7 +10,7 @@
   </parent>
 
   <artifactId>mule-custom-logger</artifactId>
-  <version>3.0.1-SNAPSHOT</version>
+  <version>3.1.0-SNAPSHOT</version>
   <packaging>mule-extension</packaging>
   <name>Mule Custom Logger</name>
   <description>Mule Custom Logger module that provides standard structured logging</description>

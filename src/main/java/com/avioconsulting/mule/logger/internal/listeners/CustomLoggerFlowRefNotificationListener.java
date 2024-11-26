@@ -59,8 +59,9 @@ public class CustomLoggerFlowRefNotificationListener
             return;
         }
         classLogger.info(message);
+        Map<String, String> flowLogAttributes = getFlowLogAttributes(notification);
         logMessage(location, notification.getEvent(), message, FLOW_REF_CATEGORY_SUFFIX,
-            config.getFlowLogLevel());
+            config.getFlowLogLevel(), flowLogAttributes);
       } catch (Exception e) {
         classLogger.error("Error processing flow notification", e);
       }
@@ -69,4 +70,5 @@ public class CustomLoggerFlowRefNotificationListener
           "Configuration hasn't been supplied to notification listener yet, flow logs won't be generated.");
     }
   }
+
 }

@@ -13,7 +13,7 @@ import org.mule.runtime.core.api.event.CoreEvent;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.Duration;
+import java.util.Collections;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -44,7 +44,8 @@ public class CustomLoggerArtifactTest extends MuleArtifactFunctionalTestCase {
   @Test
   public void testLoggerConfigForCorrelationId() throws Exception {
     // TODO: Intercept logs and validate entries
-    CoreEvent coreEvent = flowRunner("custom-logger-configFlow").run();
+    CoreEvent coreEvent = flowRunner("custom-logger-configFlow")
+        .withAttributes(Collections.singletonMap("some", "value")).run();
     Assert.assertNotNull(coreEvent);
   }
 

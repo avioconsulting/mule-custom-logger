@@ -62,10 +62,13 @@ public abstract class CustomLoggerAbstractNotificationListener {
       if (value == null)
         value = emptyAttributes;
     }
-    /** Flow name can contain wildcard (*)
-     * We only look for wildcard either starting of the string or ending of the string
+    /**
+     * Flow name can contain wildcard (*)
+     * We only look for wildcard either starting of the string or ending of the
+     * string
      * ex: mq-listener-* will look for all the flows that starts with mq-listener
-     * ex: *-mq-flow will look for all the flows that ends with -mq-flow **/
+     * ex: *-mq-flow will look for all the flows that ends with -mq-flow
+     **/
     else {
       List<Map.Entry<String, String>> matchedEntries = config.getFlowLogAttributesMap().entrySet().stream()
           .filter(entry -> matchWildcard(entry.getKey(), notification.getResourceIdentifier()))

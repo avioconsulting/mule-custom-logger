@@ -12,7 +12,9 @@ import org.mule.runtime.api.metadata.TypedValue;
 import org.mule.runtime.api.notification.EnrichedServerNotification;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public abstract class CustomLoggerAbstractNotificationListener {
   protected final CustomLoggerConfiguration config;
@@ -60,6 +62,51 @@ public abstract class CustomLoggerAbstractNotificationListener {
       if (value == null)
         value = emptyAttributes;
     }
+    /** Flow name can contain wildcard (*)
+     * We only look for wildcard either starting of the string or ending of the string
+     * ex: mq-listener-* will look for all the flows that starts with mq-listener
+     * ex: *-mq-flow will look for all the flows that ends with -mq-flow **/
+    else {
+      List<Map.Entry<String, String>> matchedEntries = config.getFlowLogAttributesMap().entrySet().stream()
+          .filter(entry -> matchWildcard(entry.getKey(), notification.getResourceIdentifier()))
+          .collect(Collectors.toList());
+      if (!matchedEntries.isEmpty()) {
+        expression = matchedEntries.get(0).getValue();
+        TypedValue<Map<String, String>> evaluate = (TypedValue<Map<String, String>>) config
+            .getExpressionManager()
+            .evaluate("#[" + expression + "]",
+                notification.getEvent().asBindingContext());
+        value = evaluate.getValue();
+        if (value == null)
+          value = emptyAttributes;
+      }
+    }
     return value;
   }
+
+  public boolean matchWildcard(String wildcardKey, String searchString) {
+    // Trim the wildcard key
+    String cleanWildcardKey = wildcardKey.trim();
+
+    // If wildcard key is just '*', match everything
+    if (cleanWildcardKey.equals("*")) {
+      return true;
+    }
+
+    // Handle start wildcard
+    if (cleanWildcardKey.startsWith("*")) {
+      String suffix = cleanWildcardKey.substring(1);
+      return searchString.endsWith(suffix);
+    }
+
+    // Handle end wildcard
+    if (cleanWildcardKey.endsWith("*")) {
+      String prefix = cleanWildcardKey.substring(0, cleanWildcardKey.length() - 1);
+      return searchString.startsWith(prefix);
+    }
+
+    // Exact match if no wildcards
+    return searchString.equals(wildcardKey);
+  }
+
 }

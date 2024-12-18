@@ -15,9 +15,9 @@ http://www.mulesoft.org/schema/mule/avio-logger http://www.mulesoft.org/schema/m
 
     <avio-logger:config name="AVIO_Logger_Config" doc:name="AVIO Logger Config" doc:id="84bd2712-015b-46b8-93e9-94536774b8ad"
                       applicationVersion="1" applicationName="munit" environment="test" compressor="GZIP" encryptionAlgorithm="PBEWithHmacSHA512AndAES_128" encryptionPassword="example" enableFlowLogs="true" flowLogLevel="INFO">
-        <avio-logger:flow-log-attributes >
-            <avio-logger:flow-attributes-expression flowName="custom-logger-configFlow" expressionText="attributes" />
-        </avio-logger:flow-log-attributes>
+        <avio-logger:flow-log-configs >
+            <avio-logger:flow-logs-config flowName="custom-logger-configFlow" attributesExpressionText="attributes" />
+        </avio-logger:flow-log-configs>
     </avio-logger:config>
 
     <flow name="custom-logger-configFlow" doc:id="0068e855-24dc-41a4-8e13-41ca38de99ba">

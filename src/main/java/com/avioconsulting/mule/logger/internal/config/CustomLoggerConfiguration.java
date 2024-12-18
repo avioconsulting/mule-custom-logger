@@ -4,7 +4,7 @@ import static org.mule.runtime.api.i18n.I18nMessageFactory.createStaticMessage;
 
 import com.avioconsulting.mule.logger.api.processor.Compressor;
 import com.avioconsulting.mule.logger.api.processor.EncryptionAlgorithm;
-import com.avioconsulting.mule.logger.api.processor.FlowLogAttributesExpression;
+import com.avioconsulting.mule.logger.api.processor.FlowLogConfig;
 import com.avioconsulting.mule.logger.api.processor.LogProperties;
 import com.avioconsulting.mule.logger.internal.CustomLogger;
 import com.avioconsulting.mule.logger.internal.CustomLoggerOperation;
@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -96,7 +97,7 @@ public class CustomLoggerConfiguration implements Startable, Initialisable {
   @NullSafe
   @Optional
   @Expression(ExpressionSupport.NOT_SUPPORTED)
-  private List<FlowLogAttributesExpression> flowLogAttributes;
+  private List<FlowLogConfig> flowLogConfigs;
 
   @Parameter
   @DisplayName("Flow Log Category Suffix")
@@ -155,7 +156,7 @@ public class CustomLoggerConfiguration implements Startable, Initialisable {
 
   @Inject
   ExpressionManager expressionManager;
-  private Map<String, String> flowLogAttributesMap;
+  private Map<String, FlowLogConfig> flowLogConfigMap;
 
   /**
    * Default constructor for auto-initialization
@@ -194,12 +195,12 @@ public class CustomLoggerConfiguration implements Startable, Initialisable {
 
   private static boolean isNotificationListenerRegistered = false;
 
-  public Map<String, String> getFlowLogAttributesMap() {
-    return flowLogAttributesMap;
+  public Map<String, FlowLogConfig> getFlowLogConfigMap() {
+    return flowLogConfigMap;
   }
 
-  public CustomLoggerConfiguration setFlowLogAttributes(List<FlowLogAttributesExpression> flowLogAttributes) {
-    this.flowLogAttributes = flowLogAttributes;
+  public CustomLoggerConfiguration setFlowLogConfigs(List<FlowLogConfig> flowLogConfigs) {
+    this.flowLogConfigs = flowLogConfigs;
     return this;
   }
 
@@ -344,8 +345,8 @@ public class CustomLoggerConfiguration implements Startable, Initialisable {
     customLoggerRegistrationService.setConfig(this);
     if (isEnableFlowLogs()) {
       classLogger.info("Flow logs enabled");
-      flowLogAttributesMap = flowLogAttributes.stream().collect(Collectors
-          .toMap(FlowLogAttributesExpression::getFlowName, FlowLogAttributesExpression::getExpressionText));
+      flowLogConfigMap = flowLogConfigs.stream().collect(
+          Collectors.toMap(FlowLogConfig::getFlowName, Function.identity()));
       synchronized (CustomLoggerConfiguration.class) {
         if (!isNotificationListenerRegistered) {
           classLogger.info("Creating and registering notification listener");

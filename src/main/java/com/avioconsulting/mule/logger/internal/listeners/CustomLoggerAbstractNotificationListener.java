@@ -1,9 +1,6 @@
 package com.avioconsulting.mule.logger.internal.listeners;
 
-import com.avioconsulting.mule.logger.api.processor.AdditionalProperties;
-import com.avioconsulting.mule.logger.api.processor.ExceptionProperties;
-import com.avioconsulting.mule.logger.api.processor.LogProperties;
-import com.avioconsulting.mule.logger.api.processor.MessageAttributes;
+import com.avioconsulting.mule.logger.api.processor.*;
 import com.avioconsulting.mule.logger.internal.CustomLogger;
 import com.avioconsulting.mule.logger.internal.config.CustomLoggerConfiguration;
 import org.mule.runtime.api.component.location.ComponentLocation;
@@ -53,10 +50,10 @@ public abstract class CustomLoggerAbstractNotificationListener {
 
   protected Map<String, String> getFlowLogAttributes(EnrichedServerNotification notification) {
     Map<String, String> value = emptyAttributes;
-    String expression = config.getFlowLogAttributesMap().get(notification.getResourceIdentifier());
-    if (expression != null) {
+    FlowLogConfig flowLogConfig = config.getFlowLogConfigMap().get(notification.getResourceIdentifier());
+    if (flowLogConfig != null) {
       TypedValue<Map<String, String>> evaluate = (TypedValue<Map<String, String>>) config.getExpressionManager()
-          .evaluate("#[" + expression + "]",
+          .evaluate("#[" + flowLogConfig.getExpressionText().getAttributesExpressionText() + "]",
               notification.getEvent().asBindingContext());
       value = evaluate.getValue();
       if (value == null)
@@ -70,14 +67,14 @@ public abstract class CustomLoggerAbstractNotificationListener {
      * ex: *-mq-flow will look for all the flows that ends with -mq-flow
      **/
     else {
-      List<Map.Entry<String, String>> matchedEntries = config.getFlowLogAttributesMap().entrySet().stream()
+      List<Map.Entry<String, FlowLogConfig>> matchedEntries = config.getFlowLogConfigMap().entrySet().stream()
           .filter(entry -> matchWildcard(entry.getKey(), notification.getResourceIdentifier()))
           .collect(Collectors.toList());
       if (!matchedEntries.isEmpty()) {
-        expression = matchedEntries.get(0).getValue();
+        flowLogConfig = matchedEntries.get(0).getValue();
         TypedValue<Map<String, String>> evaluate = (TypedValue<Map<String, String>>) config
             .getExpressionManager()
-            .evaluate("#[" + expression + "]",
+            .evaluate("#[" + flowLogConfig.getExpressionText().getAttributesExpressionText() + "]",
                 notification.getEvent().asBindingContext());
         value = evaluate.getValue();
         if (value == null)

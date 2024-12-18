@@ -1,12 +1,16 @@
 package com.avioconsulting.mule.logger.internal.listeners;
 
+import com.avioconsulting.mule.logger.api.processor.FlowLogConfig;
 import com.avioconsulting.mule.logger.internal.config.CustomLoggerConfiguration;
+import org.mule.runtime.api.metadata.TypedValue;
 import org.mule.runtime.api.notification.PipelineMessageNotification;
 import org.mule.runtime.api.notification.PipelineMessageNotificationListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /*
  * Listener for Mule notifications on flow start, end and completion.
@@ -37,10 +41,22 @@ public class CustomLoggerPipelineNotificationListener
             + "]");
     if (config != null) {
       try {
+        String msgToAppend = "";
+        List<Map.Entry<String, FlowLogConfig>> matchedEntries = config.getFlowLogConfigMap().entrySet().stream()
+            .filter(entry -> matchWildcard(entry.getKey(), notification.getResourceIdentifier()))
+            .collect(Collectors.toList());
+        if (!matchedEntries.isEmpty()) {
+          FlowLogConfig flowLogConfig = matchedEntries.get(0).getValue();
+          TypedValue<String> evaluate = (TypedValue<String>) config
+              .getExpressionManager()
+              .evaluate("#[" + flowLogConfig.getExpressionText().getMessageExpressionText() + "]",
+                  notification.getEvent().asBindingContext());
+          msgToAppend = evaluate.getValue();
+        }
         String message = "Event not processed yet, this should never be shown";
         switch (Integer.parseInt(notification.getAction().getIdentifier())) {
           case PipelineMessageNotification.PROCESS_START:
-            message = "Flow [" + notification.getResourceIdentifier() + "]" + " start";
+            message = "Flow [" + notification.getResourceIdentifier() + "]" + " start " + msgToAppend;
             break;
           case PipelineMessageNotification.PROCESS_COMPLETE:
             message = "Flow [" + notification.getResourceIdentifier() + "]" + " end";

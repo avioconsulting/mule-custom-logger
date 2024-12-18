@@ -72,7 +72,12 @@ public class CustomLoggerPipelineNotificationListener
             config.getFlowCategorySuffix(),
             config.getFlowLogLevel(), flowLogAttributes);
       } catch (Exception e) {
-        classLogger.error("Error processing flow notification", e);
+        if (e.getClass().getName().equals("java.lang.ClassCastException")
+            || e.getClass().getName().equals("ClassCastException")) {
+          classLogger.error("Message expression text in flow-log-config needs to be a String", e);
+        } else {
+          classLogger.error("Error processing flow notification", e);
+        }
       }
     } else {
       classLogger.warn(

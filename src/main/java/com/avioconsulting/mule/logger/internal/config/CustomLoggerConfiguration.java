@@ -345,6 +345,13 @@ public class CustomLoggerConfiguration implements Startable, Initialisable {
     customLoggerRegistrationService.setConfig(this);
     if (isEnableFlowLogs()) {
       classLogger.info("Flow logs enabled");
+      flowLogConfigs.forEach(flowLogConfig -> {
+        if (flowLogConfig.getExpressionText().getMessageExpressionText() == null
+            && flowLogConfig.getExpressionText().getAttributesExpressionText() == null) {
+          throw new IllegalStateException(
+              "One of attributesExpressionText or messageExpressionText must be defined in flow-logs-config");
+        }
+      });
       flowLogConfigMap = flowLogConfigs.stream().collect(
           Collectors.toMap(FlowLogConfig::getFlowName, Function.identity()));
       synchronized (CustomLoggerConfiguration.class) {

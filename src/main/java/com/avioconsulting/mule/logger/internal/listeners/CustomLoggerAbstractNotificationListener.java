@@ -51,14 +51,6 @@ public abstract class CustomLoggerAbstractNotificationListener {
   protected Map<String, String> getFlowLogAttributes(EnrichedServerNotification notification) {
     Map<String, String> value = emptyAttributes;
     FlowLogConfig flowLogConfig = config.getFlowLogConfigMap().get(notification.getResourceIdentifier());
-    if (flowLogConfig != null) {
-      TypedValue<Map<String, String>> evaluate = (TypedValue<Map<String, String>>) config.getExpressionManager()
-          .evaluate("#[" + flowLogConfig.getExpressionText().getAttributesExpressionText() + "]",
-              notification.getEvent().asBindingContext());
-      value = evaluate.getValue();
-      if (value == null)
-        value = emptyAttributes;
-    }
     /**
      * Flow name can contain wildcard (*)
      * We only look for wildcard either starting of the string or ending of the
@@ -66,20 +58,18 @@ public abstract class CustomLoggerAbstractNotificationListener {
      * ex: mq-listener-* will look for all the flows that starts with mq-listener
      * ex: *-mq-flow will look for all the flows that ends with -mq-flow
      **/
-    else {
-      List<Map.Entry<String, FlowLogConfig>> matchedEntries = config.getFlowLogConfigMap().entrySet().stream()
-          .filter(entry -> matchWildcard(entry.getKey(), notification.getResourceIdentifier()))
-          .collect(Collectors.toList());
-      if (!matchedEntries.isEmpty()) {
-        flowLogConfig = matchedEntries.get(0).getValue();
-        TypedValue<Map<String, String>> evaluate = (TypedValue<Map<String, String>>) config
-            .getExpressionManager()
-            .evaluate("#[" + flowLogConfig.getExpressionText().getAttributesExpressionText() + "]",
-                notification.getEvent().asBindingContext());
-        value = evaluate.getValue();
-        if (value == null)
-          value = emptyAttributes;
-      }
+    List<Map.Entry<String, FlowLogConfig>> matchedEntries = config.getFlowLogConfigMap().entrySet().stream()
+        .filter(entry -> matchWildcard(entry.getKey(), notification.getResourceIdentifier()))
+        .collect(Collectors.toList());
+    if (!matchedEntries.isEmpty()) {
+      flowLogConfig = matchedEntries.get(0).getValue();
+      TypedValue<Map<String, String>> evaluate = (TypedValue<Map<String, String>>) config
+          .getExpressionManager()
+          .evaluate("#[" + flowLogConfig.getExpressionText().getAttributesExpressionText() + "]",
+              notification.getEvent().asBindingContext());
+      value = evaluate.getValue();
+      if (value == null)
+        value = emptyAttributes;
     }
     return value;
   }
@@ -88,8 +78,8 @@ public abstract class CustomLoggerAbstractNotificationListener {
     // Trim the wildcard key
     String cleanWildcardKey = wildcardKey.trim();
 
-    // If wildcard key is just '*', match everything
-    if (cleanWildcardKey.equals("*")) {
+    // Exact match if no wildcards
+    if (searchString.equals(wildcardKey)) {
       return true;
     }
 
@@ -105,8 +95,8 @@ public abstract class CustomLoggerAbstractNotificationListener {
       return searchString.startsWith(prefix);
     }
 
-    // Exact match if no wildcards
-    return searchString.equals(wildcardKey);
+    // If wildcard key is just '*', match everything
+    return cleanWildcardKey.equals("*");
   }
 
 }

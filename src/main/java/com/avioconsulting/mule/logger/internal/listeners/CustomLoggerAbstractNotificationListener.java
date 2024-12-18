@@ -50,7 +50,7 @@ public abstract class CustomLoggerAbstractNotificationListener {
 
   protected Map<String, String> getFlowLogAttributes(EnrichedServerNotification notification) {
     Map<String, String> value = emptyAttributes;
-    FlowLogConfig flowLogConfig = config.getFlowLogConfigMap().get(notification.getResourceIdentifier());
+    FlowLogConfig flowLogConfig;
     /**
      * Flow name can contain wildcard (*)
      * We only look for wildcard either starting of the string or ending of the

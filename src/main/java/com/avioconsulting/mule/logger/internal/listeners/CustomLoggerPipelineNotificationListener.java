@@ -56,7 +56,8 @@ public class CustomLoggerPipelineNotificationListener
         String message = "Event not processed yet, this should never be shown";
         switch (Integer.parseInt(notification.getAction().getIdentifier())) {
           case PipelineMessageNotification.PROCESS_START:
-            message = "Flow [" + notification.getResourceIdentifier() + "]" + " start " + msgToAppend;
+            message = "Flow [" + notification.getResourceIdentifier() + "]" + " start "
+                + (msgToAppend != null ? msgToAppend : "");
             break;
           case PipelineMessageNotification.PROCESS_COMPLETE:
             message = "Flow [" + notification.getResourceIdentifier() + "]" + " end";

@@ -385,7 +385,7 @@ public class CustomLoggerConfiguration implements Startable, Initialisable {
           && flowLogConfig.getAttributesExpressionText() == null) {
         try {
           throw new InitialisationException(createStaticMessage(
-              "One of attributesExpressionText or messageExpressionText must be defined in flow-logs-config"),
+              "Both 'attributesExpressionText' and 'messageExpressionText' cannot be empty, at least one or both must be specified."),
               this);
         } catch (InitialisationException e) {
           throw new RuntimeException(e);

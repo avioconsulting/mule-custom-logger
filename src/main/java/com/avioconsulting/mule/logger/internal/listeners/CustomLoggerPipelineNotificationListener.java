@@ -74,13 +74,10 @@ public class CustomLoggerPipelineNotificationListener
         logMessage(notification.getComponent().getLocation(), notification.getEvent(), message,
             config.getFlowCategorySuffix(),
             config.getFlowLogLevel(), flowLogAttributes);
+      } catch (ClassCastException castException) {
+        classLogger.error("Message expression text in flow-log-config needs to be a String", castException);
       } catch (Exception e) {
-        if (e.getClass().getName().equals("java.lang.ClassCastException")
-            || e.getClass().getName().equals("ClassCastException")) {
-          classLogger.error("Message expression text in flow-log-config needs to be a String", e);
-        } else {
-          classLogger.error("Error processing flow notification", e);
-        }
+        classLogger.error("Error processing flow notification", e);
       }
     } else {
       classLogger.warn(

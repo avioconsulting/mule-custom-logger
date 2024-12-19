@@ -80,7 +80,7 @@ public abstract class CustomLoggerAbstractNotificationListener {
     String cleanWildcardKey = wildcardKey.trim();
 
     // Exact match if no wildcards
-    if (searchString.equalsIgnoreCase(wildcardKey.toLowerCase())) {
+    if (searchString.equalsIgnoreCase(wildcardKey)) {
       return true;
     }
 

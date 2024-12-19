@@ -345,13 +345,6 @@ public class CustomLoggerConfiguration implements Startable, Initialisable {
     customLoggerRegistrationService.setConfig(this);
     if (isEnableFlowLogs()) {
       classLogger.info("Flow logs enabled");
-      flowLogConfigs.forEach(flowLogConfig -> {
-        if (flowLogConfig.getExpressionText().getMessageExpressionText() == null
-            && flowLogConfig.getExpressionText().getAttributesExpressionText() == null) {
-          throw new IllegalStateException(
-              "One of attributesExpressionText or messageExpressionText must be defined in flow-logs-config");
-        }
-      });
       flowLogConfigMap = flowLogConfigs.stream().collect(
           Collectors.toMap(FlowLogConfig::getFlowName, Function.identity()));
       synchronized (CustomLoggerConfiguration.class) {
@@ -387,5 +380,17 @@ public class CustomLoggerConfiguration implements Startable, Initialisable {
       throw new InitialisationException(createStaticMessage(
           "Encryption Algorithm must be provided if encryption password is being supplied"), this);
     }
+    flowLogConfigs.forEach(flowLogConfig -> {
+      if (flowLogConfig.getMessageExpressionText() == null
+          && flowLogConfig.getAttributesExpressionText() == null) {
+        try {
+          throw new InitialisationException(createStaticMessage(
+              "One of attributesExpressionText or messageExpressionText must be defined in flow-logs-config"),
+              this);
+        } catch (InitialisationException e) {
+          throw new RuntimeException(e);
+        }
+      }
+    });
   }
 }

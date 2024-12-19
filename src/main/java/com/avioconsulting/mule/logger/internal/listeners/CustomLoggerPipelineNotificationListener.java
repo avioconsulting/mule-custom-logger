@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /*
@@ -42,14 +43,15 @@ public class CustomLoggerPipelineNotificationListener
     if (config != null) {
       try {
         String msgToAppend = "";
-        List<Map.Entry<String, FlowLogConfig>> matchedEntries = config.getFlowLogConfigMap().entrySet().stream()
+        Optional<Map.Entry<String, FlowLogConfig>> matchedEntry = config.getFlowLogConfigMap().entrySet()
+            .stream()
             .filter(entry -> matchWildcard(entry.getKey(), notification.getResourceIdentifier()))
-            .collect(Collectors.toList());
-        if (!matchedEntries.isEmpty()) {
-          FlowLogConfig flowLogConfig = matchedEntries.get(0).getValue();
+            .findFirst();
+        if (matchedEntry.isPresent()) {
+          FlowLogConfig flowLogConfig = matchedEntry.get().getValue();
           TypedValue<String> evaluate = (TypedValue<String>) config
               .getExpressionManager()
-              .evaluate("#[" + flowLogConfig.getExpressionText().getMessageExpressionText() + "]",
+              .evaluate("#[" + flowLogConfig.getMessageExpressionText() + "]",
                   notification.getEvent().asBindingContext());
           msgToAppend = evaluate.getValue();
         }

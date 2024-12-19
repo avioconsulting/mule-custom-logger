@@ -11,6 +11,7 @@ import org.mule.runtime.api.notification.EnrichedServerNotification;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public abstract class CustomLoggerAbstractNotificationListener {
@@ -58,14 +59,14 @@ public abstract class CustomLoggerAbstractNotificationListener {
      * ex: mq-listener-* will look for all the flows that starts with mq-listener
      * ex: *-mq-flow will look for all the flows that ends with -mq-flow
      **/
-    List<Map.Entry<String, FlowLogConfig>> matchedEntries = config.getFlowLogConfigMap().entrySet().stream()
+    Optional<Map.Entry<String, FlowLogConfig>> matchedEntry = config.getFlowLogConfigMap().entrySet().stream()
         .filter(entry -> matchWildcard(entry.getKey(), notification.getResourceIdentifier()))
-        .collect(Collectors.toList());
-    if (!matchedEntries.isEmpty()) {
-      flowLogConfig = matchedEntries.get(0).getValue();
+        .findFirst();
+    if (matchedEntry.isPresent()) {
+      flowLogConfig = matchedEntry.get().getValue();
       TypedValue<Map<String, String>> evaluate = (TypedValue<Map<String, String>>) config
           .getExpressionManager()
-          .evaluate("#[" + flowLogConfig.getExpressionText().getAttributesExpressionText() + "]",
+          .evaluate("#[" + flowLogConfig.getAttributesExpressionText() + "]",
               notification.getEvent().asBindingContext());
       value = evaluate.getValue();
       if (value == null)
@@ -79,7 +80,7 @@ public abstract class CustomLoggerAbstractNotificationListener {
     String cleanWildcardKey = wildcardKey.trim();
 
     // Exact match if no wildcards
-    if (searchString.equals(wildcardKey)) {
+    if (searchString.equalsIgnoreCase(wildcardKey.toLowerCase())) {
       return true;
     }
 

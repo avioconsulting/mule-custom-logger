@@ -41,6 +41,10 @@ public class MessageAttributes {
     return this.messageAttributes;
   }
 
+  public void addAttributes(Map<String, String> attributes) {
+    attributes.forEach((key, value) -> messageAttributes.add(new MessageAttribute(key, value)));
+  }
+
   public Map<String, String> getAttributes() {
     Map<String, String> attributes = new LinkedHashMap<>();
     if (messageAttributes != null) {

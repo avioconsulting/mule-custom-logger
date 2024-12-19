@@ -5,11 +5,20 @@
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/avio-logger http://www.mulesoft.org/schema/mule/avio-logger/current/mule-avio-logger.xsd">
 
-    <avio-logger:config name="AVIO_Logger_Config" doc:name="AVIO Logger Config" doc:id="84bd2712-015b-46b8-93e9-94536774b8ad"
-                      applicationVersion="1" applicationName="munit" environment="test" compressor="GZIP" encryptionAlgorithm="PBEWithHmacSHA512AndAES_128" encryptionPassword="example" enableFlowLogs="true"/>
 
     <avio-logger:config name="AVIO_Logger_Config_Json" doc:name="AVIO Logger Config" doc:id="84bd2712-015b-46b8-93e9-94536774b8ad"
-                        applicationVersion="1" applicationName="munit" environment="test" compressor="GZIP" encryptionAlgorithm="PBEWithHmacSHA512AndAES_128" encryptionPassword="example" enableFlowLogs="true" formatAsJson="true"/>
+                        applicationVersion="1" applicationName="munit" environment="test" compressor="GZIP" encryptionAlgorithm="PBEWithHmacSHA512AndAES_128" encryptionPassword="example" enableFlowLogs="true" formatAsJson="true" flowLogLevel="INFO">
+        <avio-logger:flow-log-configs >
+            <avio-logger:flow-log-config flowName="custom-logger-configFlow" attributesExpressionText="attributes" />
+        </avio-logger:flow-log-configs>
+    </avio-logger:config>
+
+    <avio-logger:config name="AVIO_Logger_Config" doc:name="AVIO Logger Config" doc:id="84bd2712-015b-46b8-93e9-94536774b8ad"
+                      applicationVersion="1" applicationName="munit" environment="test" compressor="GZIP" encryptionAlgorithm="PBEWithHmacSHA512AndAES_128" encryptionPassword="example" enableFlowLogs="true" flowLogLevel="INFO">
+        <avio-logger:flow-log-configs >
+            <avio-logger:flow-log-config flowName="custom-logger-configFlow" attributesExpressionText="attributes" />
+        </avio-logger:flow-log-configs>
+    </avio-logger:config>
 
     <flow name="custom-logger-configFlow" doc:id="0068e855-24dc-41a4-8e13-41ca38de99ba">
         <set-variable value="#[{'traceId': '76d5bcae3d49ff2e1b5ace9f0dcbee42','spanId': 'fa6fbe46daf007b9','spanIdLong': '18045851443427018681','traceparent': '00-76d5bcae3d49ff2e1b5ace9f0dcbee42-fa6fbe46daf007b9-01','TRACE_TRANSACTION_ID': 'bfacf7c0-d583-11ee-adfa-bcd074a0357f','traceIdLongLowPart': '1971114969454603842'}]" doc:name="Set Variable" doc:id="d7a7dade-4453-40cb-97bc-3ca7034372c6" variableName="OTEL_TRACE_CONTEXT"/>

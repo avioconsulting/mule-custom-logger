@@ -4,6 +4,7 @@ import static org.mule.runtime.api.i18n.I18nMessageFactory.createStaticMessage;
 
 import com.avioconsulting.mule.logger.api.processor.Compressor;
 import com.avioconsulting.mule.logger.api.processor.EncryptionAlgorithm;
+import com.avioconsulting.mule.logger.api.processor.FlowLogConfig;
 import com.avioconsulting.mule.logger.api.processor.LogProperties;
 import com.avioconsulting.mule.logger.internal.CustomLogger;
 import com.avioconsulting.mule.logger.internal.CustomLoggerOperation;
@@ -18,13 +19,20 @@ import org.mule.runtime.api.lifecycle.InitialisationException;
 import org.mule.runtime.api.lifecycle.Startable;
 import org.mule.runtime.api.meta.ExpressionSupport;
 import org.mule.runtime.api.notification.NotificationListenerRegistry;
+import org.mule.runtime.core.api.el.ExpressionManager;
 import org.mule.runtime.extension.api.annotation.Expression;
 import org.mule.runtime.extension.api.annotation.Operations;
+import org.mule.runtime.extension.api.annotation.param.NullSafe;
 import org.mule.runtime.extension.api.annotation.param.Optional;
 import org.mule.runtime.extension.api.annotation.param.Parameter;
 import org.mule.runtime.extension.api.annotation.param.display.*;
 import org.mule.runtime.extension.api.client.ExtensionsClient;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * This class represents an extension configuration, values set in this class
@@ -84,6 +92,14 @@ public class CustomLoggerConfiguration implements Startable, Initialisable {
   private LogProperties.LogLevel flowLogLevel;
 
   @Parameter
+  @DisplayName("Flow Log Attributes")
+  @Summary("The level flow logs will be logged at if enabled")
+  @NullSafe
+  @Optional
+  @Expression(ExpressionSupport.NOT_SUPPORTED)
+  private List<FlowLogConfig> flowLogConfigs;
+
+  @Parameter
   @DisplayName("Flow Log Category Suffix")
   @Summary("This category will be appended to the default logger category and used for all flow logs")
   @Optional(defaultValue = DEFAULT_FLOW_CATEGORY)
@@ -138,6 +154,10 @@ public class CustomLoggerConfiguration implements Startable, Initialisable {
   @Inject
   ExtensionsClient extensionsClient;
 
+  @Inject
+  ExpressionManager expressionManager;
+  private Map<String, FlowLogConfig> flowLogConfigMap;
+
   /**
    * Default constructor for auto-initialization
    */
@@ -174,6 +194,15 @@ public class CustomLoggerConfiguration implements Startable, Initialisable {
   private CustomLoggerPipelineNotificationListener notificationListener;
 
   private static boolean isNotificationListenerRegistered = false;
+
+  public Map<String, FlowLogConfig> getFlowLogConfigMap() {
+    return flowLogConfigMap;
+  }
+
+  public CustomLoggerConfiguration setFlowLogConfigs(List<FlowLogConfig> flowLogConfigs) {
+    this.flowLogConfigs = flowLogConfigs;
+    return this;
+  }
 
   public String getApplicationName() {
     return applicationName;
@@ -291,6 +320,10 @@ public class CustomLoggerConfiguration implements Startable, Initialisable {
     return extensionsClient;
   }
 
+  public ExpressionManager getExpressionManager() {
+    return expressionManager;
+  }
+
   /**
    * This method is invoked by the MuleSoft application when the AVIO Custom
    * Logger is invoked to create the connection.
@@ -312,6 +345,8 @@ public class CustomLoggerConfiguration implements Startable, Initialisable {
     customLoggerRegistrationService.setConfig(this);
     if (isEnableFlowLogs()) {
       classLogger.info("Flow logs enabled");
+      flowLogConfigMap = flowLogConfigs.stream().collect(
+          Collectors.toMap(FlowLogConfig::getFlowName, Function.identity()));
       synchronized (CustomLoggerConfiguration.class) {
         if (!isNotificationListenerRegistered) {
           classLogger.info("Creating and registering notification listener");
@@ -345,5 +380,17 @@ public class CustomLoggerConfiguration implements Startable, Initialisable {
       throw new InitialisationException(createStaticMessage(
           "Encryption Algorithm must be provided if encryption password is being supplied"), this);
     }
+    flowLogConfigs.forEach(flowLogConfig -> {
+      if (flowLogConfig.getMessageExpressionText() == null
+          && flowLogConfig.getAttributesExpressionText() == null) {
+        try {
+          throw new InitialisationException(createStaticMessage(
+              "Both 'attributesExpressionText' and 'messageExpressionText' cannot be empty, at least one or both must be specified."),
+              this);
+        } catch (InitialisationException e) {
+          throw new RuntimeException(e);
+        }
+      }
+    });
   }
 }

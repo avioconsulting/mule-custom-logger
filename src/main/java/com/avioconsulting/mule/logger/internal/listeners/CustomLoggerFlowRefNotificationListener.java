@@ -58,7 +58,7 @@ public class CustomLoggerFlowRefNotificationListener
                 .debug("Not a flow-ref pre or post event being processed, existing without logging.");
             return;
         }
-        classLogger.info(message);
+        classLogger.debug(message);
         Map<String, String> flowLogAttributes = getFlowLogAttributes(notification);
         logMessage(location, notification.getEvent(), message, FLOW_REF_CATEGORY_SUFFIX,
             config.getFlowLogLevel(), flowLogAttributes);
@@ -66,7 +66,7 @@ public class CustomLoggerFlowRefNotificationListener
         classLogger.error("Error processing flow notification", e);
       }
     } else {
-      classLogger.debug(
+      classLogger.warn(
           "Configuration hasn't been supplied to notification listener yet, flow logs won't be generated.");
     }
   }

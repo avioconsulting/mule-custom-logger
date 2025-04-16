@@ -2,7 +2,6 @@ package com.avioconsulting.mule.logger;
 
 import org.assertj.core.api.Assertions;
 import org.awaitility.Awaitility;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -56,6 +55,8 @@ public class CustomLoggerArtifactTest extends MuleArtifactFunctionalTestCase {
     CoreEvent coreEvent = flowRunner("custom-logger-flow-ref").run();
     Assert.assertNotNull(coreEvent);
     Awaitility.await().untilAsserted(() -> Assertions.assertThat(Files.readAllLines(UNIT_TEST_LOG_PATH))
-        .contains("Flow-ref with target [simple-subflow] start", "Flow-ref with target [simple-subflow] end"));
+        .filteredOn(line -> line.contains("Flow-ref with target [simple-subflow] start")
+            || line.contains("Flow-ref with target [simple-subflow] end"))
+        .hasSize(2));
   }
 }
